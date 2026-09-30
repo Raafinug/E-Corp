@@ -13,14 +13,7 @@
   <aside class="sisi" id="sisi">
     <div class="logo"><span>Engine</span></div>
 
-    <div class="kartu-kantor">
-      <div class="kk-judul">Kantor Notaris &amp; PPAT</div>
-      <div class="kk-nama">Mochammad Raafi Dwi Nugraha, S.Tr.Kom.</div>
-      <div class="kk-baris"><i>▤</i>SK · 112/KEP-17.3/PPAT/XI/2021</div>
-      <div class="kk-baris"><i>◎</i>Wilayah · Kota Bandung</div>
-      <div class="kk-baris"><i>✆</i>(022) 86012345</div>
-      <div class="kk-baris"><i>⌂</i>Jl. Ir. H. Juanda No. 128</div>
-    </div>
+    <div class="kartu-kantor" id="kartu-kantor"></div>
 
     <nav class="menu">
       <div class="m-grup mati"><i>⚙</i>System<span class="pnh">›</span></div>
@@ -28,11 +21,11 @@
 
       <div class="m-grup buka"><i>▤</i>Engine Module<span class="pnh">⌄</span></div>
       <button class="m-item mati"><i>▣</i>Dashboard</button>
-      <button class="m-item mati"><i>▤</i>Profil Kantor</button>
+      <button class="m-item" data-mode="kantor"><i>▤</i>Profil Kantor</button>
       <button class="m-item" data-mode="rancang"><i>◧</i>Form Design</button>
       <button class="m-item mati"><i>✔</i>Verifikasi</button>
-      <button class="m-item mati"><i>▦</i>Minuta</button>
-      <button class="m-item" data-mode="kondisi"><i>▤</i>Template Akta</button>
+      <button class="m-item" data-mode="minuta"><i>▦</i>Minuta</button>
+      <button class="m-item" data-mode="kondisi" id="menu-template"><i>▤</i>Template Akta</button>
       <button class="m-item mati"><i>◉</i>E-Akta Wizard</button>
       <button class="m-item mati"><i>▥</i>Akta Repository</button>
       <button class="m-item mati"><i>▩</i>Akta Salinan</button>
@@ -42,7 +35,7 @@
       <button class="m-item" data-mode="pratinjau"><i>▸</i>Order A</button>
     </nav>
 
-    <div class="sisi-kaki">Engine</div>
+    <div class="sisi-kaki">Engine <span id="versi-lab">v0.9.7</span></div>
   </aside>
 
   <!-- ============ ISI ============ -->
@@ -53,7 +46,7 @@
       <div class="atas-kanan">
         <button class="btn btn-halus">◉ Lihat Landing</button>
         <button class="ikon">🔔</button>
-        <div class="pengguna"><span class="av">A</span><span><b>Admin Default</b><small>SUPER ADMIN</small></span><span class="pnh">⌄</span></div>
+        <div class="pengguna" id="kartu-peran"><span class="av" id="peran-av">A</span><span><b id="peran-nama">Admin Default</b><small id="peran-label">SUPER ADMIN</small></span><select id="pilih-peran" title="Lihat layar sebagai peran lain"></select><span class="pnh">⌄</span></div>
       </div>
     </header>
 
@@ -73,6 +66,10 @@
       </div>
 
       <!-- ======================= FORM DESIGN ======================= -->
+      <main class="layar" data-layar="kantor" hidden>
+        <div class="kartu-order"><div class="isi-kantor-bungkus" id="isi-kantor"></div></div>
+      </main>
+
       <main class="layar" data-layar="rancang" hidden>
         <div class="bar-judul">
           <button class="btn">‹ Kembali</button>
@@ -171,13 +168,50 @@
         </div>
       </main>
 
+      <!-- ======================= MINUTA ======================= -->
+      <main class="layar" data-layar="minuta" hidden>
+        <div class="bar-judul">
+          <button class="btn" data-ke-order>‹ Kembali ke Order</button>
+          <span class="bj-nama">Minuta Order A</span>
+          <span class="lencana" id="mn-lencana">DRAF</span>
+          <span class="bj-ket" id="mn-ket">Naskah hasil perakitan — tulisannya bisa dirapikan di sini.</span>
+          <span class="kanan"><button class="btn" id="mn-rakit-ulang">⟳ Rakit ulang</button></span>
+        </div>
+
+        <div class="dua-kolom-kerja">
+          <aside class="panel-kiri">
+            <div class="pk-tab"><button aria-selected="true">Pasal &amp; Catatan <span id="mn-n"></span></button></div>
+            <div class="pk-isi">
+              <div class="pane">
+                <div id="mn-daftar"></div>
+                <div class="tambah-bagian">
+                  <button class="btn btn-halus" id="mn-tambah-pasal">+ Pasal</button>
+                  <button class="btn btn-halus" id="mn-tambah-catatan">+ Catatan</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <section class="panel-kanan">
+            <div class="pk-tab">
+              <button data-mtab="naskah" aria-selected="true">◉ Naskah</button>
+              <button data-mtab="tulisan" aria-selected="false">✎ Tulisan</button>
+            </div>
+            <div class="pk-badan">
+              <div class="pane" data-mpane="naskah"><div id="mn-naskah"></div></div>
+              <div class="pane" data-mpane="tulisan" hidden><div id="mn-tulisan"></div></div>
+            </div>
+          </section>
+        </div>
+      </main>
+
       <!-- ======================= ORDER ======================= -->
       <main class="layar" data-layar="pratinjau" hidden>
         <div class="bar-judul">
           <button class="btn">‹ Kembali</button>
           <span class="bj-nama">Order A</span>
           <span class="bj-ket">Isi seperti pengguna sungguhan, lalu rakit naskahnya.</span>
-          <span class="kanan"><button class="btn btn-utama" id="btn-rakit">⧉ Rakit Naskah</button></span>
+          <span class="kanan"><button class="btn btn-utama" id="btn-rakit">✎ Buka Drafting</button></span>
         </div>
         <div class="kartu-order">
           <div class="tab-strip" id="pv-tabs"></div>

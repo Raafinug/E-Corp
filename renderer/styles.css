@@ -643,3 +643,84 @@ td.kanan{text-align:right;white-space:nowrap;}
   border-radius:var(--r-kecil);background:var(--panel);font-size:12.5px;}
 .rk-item.rk-tutup-kel .rk-teks,.rk-item.rk-kepala-kel .rk-teks{color:var(--tinta-redup);}
 .rk-item.rk-tutup-kel{margin-bottom:16px;}
+.medan.tutup{background:var(--panel-2);border-style:dashed;padding-top:7px;padding-bottom:7px;}
+.medan.tutup .m-teks{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--tinta-samar);}
+.rk-diagnosa{border:1px solid #e6b9b9;background:var(--merah-lembut);border-radius:var(--r-kecil);
+  padding:11px 14px;margin:0 0 16px;font-size:12.5px;color:#7d2a2a;}
+.rk-diagnosa b{display:block;margin-bottom:6px;font-size:12px;letter-spacing:.4px;text-transform:uppercase;}
+.rk-diagnosa ul{margin:0;padding-left:18px;}
+.rk-diagnosa li{margin-bottom:4px;line-height:1.55;}
+.sisi-kaki #versi-lab{opacity:.65;font-variant-numeric:tabular-nums;}
+.tanda-ganda{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--merah);
+  background:var(--merah-lembut);border:1px solid #e6b9b9;border-radius:9px;padding:1px 8px;margin-left:8px;}
+
+/* ---------- Profil Kantor ---------- */
+.isi-kantor-bungkus{padding:20px 22px 24px;}
+.pk-kepala{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;color:var(--tinta);
+  margin:0 0 4px;}
+.pk-kepala i{font-style:normal;color:var(--aksen-terang,var(--hijau));}
+.pk-catatan{color:var(--tinta-samar);font-size:12.5px;margin:0 0 18px;}
+.pk-kisi{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;}
+.pk-medan{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.pk-medan.penuh{grid-column:1 / -1;}
+.pk-medan > label{font-size:12px;color:var(--tinta-redup);}
+.pk-medan > label .wajib{color:#d9534f;margin-left:3px;}
+.pk-medan input,.pk-medan textarea{width:100%;padding:9px 11px;border:1px solid var(--garis);
+  border-radius:var(--r-kecil);background:var(--panel-2);color:var(--tinta);font:inherit;font-size:13px;}
+.pk-medan textarea{min-height:66px;resize:vertical;}
+.pk-medan input:focus,.pk-medan textarea:focus{outline:none;border-color:var(--aksen);}
+.pk-medan .kodevar{font-family:'SFMono-Regular',Consolas,monospace;font-size:10.5px;color:var(--tinta-samar);}
+.pk-turunan{margin-top:22px;border-top:1px solid var(--garis);padding-top:16px;}
+.pk-turunan h4{margin:0 0 4px;font-size:12.5px;font-weight:600;color:var(--tinta);}
+.pk-turunan p.hampa{margin:0 0 11px;}
+.pk-turunan .baris{display:flex;gap:10px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--garis);}
+.pk-turunan .baris:last-child{border-bottom:0;}
+.pk-turunan code{font-family:'SFMono-Regular',Consolas,monospace;font-size:11.5px;color:var(--aksen-terang,var(--hijau));
+  flex:0 0 250px;}
+.pk-turunan .nilai{font-size:12.5px;color:var(--tinta-redup);min-width:0;word-break:break-word;}
+@media (max-width:900px){ .pk-kisi{grid-template-columns:1fr;} .pk-turunan code{flex-basis:auto;} }
+.tabel-vardok .kode-tetap{font-family:'SFMono-Regular',Consolas,monospace;font-size:11.5px;color:var(--hijau);}
+.tanda-bawaan{display:inline-block;margin-left:7px;padding:1px 6px;border-radius:999px;font-size:10px;
+  letter-spacing:.4px;background:var(--panel-2);border:1px solid var(--garis);color:var(--tinta-samar);}
+.pk-turunan p.hampa{font-size:12px;color:var(--tinta-samar);}
+.rk-teks ol,.rk-teks ul{margin:0 0 8px;padding-left:2.2em;}
+.rk-teks ol ol{list-style-type:decimal;margin:6px 0 0;}
+.rk-teks li{margin:0 0 2px;}
+
+/* ---------- gaya penanda daftar ---------- */
+.penyunting .bilah select{width:auto;flex:0 0 auto;}
+.penyunting .bilah .mulai-no{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;
+  color:var(--tinta-redup);white-space:nowrap;}
+.penyunting .bilah .mulai-no input{width:52px;padding:3px 5px;border:1px solid var(--garis);
+  border-radius:var(--r-kecil);background:var(--panel);color:var(--tinta);font:inherit;font-size:12px;}
+.penyunting .bilah .mulai-no input:disabled,.penyunting .bilah select:disabled{opacity:.45;}
+
+.editor-isi ol,.rk-teks ol,.naskah .bl ol{counter-reset:butir-induk;}
+.editor-isi ol > li,.rk-teks ol > li,.naskah .bl ol > li{counter-increment:butir-induk;}
+.editor-isi ol.ol-induk,.rk-teks ol.ol-induk,.naskah .bl ol.ol-induk{
+  list-style:none;counter-reset:butir-anak;padding-left:3em;}
+.editor-isi ol.ol-induk > li,.rk-teks ol.ol-induk > li,.naskah .bl ol.ol-induk > li{
+  counter-increment:butir-anak;position:relative;}
+.editor-isi ol.ol-induk > li::before,.rk-teks ol.ol-induk > li::before,.naskah .bl ol.ol-induk > li::before{
+  content:counter(butir-induk, var(--gaya-induk, decimal)) "." counter(butir-anak) ". ";
+  position:absolute;left:-3em;width:2.7em;text-align:right;}
+
+/* ---------- peran pengguna ---------- */
+.pengguna{position:relative;}
+.pengguna #pilih-peran{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;
+  border:0;padding:0;}
+.bagian-item.terkunci{opacity:.92;}
+.bagian-item.terkunci .geser{display:flex;align-items:center;justify-content:center;}
+.bagian-item .gembok{color:var(--tinta-samar);font-size:12px;}
+.judul-kunci{font-size:15px;font-weight:600;color:var(--tinta);}
+.tanda-kunci{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;letter-spacing:.5px;
+  text-transform:uppercase;background:var(--panel-2);border:1px solid var(--garis);color:var(--tinta-samar);}
+.sy-kunci{font-size:11.5px;color:var(--tinta-samar);margin-right:8px;}
+.pot-kunci{border-top:1px solid var(--garis);}
+.pot-kunci .pk-kep{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--garis);
+  background:var(--panel-2);}
+.pot-kunci .pk-kep b{font-size:14px;}
+.pot-kunci .pk-kep .kanan{margin-left:auto;display:flex;align-items:center;}
+.pot-kunci .pk-tubuh{padding:16px 18px 20px;}
+.pot-kunci .pk-tubuh > .j{display:block;font-size:11px;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--tinta-samar);margin-bottom:7px;}

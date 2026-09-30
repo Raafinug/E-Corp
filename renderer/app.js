@@ -38,10 +38,11 @@ const ELEMEN = [
   { tipe:'judul',     nama:'Judul bagian',   ik:'—' },
   { tipe:'seksi',     nama:'Bagian lipat',   ik:'▾▴' },
   { tipe:'ulang',     nama:'Grup berulang',  ik:'⟳' },
-  { tipe:'kbli',      nama:'Pencarian KBLI',  ik:'⌕' }
+  { tipe:'kbli',      nama:'Pencarian KBLI',  ik:'⌕' },
+  { tipe:'tutup',     nama:'Akhir grup',      ik:'⊣' }
 ];
 /* elemen yang tidak menghasilkan nilai sendiri */
-const TANPA_NILAI = ['judul','seksi','ulang'];
+const TANPA_NILAI = ['judul','seksi','ulang','kbli','tutup'];
 /* elemen yang membuka kelompok baru di formulir */
 const PEMBUKA = ['seksi','ulang'];
 const SUMBER = [
@@ -201,6 +202,50 @@ function simpanNanti(){
 }
 
 /* melengkapi rancangan lama supaya berkas tersimpan versi sebelumnya tetap terbuka */
+/* =====================================================================
+   Variabel global bawaan — tidak berasal dari formulir order sama sekali.
+   Kelompok 'waktu' diatur di Pengaturan Dokumen, kelompok 'kantor' di layar
+   Profil Kantor. Keduanya selalu ada; kodenya tidak bisa diubah atau dihapus.
+   ===================================================================== */
+const VAR_BAWAAN = [
+  /* kode, label, otomatis, nilai bawaan, kelompok, dari */
+  ['var_hari',             'Nama hari penandatanganan',       'hari',             '', 'waktu', ''],
+  ['var_tanggal',          'Tanggal penandatanganan',         'tanggal',          '', 'waktu', ''],
+  ['var_terbilang_tanggal','Tanggal penandatanganan terbilang','terbilang',       '', 'waktu', ''],
+  ['var_pukul',            'Pukul penandatanganan',           'pukul',            '', 'waktu', ''],
+  ['var_terbilang_pukul',  'Pukul penandatanganan terbilang', 'terbilangPukul',   '', 'waktu', ''],
+  ['deed_number',          'Nomor dokumen',                   '',                 '', 'waktu', ''],
+
+  ['kantor_label',            'Label kartu kantor',          '',                 'Kantor Notaris & PPAT',     'kantor', ''],
+  ['notaris_nama',            'Nama NOTARIS (tanpa gelar)',  '',                 'Mochammad Raafi Dwi Nugraha','kantor', ''],
+  ['notaris_gelar',           'Gelar disingkat',             '',                 'S.Tr.Kom.',                 'kantor', ''],
+  ['notaris_gelar_panjang',   'Gelar tidak disingkat',       '',                 'Sarjana Terapan Komputer',  'kantor', ''],
+  ['notaris_nama_gelar',      'Nama + gelar disingkat',      'namaGelar',        '', 'kantor', ''],
+  ['notaris_nama_gelar_panjang','Nama + gelar tidak disingkat','namaGelarPanjang','', 'kantor', ''],
+  ['notaris_sk_nomor',        'Nomor SK Pengangkatan',       '',                 '112/KEP-17.3/PPAT/XI/2021', 'kantor', ''],
+  ['notaris_sk_tanggal',      'Tanggal SK Pengangkatan',     'tanggalNilai',     '2021-11-08',                'kantor', ''],
+  ['notaris_sk_tanggal_terbilang','Tanggal SK terbilang',    'terbilangDari',    '', 'kantor', 'notaris_sk_tanggal'],
+  ['notaris_wilayah',         'Wilayah kerja',               '',                 'Kota Bandung',              'kantor', ''],
+  ['notaris_telepon',         'Telepon kantor',              '',                 '(022) 86012345',            'kantor', ''],
+  ['notaris_email',           'Email kantor',                '',                 'kantor@notaris.id',         'kantor', ''],
+  ['notaris_alamat',          'Alamat kantor',               '',                 'Jl. Ir. H. Juanda No. 128', 'kantor', '']
+];
+const kelompokBawaan = k => { const b = VAR_BAWAAN.find(x => x[0] === k); return b ? b[4] : ''; };
+
+/* =====================================================================
+   Peran pengguna. Super Admin menyusun struktur dan syaratnya; PPAT dan
+   Asisten hanya menambah Pasal & Catatan dan menyunting tulisan — bagian
+   otomatis beserta syaratnya terkunci bagi mereka.
+   ===================================================================== */
+const PERAN = [
+  ['super',   'Admin Default',  'SUPER ADMIN', 'A'],
+  ['ppat',    'Notaris / PPAT', 'PPAT',        'P'],
+  ['asisten', 'Asisten',        'ASISTEN',     'S']
+];
+const peranSah = k => PERAN.some(x => x[0] === k) ? k : 'super';
+/* true bila peran ini boleh menyusun struktur, syarat, dan bagian otomatis */
+const penuh = () => (rancangan && rancangan.peran ? rancangan.peran : 'super') === 'super';
+
 function pastikanBentuk(r){
   const S = window.SEED;
   if (!r || typeof r !== 'object') r = {};
@@ -209,6 +254,7 @@ function pastikanBentuk(r){
   if (!Array.isArray(r.grup))     r.grup     = JSON.parse(JSON.stringify(S.grup));
   if (!Array.isArray(r.bagian) || !r.bagian.length) r.bagian = JSON.parse(JSON.stringify(S.bagian));
   if (!r.halaman || typeof r.halaman !== 'object') r.halaman = JSON.parse(JSON.stringify(S.halaman));
+  r.peran = peranSah(r.peran);
   if (!Array.isArray(r.varDokumen)) r.varDokumen = JSON.parse(JSON.stringify(S.varDokumen || []));
   r.varDokumen.forEach(v => {
     if (typeof v.kode  !== 'string') v.kode = '';
@@ -216,6 +262,17 @@ function pastikanBentuk(r){
     if (typeof v.nilai !== 'string') v.nilai = '';
     if (typeof v.otomatis !== 'string') v.otomatis = '';
   });
+  /* variabel global bawaan selalu ada — rancangan lama ikut dilengkapi tanpa
+     mengubah variabel yang sudah dipakai di templatenya */
+  VAR_BAWAAN.forEach(b => {
+    let v = r.varDokumen.find(x => x.kode === b[0]);
+    if (!v){ v = { kode:b[0], label:b[1], nilai:b[3], otomatis:b[2] }; r.varDokumen.push(v); }
+    v.bawaan = true;
+    v.kelompok = b[4];
+    v.otomatis = b[2];
+    if (b[5]) v.dari = b[5];
+  });
+  r.varDokumen.forEach(v => { if (!v.bawaan){ v.bawaan = false; v.kelompok = ''; } });
 
   r.tab.forEach(t => { if (!Array.isArray(t.field)) t.field = []; });
   r.potongan.forEach(p => {
@@ -342,7 +399,36 @@ function ringkasSyarat(sy){
   return (sy||[]).map(c => labelField(c.field) + ' ' + c.op + (c.op === 'terisi' ? '' : ' ' + c.nilai)).join(' dan ');
 }
 
+/* dua field dengan kode sama saling menimpa saat order disimpan */
+function kodeGanda(f){
+  if (!f.kode || TANPA_NILAI.includes(f.tipe)) return false;
+  return (tabIni().field || []).filter(x => x.kode === f.kode && !TANPA_NILAI.includes(x.tipe)).length > 1;
+}
+const lencanaGanda = f => kodeGanda(f)
+  ? '<span class="tanda-ganda" title="Ada field lain di tab ini dengan kode {{' + esc(f.kode) +
+    '}}. Nilainya akan saling menimpa.">kode ganda</span>' : '';
+
+/* Dua field Referensi user dengan awalan yang sama (termasuk sama-sama tanpa awalan)
+   menghasilkan variabel yang sama persis — {{nama}}, {{nik}}, dan seterusnya. Yang terisi
+   belakangan menimpa yang sebelumnya, dan yang kosong pun ikut menghapus. */
+function sesamaPaket(f, t){
+  if (f.tipe !== 'user' || !f.kode) return [];
+  const tt = t || tabIni();
+  const aw = (f.awalan || '').trim();
+  return (tt.field || []).filter(x => x.id !== f.id && x.tipe === 'user' && x.kode &&
+    (x.awalan || '').trim() === aw);
+}
+const lencanaPaket = f => sesamaPaket(f).length
+  ? '<span class="tanda-ganda" title="Field Referensi user lain di tab ini memakai awalan yang sama, ' +
+    'jadi keduanya menghasilkan {{nama}}, {{nik}}, dan seterusnya yang sama.">paket bentrok</span>' : '';
+
 function kartuMedan(f){
+  if (f.tipe === 'tutup'){
+    return '<div class="medan tutup lebar-penuh' + (pilih === f.id ? ' terpilih' : '') +
+      '" draggable="true" data-id="' + f.id + '">' +
+      '<button class="m-hapus" data-hapus="' + f.id + '">×</button>' +
+      '<div class="m-teks">⊣ ' + esc(f.label || 'Akhir grup') + '</div></div>';
+  }
   if (f.tipe === 'kbli'){
     return '<div class="medan kbli lebar-penuh' + (pilih === f.id ? ' terpilih' : '') +
       '" draggable="true" data-id="' + f.id + '">' +
@@ -402,7 +488,7 @@ function kartuMedan(f){
     '<button class="m-hapus" data-hapus="' + f.id + '">×</button>' +
     '<span class="m-jenis">' + esc(jenis) + '</span>' +
     '<div class="m-label">' + esc(f.label || '(tanpa label)') +
-      (f.wajib ? ' <span class="bintang">*</span>' : '') +
+      (f.wajib ? ' <span class="bintang">*</span>' : '') + lencanaGanda(f) + lencanaPaket(f) +
       ((f.tampilBila && f.tampilBila.length)
         ? '<span class="tanda-syarat" title="' + esc(ringkasSyarat(f.tampilBila)) + '">bersyarat</span>' : '') +
       '</div>' +
@@ -537,6 +623,7 @@ function tambahField(tipe, indeks){
     wajib: false, lebar: 'penuh', sumber: 'order'
   };
   if (tipe === 'pilihan' || tipe === 'segmented') f.opsi = ['Pilihan A','Pilihan B'];
+  if (tipe === 'tutup') f.label = 'Akhir grup';
   if (tipe === 'seksi'){ f.keterangan = ''; f.tertutup = false; }
   if (tipe === 'ulang'){
     f.keterangan = ''; f.minBaris = 1; f.maksBaris = 0;
@@ -601,6 +688,20 @@ function blokTampilBilaHtml(f, t, kataBenda){
 function htmlProperti(f, t){
   let h = '';
   h += '<div class="f"><label class="j">Label</label><input type="text" data-p="label" value="' + esc(f.label) + '"></div>';
+  if (kodeGanda(f)){
+    h += '<div class="f blok-lebar"><p class="peringatan-var" style="margin:0"><b>Kode ganda.</b> ' +
+      'Ada field lain di tab ini yang juga berkode <code>{{' + esc(f.kode) + '}}</code>. Saat order ' +
+      'disimpan keduanya menulis ke variabel yang sama, jadi yang terakhir menimpa yang sebelumnya. ' +
+      'Ganti salah satu kodenya, atau hapus field yang tidak dipakai.</p></div>';
+  }
+  if (sesamaPaket(f, t).length){
+    h += '<div class="f blok-lebar"><p class="peringatan-var" style="margin:0"><b>Paket bentrok.</b> ' +
+      'Field <b>' + esc(sesamaPaket(f, t).map(x => x.label).join('</b>, <b>')) + '</b> juga bertipe ' +
+      'Referensi user dengan awalan yang sama, jadi keduanya menghasilkan variabel yang sama persis — ' +
+      '<code>{{nama}}</code>, <code>{{nik}}</code>, dan seterusnya. Di satu baris order hanya salah ' +
+      'satu yang terisi, dan yang kosong ikut mengosongkan variabelnya. Isi <b>Awalan variabel</b> ' +
+      'di salah satu field (misalnya <code>wakil</code>, sehingga menjadi <code>{{wakil.nama}}</code>).</p></div>';
+  }
 
   if (f.tipe === 'kbli'){
     h += '<div class="f"><label class="j">Kode variabel</label>' +
@@ -613,8 +714,10 @@ function htmlProperti(f, t){
     h += '<div class="f blok-lebar"><label class="j">Keterangan di bawah judul</label>' +
       '<input type="text" data-p="keterangan" value="' + esc(f.keterangan || '') + '"></div>';
     h += '<div class="f blok-lebar"><label class="j">Variabel yang dihasilkan</label>' +
-      '<p class="hampa" style="margin:0 0 8px">KBLI yang dipilih berupa daftar, jadi elemen ini menjadi ' +
-      'lingkup perulangan sendiri. Di Template Akta pilih <b>Diulang atas → Tiap baris ' +
+      '<p class="hampa" style="margin:0 0 8px">KBLI yang dipilih berupa daftar, jadi <code>{{' +
+      esc(f.kode || 'kbli') + '}}</code> sendiri bukan variabel. Di dalam redaksi bungkus satu barisnya ' +
+      'dengan <code>[[ulang:' + esc(f.kode || 'kbli') + ']]…[[/ulang]]</code>, atau di Template Akta ' +
+      'buat Bagian Otomatis dengan <b>Diulang atas → Tiap baris ' +
       esc(f.label || 'KBLI') + '</b>, lalu pakai variabel di bawah ini.</p>' +
       '<div class="pasangan-var">' + pecahanKbli(f).map(x =>
         '<div class="pv-baris"><code>{{' + esc(x.kode) + '}}</code>' +
@@ -677,6 +780,12 @@ function htmlProperti(f, t){
       '<input type="text" class="kode" data-p="kode" value="' + esc(f.kode) + '"></div>';
     h += '<div class="f"><label class="sakelar"><input type="checkbox" data-p="wajib"' +
       (f.wajib ? ' checked' : '') + '> Wajib diisi</label></div>';
+  }
+
+  if (f.tipe === 'tutup'){
+    h += '<p class="hampa" style="margin:0">Menutup bagian lipat atau grup berulang yang sedang ' +
+      'berjalan, tanpa membuka yang baru. Field sesudahnya berdiri di luar grup mana pun.</p>';
+    return h;
   }
 
   if (f.tipe === 'judul'){
@@ -889,6 +998,7 @@ function gambarPratinjau(){
   if (t.mode === 'formulir'){
     nilaiForm[t.id] = nilaiForm[t.id] || {};
     const simpananTab = nilaiForm[t.id];
+    pulihkanIsi($('#pv-isi'), t, simpananTab);
     $('#pv-isi').querySelectorAll('[data-kode]').forEach(el => {
       const k = el.dataset.kode;
       if (el.classList.contains('segmented')){
@@ -920,6 +1030,14 @@ function gambarPratinjau(){
   pasangUlang($('#pv-isi'), t);
   pasangTerbilang($('#pv-isi'), t);
   pasangSyarat($('#pv-isi'));
+
+  /* Tab bermode formulir tidak punya tombol Simpan yang merekam; isinya dicatat
+     setiap kali berubah, termasuk pilihan KBLI dan baris grup berulang. */
+  if (t.mode === 'formulir'){
+    const rekamSemua = () => { nilaiForm[t.id] = bacaIsi($('#pv-isi'), t); };
+    ['input', 'change', 'click'].forEach(ev =>
+      $('#pv-isi').addEventListener(ev, () => setTimeout(rekamSemua, 0)));
+  }
 }
 
 /* field dipecah menjadi kelompok: yang sebelum bagian lipat pertama berdiri sendiri */
@@ -930,7 +1048,14 @@ function kelompokField(field){
     if (PEMBUKA.includes(f.tipe)){
       if (kini.field.length || kini.buka) grup.push(kini);
       kini = { buka:f, field:[] };
-    } else kini.field.push(f);
+      return;
+    }
+    if (f.tipe === 'tutup'){                       /* menutup kelompok tanpa membuka yang baru */
+      if (kini.field.length || kini.buka) grup.push(kini);
+      kini = { buka:null, field:[] };
+      return;
+    }
+    kini.field.push(f);
   });
   if (kini.field.length || kini.buka) grup.push(kini);
   return grup;
@@ -1033,7 +1158,8 @@ function isiDaftar(t){
       h += '<tr>';
       if (kolom.length){
         kolom.forEach(k => {
-          const v = r[k.kode] || '—';
+          let v = r[k.kode] || '—';
+          if (k.tipe === 'user'){ const u = userById(r[k.kode]); v = u ? u.nama : (r[k.kode] || '—'); }
           const g = k.gaya || 'teks';
           h += '<td class="utama">' +
             (g === 'pil'  ? '<span class="pil">' + esc(String(v).toUpperCase()) + '</span>' :
@@ -1129,7 +1255,7 @@ function pasangKbli(akar){
 
 function kontrolPv(f){
   if (f.tipe === 'kbli')  return kbliSeksiHtml(f);
-  if (f.tipe === 'seksi') return '';
+  if (f.tipe === 'seksi' || f.tipe === 'tutup') return '';
   if (f.tipe === 'judul')
     return '<div class="gf-judul" data-syarat="' + esc(JSON.stringify(f.tampilBila || [])) + '">' +
       esc(f.label) + '</div>';
@@ -1267,11 +1393,11 @@ function bacaMedan(akar){
   });
   return r;
 }
-$('#m-simpan').addEventListener('click', () => {
-  const t = tabModal; if (!t) return;
+/* Membaca seluruh isian sebuah wadah — dipakai modal Tambah maupun tab bermode formulir,
+   supaya KBLI dan grup berulang tersimpan di keduanya, bukan hanya di modal. */
+function bacaIsi(akar, t){
   const r = {};
-  /* medan di luar grup berulang */
-  $$('#m-isi [data-kode]').forEach(el => {
+  akar.querySelectorAll('[data-kode]').forEach(el => {
     if (el.closest('[data-baris]')) return;
     if (sedangTersembunyi(el)) return;
     if (el.classList.contains('segmented')){
@@ -1279,16 +1405,14 @@ $('#m-simpan').addEventListener('click', () => {
       r[el.dataset.kode] = a ? a.textContent.trim() : '';
     } else r[el.dataset.kode] = el.value;
   });
-  /* baris grup berulang */
-  $$('#m-isi .ulang-blok').forEach(blok => {
-    if (blok.hidden) return;
+  akar.querySelectorAll('.ulang-blok').forEach(blok => {
+    if (sedangTersembunyi(blok)) return;
     const el = (t.field || []).find(x => x.id === blok.dataset.ulang);
     if (!el || !el.kode) return;
     r[el.kode] = [...blok.querySelectorAll('[data-baris]')].map(bacaMedan);
   });
-  /* KBLI terpilih */
-  $$('#m-isi .kbli-blok').forEach(blok => {
-    if (blok.hidden) return;
+  akar.querySelectorAll('.kbli-blok').forEach(blok => {
+    if (sedangTersembunyi(blok)) return;
     const el = (t.field || []).find(x => x.id === blok.dataset.kbli);
     if (!el || !el.kode) return;
     r[el.kode] = [...blok.querySelectorAll('[data-kbli-terpilih] [data-kode-kbli]')].map(b => {
@@ -1296,8 +1420,48 @@ $('#m-simpan').addEventListener('click', () => {
       return { kode:x.kode || '', judul:x.judul || '', golongan:x.golongan || '' };
     });
   });
+  return r;
+}
+/* Mengembalikan pilihan KBLI dan baris grup berulang sesudah layar digambar ulang.
+   Dijalankan sebelum pasangKbli/pasangUlang supaya kendalinya ikut terpasang. */
+function pulihkanIsi(akar, t, nilai){
+  if (!nilai) return;
+  akar.querySelectorAll('.kbli-blok').forEach(blok => {
+    const f = (t.field || []).find(x => x.id === blok.dataset.kbli);
+    const dipilih = f && Array.isArray(nilai[f.kode]) ? nilai[f.kode] : [];
+    if (!dipilih.length) return;
+    const wadah = blok.querySelector('[data-kbli-terpilih]');
+    const kosong = wadah.querySelector('.kb-kosong');
+    if (kosong) kosong.remove();
+    dipilih.forEach(x => wadah.insertAdjacentHTML('beforeend', kbliBarisHtml(x, true)));
+  });
+  akar.querySelectorAll('.ulang-blok').forEach(blok => {
+    const f = (t.field || []).find(x => x.id === blok.dataset.ulang);
+    const baris = f && Array.isArray(nilai[f.kode]) ? nilai[f.kode] : [];
+    if (!baris.length) return;
+    const g = kelompokField(t.field).find(x => x.buka && x.buka.id === blok.dataset.ulang);
+    const wadah = blok.querySelector('[data-daftar-baris]');
+    if (!g || !wadah) return;
+    wadah.innerHTML = '';
+    baris.forEach((isi, i) => {
+      wadah.insertAdjacentHTML('beforeend', barisUlangHtml(g, i + 1));
+      const b = wadah.lastElementChild;
+      b.querySelectorAll('[data-kode]').forEach(el => {
+        const v = isi[el.dataset.kode];
+        if (v == null) return;
+        if (el.classList.contains('segmented'))
+          el.querySelectorAll('button').forEach(x =>
+            x.setAttribute('aria-pressed', String(x.textContent.trim() === v)));
+        else el.value = v;
+      });
+    });
+  });
+}
+
+$('#m-simpan').addEventListener('click', () => {
+  const t = tabModal; if (!t) return;
   barisPv[t.id] = barisPv[t.id] || [];
-  barisPv[t.id].push(r);
+  barisPv[t.id].push(bacaIsi($('#m-isi'), t));
   $('#tirai').hidden = true;
   gambarPratinjau();
 });
@@ -1305,7 +1469,89 @@ $$('[data-tutup]').forEach(b => b.addEventListener('click', () => $('#tirai').hi
 $('#tirai').addEventListener('mousedown', e => { if (e.target === $('#tirai')) $('#tirai').hidden = true; });
 
 /* ================= navigasi ================= */
+/* =====================================================================
+   Layar Profil Kantor — isinya variabel global, bukan field formulir order.
+   ===================================================================== */
+const MEDAN_KANTOR = [
+  /* kode, label, jenis, placeholder, wajib, lebar */
+  ['notaris_nama',          'Nama NOTARIS',              'teks',    'mis. Budi Santoso',        true,  ''],
+  ['notaris_sk_nomor',      'Nomor SK Pengangkatan',     'teks',    'mis. 123/KEP-17.3/IV/2023',true,  ''],
+  ['notaris_gelar',         'Gelar disingkat',           'teks',    'mis. S.H., M.Kn.',         false, ''],
+  ['notaris_sk_tanggal',    'Tanggal SK Pengangkatan',   'tanggal', '',                         false, ''],
+  ['notaris_gelar_panjang', 'Gelar tidak disingkat',     'teks',    'mis. Sarjana Hukum, Magister Kenotariatan', false, ''],
+  ['notaris_wilayah',       'Wilayah Kerja',             'teks',    'mis. Kota Jakarta Selatan',true,  ''],
+  ['notaris_telepon',       'Telepon',                   'teks',    'mis. 021-1234567',         false, ''],
+  ['notaris_email',         'Email',                     'teks',    'mis. kantor@notaris.id',   false, ''],
+  ['notaris_alamat',        'Alamat Kantor',             'panjang', 'Alamat lengkap kantor',    true,  'penuh'],
+  ['kantor_label',          'Label kartu kantor',        'teks',    'mis. Kantor Notaris & PPAT',false,'penuh']
+];
+const TURUNAN_KANTOR = [
+  ['notaris_nama_gelar',          'nama + gelar disingkat — dipakai pada kartu kantor'],
+  ['notaris_nama_gelar_panjang',  'nama + gelar tidak disingkat — dipakai pada badan akta'],
+  ['notaris_sk_tanggal_terbilang','tanggal SK dalam huruf']
+];
+function varDok(kode){ return (rancangan.varDokumen || []).find(v => v.kode === kode) || null; }
+
+function gambarPanelKantor(){
+  const kotak = $('#isi-kantor');
+  if (!kotak) return;
+  const medan = ([kode, label, jenis, ph, wajib, lebar]) => {
+    const v = varDok(kode);
+    const nilai = v ? (v.nilai || '') : '';
+    const kendali = jenis === 'panjang'
+      ? '<textarea data-pk="' + kode + '" placeholder="' + esc(ph) + '">' + esc(nilai) + '</textarea>'
+      : '<input type="' + (jenis === 'tanggal' ? 'date' : 'text') + '" data-pk="' + kode + '" ' +
+        'placeholder="' + esc(ph) + '" value="' + esc(nilai) + '">';
+    return '<div class="pk-medan' + (lebar === 'penuh' ? ' penuh' : '') + '">' +
+      '<label>' + esc(label) + (wajib ? '<span class="wajib">*</span>' : '') + '</label>' + kendali +
+      '<span class="kodevar">{{' + esc(kode) + '}}</span></div>';
+  };
+  const ctx = konteksDokumen();
+  kotak.innerHTML =
+    '<h3 class="pk-kepala"><i>▤</i>Profil Kantor</h3>' +
+    '<p class="pk-catatan">Isian di sini tidak terikat pada formulir order mana pun — semuanya ' +
+    'menjadi variabel global yang bisa dipakai di bagian template mana saja, dan mengisi kartu ' +
+    'kantor di sisi kiri layar.</p>' +
+    '<div class="pk-kisi">' + MEDAN_KANTOR.map(medan).join('') + '</div>' +
+    '<div class="pk-turunan"><h4>Variabel turunan</h4>' +
+    '<p class="hampa">Dirakit sendiri dari isian di atas; tidak perlu diketik.</p>' +
+    TURUNAN_KANTOR.map(([k, ket]) => '<div class="baris"><code>{{' + esc(k) + '}}</code>' +
+      '<span class="nilai">' + (ctx[k] ? esc(ctx[k]) : '—') + ' <span class="hampa">· ' + esc(ket) +
+      '</span></span></div>').join('') + '</div>';
+  kotak.querySelectorAll('[data-pk]').forEach(el => el.addEventListener('input', () => {
+    const v = varDok(el.dataset.pk);
+    if (!v) return;
+    v.nilai = el.value;
+    gambarKartuKantor();
+    kotak.querySelectorAll('.pk-turunan .nilai').forEach((sp, i) => {
+      const c = konteksDokumen();
+      const k = TURUNAN_KANTOR[i];
+      sp.innerHTML = (c[k[0]] ? esc(c[k[0]]) : '—') + ' <span class="hampa">· ' + esc(k[1]) + '</span>';
+    });
+    simpanNanti();
+  }));
+}
+/* kartu kantor di sidebar dibaca dari variabel global yang sama */
+function gambarKartuKantor(){
+  const kk = $('#kartu-kantor');
+  if (!kk) return;
+  const c = konteksDokumen();
+  const baris = (ikon, teks) => teks ? '<div class="kk-baris"><i>' + ikon + '</i>' + esc(teks) + '</div>' : '';
+  kk.innerHTML =
+    '<div class="kk-judul">' + esc(c.kantor_label || 'Profil Kantor') + '</div>' +
+    '<div class="kk-nama">' + esc(c.notaris_nama_gelar || c.notaris_nama || '—') + '</div>' +
+    baris('▤', c.notaris_sk_nomor ? 'SK · ' + c.notaris_sk_nomor : '') +
+    baris('◎', c.notaris_wilayah ? 'Wilayah · ' + c.notaris_wilayah : '') +
+    baris('✆', c.notaris_telepon) +
+    baris('✉', c.notaris_email) +
+    baris('⌂', c.notaris_alamat);
+}
+
 const KEPALA = {
+  minuta:    ['Engine Module › Minuta', 'Minuta Order A',
+              'Naskah hasil perakitan order — Notaris dan Asisten merapikan tulisannya di sini.'],
+  kantor:    ['Engine Module › Profil Kantor', 'Profil Kantor',
+              'Identitas kantor dan penanda tangan — tersedia sebagai variabel global di semua template.'],
   rancang:   ['Engine Module › Form Design', 'Form Design',
               'Rancangan isian layar order — field di sini sekaligus menjadi kamus variabel.'],
   kondisi:   ['Engine Module › Template Akta', 'Template Akta Kantor',
@@ -1320,6 +1566,9 @@ function pilihMode(mode){
   $('#judul-halaman').textContent = k[1];
   $('#sub-halaman').textContent = k[2];
   if (mode === 'pratinjau') gambarPratinjau();
+  if (mode === 'kantor') gambarPanelKantor();
+  if (mode === 'minuta') gambarMinuta();
+  terapkanPeranLayar();
   if (mode === 'kondisi'){ gambarDaftarBagian(); gambarKanan(); }
   window.scrollTo(0,0);
 }
@@ -1363,12 +1612,56 @@ api.onMenu(async aksi => {
   if (aksi === 'impor')  $('#btn-impor').click();
 });
 
+/* menyembunyikan aksi yang bukan milik peran terbatas */
+function terapkanPeranLayar(){
+  const bebas = penuh();
+  /* Template Akta menyusun struktur dan syarat — hanya Super Admin. Notaris dan
+     Asisten bekerja di Minuta, yang hanya menyentuh tulisannya. */
+  const mt = $('#menu-template');
+  if (mt){
+    mt.classList.toggle('mati', !bebas);
+    mt.title = bebas ? '' : 'Hanya Super Admin. Notaris dan Asisten menyunting naskah di Minuta.';
+  }
+  if (!bebas && !$('.layar[data-layar="kondisi"]').hidden) pilihMode('minuta');
+}
+
+function gambarKartuPeran(){
+  const sel = $('#pilih-peran');
+  if (!sel) return;
+  const kini = rancangan.peran || 'super';
+  if (!sel.options.length)
+    sel.innerHTML = PERAN.map(p => '<option value="' + p[0] + '">' + esc(p[1]) + ' · ' + esc(p[2]) +
+      '</option>').join('');
+  sel.value = kini;
+  const p = PERAN.find(x => x[0] === kini) || PERAN[0];
+  $('#peran-nama').textContent  = p[1];
+  $('#peran-label').textContent = p[2];
+  $('#peran-av').textContent    = p[3];
+  document.body.classList.toggle('peran-terbatas', !penuh());
+  terapkanPeranLayar();
+}
+
 function gambarSemua(){
+  gambarKartuPeran();
+  gambarKartuKantor();
   gambarDaftarTab();
   gambarKanvas();
   if (rancangan.bagian && !$('.layar[data-layar="kondisi"]').hidden){ gambarDaftarBagian(); gambarKanan(); }
   if (!$('.layar[data-layar="pratinjau"]').hidden) gambarPratinjau();
+  if (!$('.layar[data-layar="kantor"]').hidden) gambarPanelKantor();
 }
+
+(function pasangPilihPeran(){
+  const sel = $('#pilih-peran');
+  if (!sel) return;
+  sel.addEventListener('change', () => {
+    rancangan.peran = peranSah(sel.value);
+    potAktif = null;
+    gambarSemua();
+    if (!$('.layar[data-layar="kondisi"]').hidden){ gambarDaftarBagian(); gambarKanan(); }
+    simpanNanti();
+  });
+})();
 
 mulai().then(() => pilihMode('rancang'));
 
@@ -1408,7 +1701,7 @@ function grupUlangDari(t, f){
   let kini = null;
   for (const x of (t.field || [])){
     if (x.tipe === 'ulang'){ kini = x; continue; }
-    if (x.tipe === 'seksi'){ kini = null; continue; }
+    if (x.tipe === 'seksi' || x.tipe === 'tutup'){ kini = null; continue; }
     if (x.id === f.id) return kini;
   }
   return null;
@@ -1419,14 +1712,20 @@ function semuaField(){
   const ada = {};
   const taruh = x => { if (!ada[x.kode]){ ada[x.kode] = 1; out.push(x); } };
   rancangan.tab.forEach(t => t.field.forEach(f => {
-    if (TANPA_NILAI.includes(f.tipe) || !f.kode) return;
+    if (!f.kode) return;
     const g = grupUlangDari(t, f);
     const tanda = { tab: t.nama, tabId: t.id, grup: g ? (g.label || 'Grup') : '', grupKode: g ? g.kode : '' };
+    /* Elemen KBLI sendiri bukan variabel — yang jadi variabel adalah pecahan tiap barisnya,
+       jadi ia tetap dilewati sebagai field tetapi turunannya tetap didaftarkan. */
+    if (f.tipe === 'kbli'){
+      pecahanKbli(f).forEach(x => taruh(Object.assign({}, x, tanda,
+        { lebar:'penuh', grup: f.label || 'KBLI', grupKode: f.kode })));
+      return;
+    }
+    if (TANPA_NILAI.includes(f.tipe)) return;
     taruh(Object.assign({}, f, tanda));
     pecahanUser(f).forEach(x => taruh(Object.assign({}, x, tanda, { lebar:'penuh' })));
     pecahanTerbilang(f).forEach(x => taruh(Object.assign({}, x, tanda, { lebar:'penuh' })));
-    pecahanKbli(f).forEach(x => taruh(Object.assign({}, x, tanda,
-      { lebar:'penuh', grup: f.label || 'KBLI', grupKode: f.kode })));
   }));
   return out;
 }
@@ -1593,6 +1892,41 @@ function gambarEditorPot(p, box){
   pasangEditorPot(p, grup, box);
 }
 
+/* Tampilan potongan untuk PPAT dan Asisten: syarat, perulangan, penomoran dan
+   grup pilih-satu hanya terbaca; yang bisa diubah cuma tulisannya. */
+function gambarEditorPotTerbatas(p, box){
+  const dipakai = (rancangan.bagian || [])
+    .filter(b => (b.potongan || []).includes(p.kode)).map(b => b.judul);
+  let h = '<div class="pot-kunci">' +
+    '<div class="pk-kep"><b>' + esc(p.judul) + '</b>' +
+    '<span class="kanan"><span class="sy-kunci">' + esc(ringkasSyarat(p.syarat)) + '</span>' +
+    '<span class="tanda-kunci">bawaan</span></span></div>';
+
+  h += '<div class="pk-tubuh"><label class="j">Tulisan</label>' +
+    penyuntingHtml('teks', p.teks) + peringatanVarHtml(p);
+
+  if (p.slot && p.slot.length){
+    h += '<div class="f" style="margin-top:14px"><label class="j">Sisipan bersyarat</label>' +
+      '<p class="hampa">Syaratnya terkunci; tulisannya bisa diubah.</p>';
+    p.slot.forEach((sl, i) => {
+      h += '<div class="slot-kartu"><div class="kep">' +
+        '<span class="kode-slot">[[slot:' + esc(sl.kode) + ']]</span><b>' + esc(sl.label) + '</b>' +
+        '<span class="kanan"><span class="sy-kunci">' + esc(ringkasSyarat(sl.syarat)) + '</span></span></div>' +
+        penyuntingHtml('slot' + i, sl.teks, { pendek:true }) + '</div>';
+    });
+    h += '</div>';
+  }
+
+  h += '<p class="hampa" style="margin-top:12px">Dipakai pada: ' +
+    (dipakai.length ? esc(dipakai.join(', ')) : '—') + '</p>';
+  h += '</div></div>';
+
+  box.innerHTML = h;
+  pasangPenyunting(box, 'teks', v => { p.teks = v; simpanNanti(); });
+  (p.slot || []).forEach((sl, i) => pasangPenyunting(box, 'slot' + i,
+    v => { sl.teks = v; simpanNanti(); }));
+}
+
 /* =====================================================================
    Penyunting naskah — bilah alat lengkap
    ===================================================================== */
@@ -1651,6 +1985,22 @@ function tbl(aksi, isi, judul, extra){
   return '<button type="button" data-aksi="' + aksi + '" title="' + esc(judul) + '"' +
     (extra || '') + '>' + isi + '</button>';
 }
+/* Gaya penanda daftar — sama seperti pada penyunting aplikasi asli. */
+const GAYA_NOMOR = [
+  ['decimal',     '1. 2. 3.'],
+  ['lower-alpha', 'a. b. c.'],
+  ['upper-alpha', 'A. B. C.'],
+  ['lower-roman', 'i. ii. iii.'],
+  ['upper-roman', 'I. II. III.'],
+  ['induk',       'Ikut induk (I.1. / A.1. / a.1.)']
+];
+const GAYA_TITIK = [
+  ['disc',   '•  bulat'],
+  ['dash',   '–  strip'],
+  ['circle', '◦  lingkaran'],
+  ['square', '▪  kotak']
+];
+
 function penyuntingHtml(kunci, nilai, opsi){
   const o = opsi || {};
   const id = 'ed' + (++editorKe);
@@ -1670,6 +2020,14 @@ function penyuntingHtml(kunci, nilai, opsi){
   h += tbl('removeFormat', IK.bersih, 'Hapus format');
   h += tbl('insertUnorderedList', IK.ul, 'Daftar titik');
   h += tbl('insertOrderedList', IK.ol, 'Daftar bernomor');
+  h += '<select data-gayanomor title="Gaya penanda daftar" disabled>' +
+       '<optgroup label="Daftar bernomor">' +
+       GAYA_NOMOR.map(g => '<option value="' + g[0] + '">' + esc(g[1]) + '</option>').join('') +
+       '</optgroup><optgroup label="Daftar titik">' +
+       GAYA_TITIK.map(g => '<option value="' + g[0] + '">' + esc(g[1]) + '</option>').join('') +
+       '</optgroup></select>';
+  h += '<label class="mulai-no" title="Nomor awal daftar">Mulai' +
+       '<input type="number" min="1" value="1" data-mulaino disabled></label>';
   h += '<span class="sp"></span>';
 
   h += tbl('blok:H1','<span class="cap">H<span class="kcl">1</span></span>','Judul 1');
@@ -1814,7 +2172,13 @@ function pasangPenyunting(akar, kunci, simpan){
   }
 
   /* tombol tidak boleh merebut fokus dari area tulis */
-  bilah.addEventListener('mousedown', ev => { if (ev.target.closest('button,select')) ev.preventDefault(); });
+  /* Menahan mousedown menjaga sorotan teks tetap hidup saat tombol ditekan, tetapi pada
+     <select> dan <input> hal itu justru menahan daftar pilihannya terbuka — jadi keduanya
+     dilewati; sorotannya sudah direkam lebih dulu lewat mouseup/keyup/blur. */
+  bilah.addEventListener('mousedown', ev => {
+    if (ev.target.closest('select,input')) return;
+    if (ev.target.closest('button')) ev.preventDefault();
+  });
 
   bilah.addEventListener('click', ev => {
     const laci = ev.target.closest('[data-laci]');
@@ -1886,12 +2250,76 @@ function pasangPenyunting(akar, kunci, simpan){
       return;
     }
     perintah(a);
+    segarkanDaftar();
   });
 
   sumber.addEventListener('input', () => { isi.innerHTML = sumber.value; simpan(sumber.value); });
 
   const selUk = bilah.querySelector('[data-ukuran]');
   if (selUk) selUk.addEventListener('change', () => ukuranHuruf(selUk.value));
+  /* ---- gaya penanda daftar ---- */
+  function daftarTerdekat(){
+    const sel = window.getSelection();
+    let n = (sel && sel.rangeCount) ? sel.getRangeAt(0).startContainer
+          : (simpanan ? simpanan.startContainer : null);
+    if (!n || !isi.contains(n)) n = simpanan ? simpanan.startContainer : null;
+    if (!n || !isi.contains(n)) return null;
+    if (n.nodeType === 3) n = n.parentNode;
+    while (n && n !== isi && n.tagName !== 'OL' && n.tagName !== 'UL') n = n.parentNode;
+    return (n && n !== isi) ? n : null;
+  }
+  function gayaInduk(l){
+    let p = l.parentNode;
+    while (p && p !== isi && p.tagName !== 'OL') p = p.parentNode;
+    if (!p || p.tagName !== 'OL') return 'decimal';
+    return p.style.listStyleType || getComputedStyle(p).listStyleType || 'decimal';
+  }
+  const selGaya  = bilah.querySelector('[data-gayanomor]');
+  const inpMulai = bilah.querySelector('[data-mulaino]');
+  function segarkanDaftar(){
+    const l = daftarTerdekat();
+    if (selGaya)  selGaya.disabled  = !l;
+    if (inpMulai) inpMulai.disabled = !l || l.tagName !== 'OL';
+    if (!l) return;
+    if (selGaya){
+      selGaya.value = l.classList.contains('ol-induk') ? 'induk'
+        : (l.style.listStyleType || '').indexOf('-') >= 0 ? 'dash'
+        : (l.style.listStyleType || (l.tagName === 'OL' ? 'decimal' : 'disc'));
+    }
+    if (inpMulai && l.tagName === 'OL') inpMulai.value = l.getAttribute('start') || '1';
+  }
+  if (selGaya) selGaya.addEventListener('change', () => {
+    pulih();
+    const l = daftarTerdekat();
+    if (!l) return;
+    const v = selGaya.value;
+    l.classList.remove('ol-induk');
+    l.style.removeProperty('--gaya-induk');
+    if (v === 'induk'){
+      if (l.tagName !== 'OL') return;
+      l.classList.add('ol-induk');
+      l.style.listStyleType = '';
+      l.style.setProperty('--gaya-induk', gayaInduk(l));
+    } else if (v === 'dash'){
+      l.style.listStyleType = '"-  "';
+    } else {
+      l.style.listStyleType = v;
+    }
+    rekam(); ubah(); segarkanDaftar();
+  });
+  if (inpMulai) inpMulai.addEventListener('change', () => {
+    pulih();
+    const l = daftarTerdekat();
+    if (!l || l.tagName !== 'OL') return;
+    const n = Math.max(1, parseInt(inpMulai.value, 10) || 1);
+    inpMulai.value = n;
+    if (n === 1) l.removeAttribute('start'); else l.setAttribute('start', n);
+    rekam(); ubah();
+  });
+  isi.addEventListener('keyup', segarkanDaftar);
+  isi.addEventListener('mouseup', segarkanDaftar);
+  segarkanDaftar();
+
   const selSp = bilah.querySelector('[data-spasi]');
   if (selSp) selSp.addEventListener('change', () => {
     pulih();
@@ -1899,9 +2327,15 @@ function pasangPenyunting(akar, kunci, simpan){
     ubah();
   });
 
-  box.querySelectorAll('[data-sisip]').forEach(x => x.addEventListener('mousedown', ev => ev.preventDefault()));
+  box.querySelectorAll('[data-sisip],[data-sisip-blok]').forEach(x =>
+    x.addEventListener('mousedown', ev => ev.preventDefault()));
   box.querySelectorAll('[data-sisip]').forEach(x => x.addEventListener('click', () => {
     perintah('insertText', '{{' + x.dataset.sisip + '}}');
+  }));
+  box.querySelectorAll('[data-sisip-blok]').forEach(x => x.addEventListener('click', () => {
+    const k = x.dataset.sisipBlok;
+    const contoh = (semuaField().find(f => f.dari === k) || {}).kode || (k + '_kode');
+    perintah('insertText', '[[ulang:' + k + ']]{{' + contoh + '}};[[/ulang]]');
   }));
 
   document.addEventListener('click', ev => {
@@ -1928,7 +2362,21 @@ function daftarVarHtml(kunci){
         '<div class="chips-var">' + anak[k].map(chip).join('') + '</div>';
     });
     return h;
-  }).join('');
+  }).join('') + blokUlangHtml();
+}
+/* Lingkup berulang bukan variabel tunggal — disediakan sebagai blok yang dibungkus di
+   sekeliling satu baris redaksi, supaya barisnya ditulis sekali untuk tiap isian. */
+function blokUlangHtml(){
+  const g = semuaGrupUlang();
+  if (!g.length) return '';
+  return '<div class="gv">Blok berulang</div>' +
+    '<p class="hampa" style="margin:0 0 7px;font-size:11px">Bungkus satu baris redaksi dengan blok ' +
+    'ini; baris itu ditulis sekali untuk tiap isian. Letakkan di dalam <b>satu butir daftar</b> ' +
+    '(tekan Tab untuk membuat sub-butir) dan butir itulah yang berulang, jadi hasilnya sub-daftar ' +
+    'bernomor sendiri. Di dalamnya tersedia <code>{{nomor_baris}}</code> dan ' +
+    '<code>{{huruf_baris}}</code> bila penomorannya mau diketik sendiri.</p>' +
+    '<div class="chips-var">' + g.map(x => '<button data-sisip-blok="' + esc(x.kode) + '" title="' +
+      esc(x.label + ' — ' + x.tab) + '">[[ulang:' + esc(x.kode) + ']]</button>').join('') + '</div>';
 }
 function varTakDikenal(p){
   const sah = semuaField().map(f => f.kode)
@@ -2115,15 +2563,22 @@ function gambarDaftarBagian(){
     const nomor = b.jenis === 'pasal' ? String(++no) : (b.jenis === 'otomatis' ? '⚙' : '▤');
     const kelas = b.jenis === 'pasal' ? '' : (b.jenis === 'otomatis' ? ' oto' : ' cat');
     if (q && !b.judul.toLowerCase().includes(q)) return '';
+    const kunci = false;
     const sub = b.jenis === 'otomatis'
-      ? '<div class="sb">Kondisi · disusun sistem<br>judul disembunyikan</div>' : '';
+      ? '<div class="sb">' + (kunci ? 'Bagian otomatis · terkunci' : 'Kondisi · disusun sistem<br>judul disembunyikan') +
+        '</div>' : '';
     const i = rancangan.bagian.indexOf(b);
-    return '<div class="bagian-item' + (bagianAktif === b.id ? ' aktif' : '') + '" data-bagian="' + b.id +
-      '" draggable="true" title="Seret untuk memindahkan">' +
-      '<span class="geser">' +
+    return '<div class="bagian-item' + (bagianAktif === b.id ? ' aktif' : '') +
+      (kunci ? ' terkunci' : '') + '" data-bagian="' + b.id + '"' +
+      (kunci ? '' : ' draggable="true" title="Seret untuk memindahkan"') + '>' +
+      (kunci
+        ? '<span class="geser"><span class="gembok" title="Urutan dan syaratnya terkunci">' +
+          SVG('<rect x="3.2" y="7" width="9.6" height="6.4" rx="1.2"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/>') +
+          '</span></span>'
+        : '<span class="geser">' +
         '<button type="button" data-geser="naik" title="Naikkan"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
         '<button type="button" data-geser="turun" title="Turunkan"' +
-          (i === rancangan.bagian.length - 1 ? ' disabled' : '') + '>↓</button></span>' +
+          (i === rancangan.bagian.length - 1 ? ' disabled' : '') + '>↓</button></span>') +
       '<span class="no' + kelas + '">' + nomor + '</span>' +
       '<span class="tk"><span class="jd">' + esc(b.judul) + '</span>' + sub + '</span>' +
       '<span class="mata">◉</span></div>';
@@ -2333,21 +2788,31 @@ function gambarPanelBagian(){
   /* bagian otomatis: daftar potongan + editor */
   b.potongan = b.potongan || [];
   if (!potAktif && b.potongan.length) potAktif = b.potongan[0];
+  const bebas = true;
   let h = '<div class="ed-kepala">' +
-      '<input type="text" class="judul-input" data-bj value="' + esc(b.judul) + '">' +
+      (bebas
+        ? '<input type="text" class="judul-input" data-bj value="' + esc(b.judul) + '">'
+        : '<span class="judul-kunci">' + esc(b.judul) + '</span>') +
       '<span class="lencana">Bagian Otomatis</span>' +
-      '<span class="kanan"><button class="btn btn-kecil" data-tambahpot>+ Potongan</button>' +
-      '<button class="btn btn-kecil btn-bahaya" data-hapusbagian>Hapus bagian</button></span></div>' +
+      (bebas
+        ? '<span class="kanan"><button class="btn btn-kecil" data-tambahpot>+ Potongan</button>' +
+          '<button class="btn btn-kecil btn-bahaya" data-hapusbagian>Hapus bagian</button></span>'
+        : '<span class="kanan"><span class="tanda-kunci">terkunci</span></span>') + '</div>' +
     '<div class="ed-badan" style="padding-bottom:0">' +
-    '<p class="hampa">Struktur dan syaratnya disusun di sini. Di tenant, kantor hanya melihat syaratnya ' +
-    'sebagai keterangan terkunci dan menyunting tulisannya saja.</p>' +
-    pengaturUlangBagianHtml(b) + daftarPotHtml(b) + '</div>';
+    '<p class="hampa">' + (bebas
+      ? 'Struktur dan syaratnya disusun di sini. Di tenant, kantor hanya melihat syaratnya ' +
+        'sebagai keterangan terkunci dan menyunting tulisannya saja.'
+      : 'Bagian Otomatis — struktur, syarat tampil, dan urutannya terkunci. Klik potongan untuk ' +
+        'menyunting tulisannya.') + '</p>' +
+    (bebas ? pengaturUlangBagianHtml(b) : '') + daftarPotHtml(b) + '</div>';
   box.innerHTML = h;
 
-  box.querySelector('[data-bj]').addEventListener('input', e => {
-    b.judul = e.target.value; gambarDaftarBagian(); simpanNanti();
-  });
-  box.querySelector('[data-hapusbagian]').addEventListener('click', () => hapusBagian(b.id));
+  if (bebas){
+    box.querySelector('[data-bj]').addEventListener('input', e => {
+      b.judul = e.target.value; gambarDaftarBagian(); simpanNanti();
+    });
+    box.querySelector('[data-hapusbagian]').addEventListener('click', () => hapusBagian(b.id));
+  }
   const selUlang = box.querySelector('[data-bulang]');
   if (selUlang) selUlang.addEventListener('change', e => {
     b.ulang = e.target.value;
@@ -2360,7 +2825,8 @@ function gambarPanelBagian(){
   if (selNo) selNo.addEventListener('change', e => { b.nomor = e.target.value; simpanNanti(); });
   const cbNo = box.querySelector('[data-bnomorulang]');
   if (cbNo) cbNo.addEventListener('change', e => { b.nomorUlangKelompok = e.target.checked; simpanNanti(); });
-  box.querySelector('[data-tambahpot]').addEventListener('click', () => {
+  const tbhPot = box.querySelector('[data-tambahpot]');
+  if (tbhPot) tbhPot.addEventListener('click', () => {
     const n = rancangan.potongan.length + 1;
     const kode = 'potongan_' + n + '_' + Math.floor(Math.random()*90+10);
     rancangan.potongan.push({ kode, judul:'Potongan ' + n, grup:null, ulang:'', nomor:'tanpa',
@@ -2484,22 +2950,37 @@ function gambarPanelHalaman(){
     baris('footerKanan','Footer kanan') +
     '<div class="f" style="margin-top:22px;border-top:1px solid var(--garis);padding-top:18px">' +
     '<label class="j">Variabel dokumen</label>' +
-    '<p class="hampa" style="margin:0 0 10px">Variabel yang tidak berasal dari formulir order — ' +
-    'identitas penanda tangan, nama kantor, penanggalan. Nilainya diatur di sini, jadi rancangan ini ' +
-    'tidak terikat pada satu jenis dokumen.</p>' +
+    '<p class="hampa" style="margin:0 0 10px">Variabel global — tidak berasal dari formulir order ' +
+    'mana pun, jadi bisa dipakai di bagian template apa saja, termasuk bagian yang tidak berulang. ' +
+    'Yang bertanda <b>bawaan</b> selalu ada dan kodenya tetap; identitas kantor diatur terpisah di ' +
+    'layar <b>Profil Kantor</b>.</p>' +
     '<div class="tabel-bungkus"><table class="tabel-vardok"><thead><tr>' +
     '<th>Variabel</th><th>Keterangan</th><th>Isi</th><th></th></tr></thead><tbody>' +
-    (rancangan.varDokumen || []).map((v,i) =>
-      '<tr><td><input type="text" class="kode" data-vd="kode" data-i="' + i + '" value="' + esc(v.kode) + '"></td>' +
-      '<td><input type="text" data-vd="label" data-i="' + i + '" value="' + esc(v.label) + '"></td>' +
-      '<td><select data-vd="otomatis" data-i="' + i + '">' +
-        OTOMATIS_VAR.map(o => '<option value="' + o[0] + '"' + (v.otomatis === o[0] ? ' selected' : '') +
-          '>' + o[1] + '</option>').join('') + '</select>' +
-        (v.otomatis ? '' : '<input type="text" data-vd="nilai" data-i="' + i + '" value="' + esc(v.nilai) +
-          '" style="margin-top:6px">') + '</td>' +
-      '<td><button class="btn btn-kecil btn-bahaya" data-vd-hapus="' + i + '">×</button></td></tr>').join('') +
+    (rancangan.varDokumen || []).map((v,i) => {
+      if (v.kelompok === 'kantor') return '';
+      const kunci = !!v.bawaan;
+      return '<tr><td>' + (kunci
+          ? '<code class="kode-tetap">{{' + esc(v.kode) + '}}</code>' +
+            '<span class="tanda-bawaan">bawaan</span>'
+          : '<input type="text" class="kode" data-vd="kode" data-i="' + i + '" value="' + esc(v.kode) + '">') + '</td>' +
+        '<td><input type="text" data-vd="label" data-i="' + i + '" value="' + esc(v.label) + '"></td>' +
+        '<td>' + (kunci
+          ? (v.otomatis
+              ? '<span class="hampa">' + esc((OTOMATIS_VAR.find(o => o[0] === v.otomatis) || ['',''])[1]) + '</span>'
+              : '<input type="text" data-vd="nilai" data-i="' + i + '" value="' + esc(v.nilai) + '">')
+          : '<select data-vd="otomatis" data-i="' + i + '">' +
+            OTOMATIS_VAR.map(o => '<option value="' + o[0] + '"' + (v.otomatis === o[0] ? ' selected' : '') +
+              '>' + o[1] + '</option>').join('') + '</select>' +
+            (v.otomatis ? '' : '<input type="text" data-vd="nilai" data-i="' + i + '" value="' + esc(v.nilai) +
+              '" style="margin-top:6px">')) + '</td>' +
+        '<td>' + (kunci ? '' : '<button class="btn btn-kecil btn-bahaya" data-vd-hapus="' + i + '">×</button>') +
+        '</td></tr>';
+    }).join('') +
     '</tbody></table></div>' +
-    '<button class="btn btn-kecil" data-vd-tambah style="margin-top:9px">+ Variabel dokumen</button></div>' +
+    '<button class="btn btn-kecil" data-vd-tambah style="margin-top:9px">+ Variabel dokumen</button>' +
+    '<p class="hampa" style="margin:10px 0 0">Identitas kantor — nama, gelar disingkat dan tidak ' +
+    'disingkat, SK, wilayah, kontak — diisi di layar <b>Profil Kantor</b> dan tersedia di sini ' +
+    'sebagai variabel global juga.</p></div>' +
     '</div>';
   $$('#isi-halaman [data-h]').forEach(el => el.addEventListener('input', e => {
     rancangan.halaman[el.dataset.h] = e.target.value; simpanNanti();
@@ -2511,6 +2992,7 @@ function gambarPanelHalaman(){
       if (!v) return;
       v[el.dataset.vd] = el.value;
       if (el.dataset.vd === 'otomatis') gambarPanelHalaman();
+      if (v.kelompok === 'kantor') gambarKartuKantor();
       simpanNanti();
     });
   });
@@ -2563,7 +3045,13 @@ function sapaanDari(u){
   }
   return 'Tuan';
 }
-function userById(id){ return (window.USER_CONTOH || []).find(u => u.id === id) || null; }
+function userById(id){
+  const k = String(id == null ? '' : id).trim().toLowerCase();
+  if (!k) return null;
+  const d = window.USER_CONTOH || [];
+  return d.find(u => String(u.id).toLowerCase() === k) ||
+         d.find(u => String(u.nama).toLowerCase() === k) || null;
+}
 function nilaiPaketOrang(u, k){
   if (!u) return '';
   if (k === 'tanggal_lahir')            return tglID(u.tanggal_lahir);
@@ -2582,6 +3070,9 @@ function nilaiTerbilangVar(f, kodeVar, mentah){
   return (terbilang(bersih) + (st ? ' ' + st : '')).trim();
 }
 /* konteks satu baris tab: nilai field + pecahan paket + turunan terbilang */
+let catatanRakit = [];
+function catat(t){ if (catatanRakit.indexOf(t) < 0) catatanRakit.push(t); }
+
 function konteksBaris(tab, row){
   const c = {};
   (tab.field || []).forEach(f => {
@@ -2590,12 +3081,29 @@ function konteksBaris(tab, row){
     const mentah = row[f.kode] == null ? '' : row[f.kode];
     if (f.tipe === 'user'){
       const u = userById(mentah);
+      if (!u && mentah)
+        catat('Baris di tab ' + tab.nama + ': isian “' + f.label + '” bernilai “' + mentah +
+          '” tetapi tidak cocok dengan user mana pun, jadi seluruh variabel identitasnya kosong.');
+      else if (!u && f.wajib)
+        catat('Baris di tab ' + tab.nama + ': isian “' + f.label + '” belum dipilih, jadi seluruh ' +
+          'variabel identitasnya kosong.');
       c[f.kode] = u ? u.nama : '';
       const aw = (f.awalan || '').trim();
-      const pilih = Array.isArray(f.paket) ? f.paket : PAKET_SEMUA;
+      const pilihPaket = Array.isArray(f.paket) ? f.paket : PAKET_SEMUA;
+      const kembar = sesamaPaket(f, tab);
+      if (!u && kembar.length){
+        const nama = kembar.map(x => x.label || x.kode).concat([f.label || f.kode]).sort();
+        catat('Di tab ' + tab.nama + ', isian “' + nama.join('” dan “') + '” sama-sama Referensi user ' +
+          'dengan awalan yang sama, jadi keduanya menghasilkan {{nama}}, {{nik}}, dan seterusnya yang ' +
+          'sama. Beri salah satunya Awalan variabel di Form Design agar tidak saling menimpa.');
+      }
       PAKET_ORANG.forEach(x => {
-        if (!pilih.includes(x[0])) return;
-        c[(aw ? aw + '.' : '') + x[0]] = nilaiPaketOrang(u, x[0]);
+        if (!pilihPaket.includes(x[0])) return;
+        const kv = (aw ? aw + '.' : '') + x[0];
+        const nilai = nilaiPaketOrang(u, x[0]);
+        /* field Referensi user yang tidak terisi tidak boleh menghapus isi kembarannya */
+        if (nilai === '' && c[kv]) return;
+        c[kv] = nilai;
       });
       return;
     }
@@ -2609,21 +3117,42 @@ function konteksBaris(tab, row){
 /* Variabel yang tidak berasal dari formulir order — nilainya diatur di Pengaturan Dokumen,
    bukan ditanam di dalam kode, supaya rancangan ini bisa dipakai untuk dokumen apa pun. */
 const OTOMATIS_VAR = [
-  ['',         'Nilai tetap di bawah'],
-  ['hari',     'Nama hari saat dokumen dibuat'],
-  ['tanggal',  'Tanggal saat dokumen dibuat'],
-  ['terbilang','Tanggal terbilang saat dokumen dibuat']
+  ['',          'Nilai tetap di bawah'],
+  ['hari',      'Nama hari saat dokumen dibuat'],
+  ['tanggal',   'Tanggal saat dokumen dibuat'],
+  ['terbilang', 'Tanggal terbilang saat dokumen dibuat'],
+  ['pukul',     'Pukul saat dokumen dibuat'],
+  ['terbilangPukul', 'Pukul terbilang saat dokumen dibuat']
 ];
+/* pukul dalam huruf: 10.00 -> "sepuluh", 10.15 -> "sepuluh lewat lima belas menit" */
+function terbilangPukul(jam, menit){
+  const j = terbilang(jam);
+  return menit ? j + ' lewat ' + terbilang(menit) + ' menit' : j;
+}
 function konteksDokumen(){
   const d = new Date();
   const iso = d.toISOString().slice(0,10);
+  const jam = String(d.getHours()).padStart(2,'0') + '.' + String(d.getMinutes()).padStart(2,'0');
+  const mentah = k => {
+    const v = (rancangan.varDokumen || []).find(x => x.kode === k);
+    return v && v.nilai != null ? String(v.nilai) : '';
+  };
+  const gabung = (a, b) => [a, b].map(x => String(x || '').trim()).filter(Boolean).join(', ');
   const c = {};
   (rancangan.varDokumen || []).forEach(v => {
     if (!v.kode) return;
-    c[v.kode] = v.otomatis === 'hari'      ? HARI[d.getDay()]
-              : v.otomatis === 'tanggal'   ? tglID(iso)
-              : v.otomatis === 'terbilang' ? terbilangTanggal(iso)
-              : (v.nilai == null ? '' : String(v.nilai));
+    switch (v.otomatis){
+      case 'hari':             c[v.kode] = HARI[d.getDay()]; break;
+      case 'tanggal':          c[v.kode] = tglID(iso); break;
+      case 'terbilang':        c[v.kode] = terbilangTanggal(iso); break;
+      case 'pukul':            c[v.kode] = jam; break;
+      case 'terbilangPukul':   c[v.kode] = terbilangPukul(d.getHours(), d.getMinutes()); break;
+      case 'namaGelar':        c[v.kode] = gabung(mentah('notaris_nama'), mentah('notaris_gelar')); break;
+      case 'namaGelarPanjang': c[v.kode] = gabung(mentah('notaris_nama'), mentah('notaris_gelar_panjang')); break;
+      case 'tanggalNilai':     c[v.kode] = tglID(v.nilai || ''); break;
+      case 'terbilangDari':    c[v.kode] = terbilangTanggal(mentah(v.dari || '')); break;
+      default:                 c[v.kode] = v.nilai == null ? '' : String(v.nilai);
+    }
   });
   return c;
 }
@@ -2683,11 +3212,68 @@ function nomorTulis(gaya, n){
 function gantiVar(html, ctx){
   return String(html || '').replace(/\{\{([^}]+)\}\}/g, (m, k) => {
     const kunci = k.trim();
+    if (!(kunci in ctx)){
+      const lingkup = semuaGrupUlang().find(g => g.kode === kunci);
+      if (lingkup){
+        catat('{{' + kunci + '}} adalah lingkup berulang (' + lingkup.label + ' di tab ' + lingkup.tab +
+          '), bukan satu variabel — isinya bisa lebih dari satu baris. Bungkus barisnya dengan blok ' +
+          '[[ulang:' + kunci + ']] … [[/ulang]] di dalam redaksi, atau pakai Bagian Otomatis dengan ' +
+          'Diulang atas → ' + lingkup.label + '.');
+        return '<span class="rk-hampa" title="' + esc(kunci) + ' adalah lingkup berulang">⟨' +
+          esc(kunci) + '⟩</span>';
+      }
+      const asal = semuaField().find(x => x.kode === kunci);
+      catat(asal
+        ? 'Variabel {{' + kunci + '}} berasal dari “' + asal.label + '” di tab ' + asal.tab +
+          (asal.grup ? ' (di dalam ' + asal.grup + ')' : '') + ', yang tidak terjangkau dari bagian ini. ' +
+          'Setel “Diulang atas” pada potongan atau bagiannya ke lingkup tersebut.'
+        : 'Variabel {{' + kunci + '}} tidak dihasilkan formulir mana pun — periksa kodenya di Form Design.');
+    }
     const v = ctx[kunci];
     if (v == null || v === '') return '<span class="rk-hampa" title="' + esc(kunci) + ' belum terisi">⟨' +
       esc(kunci) + '⟩</span>';
     return esc(v);
   });
+}
+/* Blok berulang di dalam redaksi:  [[ulang:kode]] … [[/ulang]]
+   Isinya ditulis sekali untuk tiap baris lingkup itu, memakai konteks barisnya sendiri.
+   Di dalam blok tersedia {{nomor_baris}} dan {{huruf_baris}} sebagai penomoran. */
+const RE_ULANG = /\[\[ulang:([A-Za-z0-9_]+)\]\]([\s\S]*?)\[\[\/ulang\]\]/g;
+const NILAI_ROMAWI = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],
+  [50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+const romawiKe = n => NILAI_ROMAWI.reduce((t, [v, h]) => { while (n >= v){ t += h; n -= v; } return t; }, '');
+const hurufKe = n => {
+  let t = '';
+  while (n > 0){ n--; t = String.fromCharCode(97 + (n % 26)) + t; n = Math.floor(n / 26); }
+  return t;
+};
+/* Penanda yang diketik di dalam satu butir daftar, satu paragraf, atau satu baris tabel
+   diangkat keluar dari pembungkusnya, supaya yang diulang adalah butirnya — bukan isi di
+   dalam satu butir. Dengan begitu satu sub-butir di editor menjadi sub-daftar bernomor. */
+function angkatPenandaUlang(html){
+  return String(html).replace(
+    /<(li|p|tr|div)\b([^>]*)>\s*\[\[ulang:([A-Za-z0-9_]+)\]\]([\s\S]*?)\[\[\/ulang\]\]\s*<\/\1>/gi,
+    (m, tag, atr, kode, isi) =>
+      '[[ulang:' + kode + ']]<' + tag + atr + '>' + isi + '</' + tag + '>[[/ulang]]');
+}
+function rakitIsi(html, ctx){
+  const src = angkatPenandaUlang(String(html == null ? '' : html));
+  if (src.indexOf('[[ulang:') < 0) return gantiVar(src, ctx);
+  const re = new RegExp(RE_ULANG.source, 'g');
+  let keluar = '', mulai = 0, m;
+  while ((m = re.exec(src)) !== null){
+    keluar += gantiVar(src.slice(mulai, m.index), ctx);
+    const baris = lingkupBaris(m[1], ctx);
+    if (!baris.length)
+      catat('Blok berulang [[ulang:' + m[1] + ']] tidak menemukan satu baris pun — belum ada isian ' +
+        'pada lingkup itu di layar Order, atau kodenya tidak cocok dengan elemen berulang mana pun.');
+    keluar += baris.map((r, i) => gantiVar(m[2], Object.assign({}, r.ctx, {
+      nomor_baris: String(i + 1), angka_baris: String(i + 1),
+      huruf_baris: hurufKe(i + 1), romawi_baris: romawiKe(i + 1)
+    }))).join('');
+    mulai = re.lastIndex;
+  }
+  return keluar + gantiVar(src.slice(mulai), ctx);
 }
 function rakitTeks(p, ctx){
   let bagian = [{ t: p.teks, slot: null }];
@@ -2703,8 +3289,8 @@ function rakitTeks(p, ctx){
     bagian = baru;
   });
   return bagian.map(b => b.slot
-    ? (lolosSyarat(b.slot.syarat, ctx) ? gantiVar(b.slot.teks, ctx) : '')
-    : gantiVar(b.t, ctx)).join('');
+    ? (lolosSyarat(b.slot.syarat, ctx) ? rakitIsi(b.slot.teks, ctx) : '')
+    : rakitIsi(b.t, ctx)).join('');
 }
 function itemRk(no, teks, kelas){
   return '<div class="rk-item' + (kelas ? ' ' + kelas : '') + '">' +
@@ -2805,7 +3391,34 @@ function rakitBagianBerulang(b, global, menang){
   return { html, jumlah, hampa };
 }
 
+/* Syarat yang menguji sebuah nilai yang tidak ada di daftar pilihan fieldnya tidak akan pernah
+   terpenuhi — biasanya karena daftar opsi diubah setelah syaratnya ditulis. */
+function periksaNilaiSyarat(){
+  const opsiDari = {};
+  rancangan.tab.forEach(t => (t.field || []).forEach(f => {
+    if (!f.kode) return;
+    if (f.tipe === 'pilihan' || f.tipe === 'segmented') opsiDari[f.kode] = (f.opsi || []).slice();
+    else if (f.tipe === 'yatidak') opsiDari[f.kode] = ['Ya', 'Tidak'];
+  }));
+  const uji = (sy, dimana) => (sy || []).forEach(c => {
+    if (!c || !c.field || c.op === 'terisi') return;
+    if (c.nilai == null || c.nilai === '') return;
+    const o = opsiDari[c.field];
+    if (!o || !o.length || o.indexOf(c.nilai) >= 0) return;
+    catat('Syarat pada ' + dimana + ' menguji ' + c.field + ' = “' + c.nilai + '”, padahal pilihan ' +
+      'yang tersedia hanya “' + o.join('”, “') + '”. Syarat itu tidak akan pernah terpenuhi.');
+  });
+  (rancangan.potongan || []).forEach(p => {
+    uji(p.syarat, 'potongan “' + (p.judul || p.kode) + '”');
+    (p.slot || []).forEach(sl => uji(sl.syarat, 'sisipan “' + (sl.label || sl.kode) + '”'));
+  });
+  rancangan.tab.forEach(t => (t.field || []).forEach(f =>
+    uji(f.tampilBila, 'elemen “' + (f.label || f.kode) + '” di tab ' + t.nama)));
+}
+
 function rakitAkta(){
+  catatanRakit = [];
+  periksaNilaiSyarat();
   const global = Object.assign({}, konteksDokumen());
   rancangan.tab.forEach(t => {
     if (t.mode === 'formulir') Object.assign(global, konteksBaris(t, nilaiForm[t.id] || {}));
@@ -2817,7 +3430,7 @@ function rakitAkta(){
   (rancangan.bagian || []).forEach(b => {
     if (b.jenis !== 'otomatis'){
       html += '<div class="rk-bagian"><div class="rk-judul">' + esc(b.judul) + '</div>' +
-        '<div class="rk-teks">' + gantiVar(b.teks || '', global) + '</div></div>';
+        '<div class="rk-teks">' + rakitIsi(b.teks || '', global) + '</div></div>';
       return;
     }
     const hasilBagian = b.ulang
@@ -2833,6 +3446,143 @@ function rakitAkta(){
 
   return { html, jumlahPotongan, jumlahHampa };
 }
+/* =====================================================================
+   Minuta — ruang kerja drafting. Struktur dan syarat datang dari Template
+   Akta dan terkunci di sini; yang bisa disentuh hanya tulisannya.
+   ===================================================================== */
+let mnBagian = null, mnTab = 'naskah';
+
+function gambarMinuta(){
+  if (!Array.isArray(rancangan.bagian)) rancangan.bagian = [];
+  if (!mnBagian || !rancangan.bagian.some(b => b.id === mnBagian))
+    mnBagian = rancangan.bagian.length ? rancangan.bagian[0].id : null;
+  gambarMinutaDaftar();
+  gambarMinutaKanan();
+  const p = PERAN.find(x => x[0] === (rancangan.peran || 'super')) || PERAN[0];
+  const lc = $('#mn-lencana');
+  if (lc) lc.textContent = p[2];
+}
+
+function gambarMinutaDaftar(){
+  let no = 0;
+  const kartu = rancangan.bagian.map(b => {
+    const nomor = b.jenis === 'pasal' ? String(++no) : (b.jenis === 'otomatis' ? '⚙' : '▤');
+    const kelas = b.jenis === 'pasal' ? '' : (b.jenis === 'otomatis' ? ' oto' : ' cat');
+    const kunci = b.jenis === 'otomatis';
+    const i = rancangan.bagian.indexOf(b);
+    return '<div class="bagian-item' + (mnBagian === b.id ? ' aktif' : '') + (kunci ? ' terkunci' : '') +
+      '" data-mnbagian="' + b.id + '">' +
+      (kunci
+        ? '<span class="geser"><span class="gembok" title="Disusun di Template Akta — terkunci">' +
+          SVG('<rect x="3.2" y="7" width="9.6" height="6.4" rx="1.2"/><path d="M5.6 7V5.2a2.4 2.4 0 0 1 4.8 0V7"/>') +
+          '</span></span>'
+        : '<span class="geser">' +
+          '<button type="button" data-mngeser="naik" title="Naikkan"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+          '<button type="button" data-mngeser="turun" title="Turunkan"' +
+            (i === rancangan.bagian.length - 1 ? ' disabled' : '') + '>↓</button></span>') +
+      '<span class="no' + kelas + '">' + nomor + '</span>' +
+      '<span class="tk"><span class="jd">' + esc(b.judul) + '</span>' +
+        (kunci ? '<div class="sb">Bagian otomatis · terkunci</div>' : '') + '</span>' +
+      '<span class="mata">◉</span></div>';
+  }).join('');
+  $('#mn-daftar').innerHTML = kartu || '<div class="kosong-panel">Belum ada bagian.</div>';
+  $('#mn-n').textContent = '(' + rancangan.bagian.length + ')';
+
+  $$('#mn-daftar [data-mngeser]').forEach(tb => tb.addEventListener('click', ev => {
+    ev.stopPropagation();
+    pindahBagian(tb.closest('[data-mnbagian]').dataset.mnbagian, tb.dataset.mngeser === 'naik' ? -1 : 1);
+    gambarMinuta();
+  }));
+  $$('#mn-daftar [data-mnbagian]').forEach(el => el.addEventListener('click', () => {
+    mnBagian = el.dataset.mnbagian; potAktif = null; mnTab = 'tulisan';
+    gambarMinuta();
+  }));
+}
+
+function gambarMinutaKanan(){
+  $$('[data-mtab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mtab === mnTab)));
+  $$('[data-mpane]').forEach(x => { x.hidden = x.dataset.mpane !== mnTab; });
+  if (mnTab === 'naskah') gambarMinutaNaskah();
+  else gambarMinutaTulisan();
+}
+
+function gambarMinutaNaskah(){
+  const hasil = rakitAkta();
+  const jumlahBaris = rancangan.tab.map(t => t.mode === 'daftar'
+    ? t.nama + ' ' + ((barisPv[t.id] || []).length) : null).filter(Boolean).join(' · ');
+  const ket = $('#mn-ket');
+  if (ket) ket.textContent = (jumlahBaris || 'Belum ada baris yang diisi') + ' · ' +
+    hasil.jumlahPotongan + ' potongan tertulis' +
+    (hasil.jumlahHampa ? ' · ' + hasil.jumlahHampa + ' variabel belum terisi' : '');
+  $('#mn-naskah').innerHTML =
+    (catatanRakit.length
+      ? '<div class="rk-diagnosa"><b>Kenapa ada yang kosong</b><ul>' +
+        catatanRakit.slice(0, 8).map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>'
+      : '') +
+    '<div class="rk-kertas">' + hasil.html + '</div>';
+}
+
+function gambarMinutaTulisan(){
+  const box = $('#mn-tulisan');
+  const b = rancangan.bagian.find(x => x.id === mnBagian);
+  if (!b){
+    box.innerHTML = '<div class="kosong-kanan"><div class="bulat">✎</div>' +
+      'Pilih bagian di panel kiri untuk menyunting tulisannya.</div>';
+    return;
+  }
+  if (b.jenis !== 'otomatis'){
+    box.innerHTML = '<div class="ed-kepala">' +
+        '<input type="text" class="judul-input" data-mnj value="' + esc(b.judul) + '">' +
+        '<span class="lencana">' + (b.jenis === 'pasal' ? 'Pasal' : 'Catatan') + '</span>' +
+        '<span class="kanan"><button class="btn btn-kecil btn-bahaya" data-mnhapus>Hapus bagian</button></span></div>' +
+      '<div class="ed-badan"><div class="f"><label class="j">Tulisan</label>' +
+        penyuntingHtml('bagian', b.teks || '') +
+        '<p class="hampa" style="margin-top:6px">Tidak berkondisi — selalu tertulis apa adanya.</p></div></div>';
+    box.querySelector('[data-mnj]').addEventListener('input', e => {
+      b.judul = e.target.value; gambarMinutaDaftar(); simpanNanti();
+    });
+    box.querySelector('[data-mnhapus]').addEventListener('click', () => {
+      if (!window.confirm('Hapus bagian \u201c' + b.judul + '\u201d?')) return;
+      rancangan.bagian = rancangan.bagian.filter(x => x.id !== b.id);
+      mnBagian = null; nomorUlangPasal(); gambarMinuta(); simpanNanti();
+    });
+    pasangPenyunting(box, 'bagian', v => { b.teks = v; simpanNanti(); });
+    return;
+  }
+
+  b.potongan = b.potongan || [];
+  if (!potAktif || !b.potongan.includes(potAktif)) potAktif = b.potongan[0] || null;
+  bagianAktif = b.id;   /* dipakai kartuPot untuk menandai cara tulisnya */
+  box.innerHTML = '<div class="ed-kepala">' +
+      '<span class="judul-kunci">' + esc(b.judul) + '</span>' +
+      '<span class="lencana">Bagian Otomatis</span>' +
+      '<span class="kanan"><span class="tanda-kunci">terkunci</span></span></div>' +
+    '<div class="ed-badan" style="padding-bottom:0">' +
+    '<p class="hampa">Struktur, syarat tampil, dan urutannya disusun di Template Akta dan terkunci ' +
+    'di sini. Klik potongan untuk menyunting tulisannya.</p>' + daftarPotHtml(b) + '</div>' +
+    '<div id="mn-editor-pot"></div>';
+  box.querySelectorAll('.pot').forEach(el => el.addEventListener('click', () => {
+    potAktif = el.dataset.kode; gambarMinutaTulisan();
+  }));
+  const p = rancangan.potongan.find(x => x.kode === potAktif && b.potongan.includes(x.kode));
+  const wadah = box.querySelector('#mn-editor-pot');
+  if (p) gambarEditorPotTerbatas(p, wadah);
+  else wadah.innerHTML = '<div class="kosong-kanan"><div class="bulat">✎</div>' +
+    'Pilih potongan di atas untuk menyunting tulisannya.</div>';
+}
+
+$$('[data-mtab]').forEach(b => b.addEventListener('click', () => {
+  mnTab = b.dataset.mtab; gambarMinutaKanan();
+}));
+$('#mn-rakit-ulang').addEventListener('click', () => { mnTab = 'naskah'; gambarMinutaKanan(); });
+$('[data-ke-order]').addEventListener('click', () => pilihMode('pratinjau'));
+$('#mn-tambah-pasal').addEventListener('click', () => {
+  tambahBagian('pasal'); mnBagian = bagianAktif; mnTab = 'tulisan'; gambarMinuta();
+});
+$('#mn-tambah-catatan').addEventListener('click', () => {
+  tambahBagian('catatan'); mnBagian = bagianAktif; mnTab = 'tulisan'; gambarMinuta();
+});
+
 function bukaRakit(){
   const hasil = rakitAkta();
   const jumlahBaris = rancangan.tab.map(t => t.mode === 'daftar'
@@ -2841,9 +3591,14 @@ function bukaRakit(){
   $('#rk-isi').innerHTML = '<div class="rk-kertas">' + hasil.html + '</div>';
   $('#rk-catatan').innerHTML = hasil.jumlahPotongan + ' potongan tertulis' +
     (hasil.jumlahHampa ? ' · <b>' + hasil.jumlahHampa + '</b> variabel belum terisi (ditandai ⟨…⟩)' : '');
+  const box = $('#rk-isi');
+  if (catatanRakit.length){
+    box.insertAdjacentHTML('afterbegin', '<div class="rk-diagnosa"><b>Kenapa ada yang kosong</b>' +
+      '<ul>' + catatanRakit.slice(0, 8).map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>');
+  }
   $('#tirai-rakit').hidden = false;
 }
-$('#btn-rakit').addEventListener('click', bukaRakit);
+$('#btn-rakit').addEventListener('click', () => { pilihMode('minuta'); });
 $$('[data-tutup-rakit]').forEach(b => b.addEventListener('click', () => { $('#tirai-rakit').hidden = true; }));
 $('#tirai-rakit').addEventListener('mousedown', e => {
   if (e.target === $('#tirai-rakit')) $('#tirai-rakit').hidden = true;

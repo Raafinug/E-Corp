@@ -130,8 +130,9 @@ order. Field di bawahnya masuk ke dalam bagian itu sampai bertemu bagian lipat b
 bagian punya judul, keterangan di bawah judul, dan pilihan tertutup saat order dibuka.
 
 **Grup berulang.** Elemen **Grup berulang** membuat blok yang barisnya bisa ditambah dan dihapus di
-dalam satu formulir. Field di bawahnya masuk ke grup itu sampai bertemu bagian lipat atau grup
-berulang berikutnya. Propertinya: kode grup, teks tombol tambah, baris minimal dan maksimal, serta
+dalam satu formulir. Field di bawahnya masuk ke grup itu sampai bertemu **Akhir grup**, bagian lipat,
+atau grup berulang berikutnya. Elemen **Akhir grup** menutup bagian lipat atau grup berulang yang
+sedang berjalan tanpa membuka yang baru, jadi field sesudahnya berdiri sendiri. Propertinya: kode grup, teks tombol tambah, baris minimal dan maksimal, serta
 keterangan. Variabel field di dalamnya bernilai berbeda pada tiap baris, dan lingkupnya tertulis
 `Tab › Nama grup (berulang)` di tab Variabel. Di Template Akta, grup itu muncul sebagai pilihan
 **Diulang atas → Tiap baris <nama grup>**; di dalam perulangan itu `{{kode}}` selalu berarti baris
@@ -203,3 +204,222 @@ ke dalam redaksi.
 **Uji kondisi** ada di bawah editor: isi nilai fieldnya, dan hasil rakitannya langsung terlihat,
 lengkap dengan sisipan yang ditandai. Variabel yang belum punya field di Form Design diberi
 peringatan supaya tidak lolos ke draf.
+
+---
+
+## v0.9.1 — Awalan paket dan diagnosa Rakit Naskah
+
+**Dua field Referensi user di satu tab tidak lagi saling menimpa.** Tiap field Referensi user
+memekarkan paket identitas yang sama — `{{nama}}`, `{{nik}}`, `{{sapaan}}`, dan seterusnya. Jika
+dua field semacam itu berada di satu tab tanpa **Awalan variabel** yang berbeda, keduanya menulis
+ke variabel yang sama; pada baris di mana salah satunya kosong (karena syarat tampilnya tidak
+terpenuhi), yang kosong itu dulu ikut menghapus isi kembarannya, sehingga seluruh identitas
+menjadi kosong tanpa pesan apa pun. Sekarang field yang tidak terisi tidak pernah menghapus nilai
+yang sudah ada, dan pasangan yang bentrok ditandai:
+
+- lencana **paket bentrok** pada kartu di Form Design;
+- peringatan di modal properti, dengan saran mengisi Awalan variabel (misalnya `wakil`, sehingga
+  variabelnya menjadi `{{wakil.nama}}`);
+- catatan di panel **Kenapa ada yang kosong** pada Rakit Naskah.
+
+**Syarat yang tidak mungkin terpenuhi kini dilaporkan.** Bila sebuah syarat menguji nilai yang
+tidak ada pada daftar pilihan fieldnya — misalnya `bentuk_pihak = "Badan Hukum"` sementara
+opsinya `"Badan Hukum (PT)"` — Rakit Naskah menyebutkan syarat mana, nilai apa, dan pilihan apa
+saja yang sebenarnya tersedia.
+
+**Variabel di luar jangkauan dibedakan dari variabel yang tidak ada.** Dulu keduanya dilaporkan
+sebagai "tidak dihasilkan formulir mana pun". Sekarang variabel yang fieldnya ada tetapi berada
+di lingkup lain disebutkan asal tab dan grupnya, berikut saran menyetel "Diulang atas".
+
+---
+
+## v0.9.2 — Variabel global dan layar Profil Kantor
+
+**Penanggalan, nomor, dan identitas kantor kini benar-benar global.** Variabel berikut selalu ada
+pada tiap rancangan, tidak berasal dari formulir order mana pun, jadi bisa dipakai di bagian
+template apa saja termasuk kepala akta yang tidak berulang:
+
+| Variabel | Isi |
+|---|---|
+| `{{var_hari}}` | nama hari penandatanganan |
+| `{{var_tanggal}}` | tanggal penandatanganan |
+| `{{var_terbilang_tanggal}}` | tanggal dalam huruf |
+| `{{var_pukul}}` | pukul penandatanganan, mis. `10.15` |
+| `{{var_terbilang_pukul}}` | pukul dalam huruf, mis. *sepuluh lewat lima belas menit* |
+| `{{deed_number}}` | nomor dokumen |
+
+Keenamnya tampil di **Template Akta → Pengaturan Dokumen** dengan tanda **bawaan**: kodenya tetap
+dan tidak bisa dihapus, supaya template yang memakainya tidak pernah putus. Variabel dokumen
+buatan sendiri tetap bisa ditambah, diubah kodenya, dan dihapus seperti biasa.
+
+**Layar Profil Kantor.** Menu *Engine Module → Profil Kantor* kini hidup, dengan susunan yang sama
+seperti aplikasi asli — Nama NOTARIS, Nomor SK Pengangkatan, Wilayah Kerja, Telepon, Email, Alamat
+Kantor — ditambah tiga isian baru: **Tanggal SK Pengangkatan**, **Gelar disingkat**, dan **Gelar
+tidak disingkat**. Tiap isian memperlihatkan kode variabelnya sendiri di bawah kotaknya.
+
+Dari isian itu dirakit tiga variabel turunan:
+
+| Variabel | Isi | Dipakai di |
+|---|---|---|
+| `{{notaris_nama_gelar}}` | nama + gelar disingkat | kartu kantor |
+| `{{notaris_nama_gelar_panjang}}` | nama + gelar tidak disingkat | badan akta |
+| `{{notaris_sk_tanggal_terbilang}}` | tanggal SK dalam huruf | badan akta |
+
+**Kartu kantor di sisi kiri layar tidak lagi ditulis tetap** — isinya dibaca dari variabel yang
+sama dan berubah begitu Profil Kantor disunting, memakai nama bergelar singkat sesuai aturan itu.
+
+---
+
+## v0.9.3 — Blok berulang di dalam redaksi
+
+**KBLI dan grup berulang bukan variabel tunggal.** `{{kbli}}` sendiri tidak pernah menghasilkan
+apa-apa, karena isinya bisa nol, satu, atau sepuluh baris. Dulu satu-satunya jalan adalah memecah
+pasal menjadi beberapa bagian dan membuat Bagian Otomatis tersendiri — repot untuk daftar yang
+duduk di tengah sebuah pasal.
+
+Sekarang redaksi mana pun boleh memuat **blok berulang**:
+
+```
+[[ulang:kbli]]{{huruf_baris}}. {{kbli_kode}} — {{kbli_judul}};<br>[[/ulang]]
+```
+
+Isi di antara kedua penanda ditulis sekali untuk tiap baris lingkup itu, memakai konteks barisnya
+sendiri. Di dalam blok tersedia `{{nomor_baris}}` (1, 2, 3) dan `{{huruf_baris}}` (a, b, c).
+Blok ini berlaku untuk semua lingkup berulang — KBLI maupun Grup berulang — dan bisa dipakai di
+redaksi bagian biasa, potongan bagian otomatis, maupun teks sisipan `[[slot:…]]`.
+
+Tombolnya ada di panel **{ } Variabel** editor, pada kelompok **Blok berulang**; sekali klik
+menyisipkan kerangkanya lengkap.
+
+**Tiga cacat yang ikut diperbaiki:**
+
+- Tab bermode **formulir** tidak pernah menyimpan pilihan KBLI dan baris grup berulangnya — hanya
+  tab bermode daftar yang merekamnya lewat modal Tambah. Sekarang keduanya dicatat setiap kali
+  berubah, dan dikembalikan saat layar digambar ulang, jadi tidak hilang ketika pindah menu.
+- Panel **{ } Variabel** tidak pernah memuat variabel turunan KBLI (`{{kbli_kode}}`,
+  `{{kbli_judul}}`, `{{kbli_golongan}}`), karena elemen KBLI dilewati seluruhnya sebagai elemen
+  tanpa nilai. Turunannya kini terdaftar, dan ikut diperiksa sebagai variabel yang sah.
+- Memakai nama lingkup sebagai variabel — menulis `{{kbli}}` begitu saja — kini dijelaskan
+  sendiri oleh Rakit Naskah, lengkap dengan bentuk blok yang seharusnya dipakai.
+
+---
+
+## v0.9.4 — Blok berulang sebagai sub-daftar
+
+Penanda `[[ulang:…]]` yang diketik **di dalam satu butir daftar** — atau satu paragraf, atau satu
+baris tabel — kini diangkat keluar dari pembungkusnya sebelum dirakit. Yang berulang menjadi butir
+itu sendiri, bukan isi di dalam satu butir, sehingga satu sub-butir di editor berubah menjadi
+sub-daftar bernomor:
+
+```html
+<li>… kegiatan usaha sebagai berikut:
+  <ol><li>[[ulang:kbli]]{{kbli_kode}} — {{kbli_judul}};[[/ulang]]</li></ol>
+</li>
+```
+
+menghasilkan
+
+```
+2. Untuk mencapai maksud dan tujuan tersebut di atas, Perseroan dapat
+   melaksanakan kegiatan usaha sebagai berikut:
+   1. 01111 — Pertanian Jagung;
+   2. 01132 — Pertanian Buah Semusim;
+```
+
+Cara membuatnya di editor: taruh kursor di ujung kalimat pengantar, tekan Enter untuk butir baru,
+tekan tombol indent (⇥) supaya menjadi sub-butir, lalu klik `[[ulang:kbli]]` di panel
+**{ } Variabel**. Penomorannya ditangani daftar itu sendiri.
+
+**Penghitung baris** di dalam blok: `{{nomor_baris}}` dan padanannya `{{angka_baris}}` (1, 2, 3),
+`{{huruf_baris}}` (a, b, c), dan `{{romawi_baris}}` (I, II, III) — hanya diperlukan bila
+penomorannya mau diketik sendiri, bukan diserahkan ke daftar.
+
+Daftar KBLI contoh ditambah empat baris bidang pertanian dan industri, supaya contoh di luar
+bidang konstruksi juga bisa dicoba.
+
+---
+
+## v0.9.5 — Gaya penanda daftar
+
+Bilah alat penyunting kini punya pemilih **gaya penanda daftar** dan kotak **Mulai**, tepat di
+sebelah tombol daftar bernomor, seperti pada penyunting aplikasi asli. Keduanya hidup hanya ketika
+kursor berada di dalam sebuah daftar, dan langsung menampilkan gaya daftar yang sedang ditempati.
+
+Daftar bernomor:
+
+| Pilihan | Hasil |
+|---|---|
+| `1. 2. 3.` | angka |
+| `a. b. c.` | huruf kecil |
+| `A. B. C.` | huruf besar |
+| `i. ii. iii.` | romawi kecil |
+| `I. II. III.` | romawi besar |
+| `Ikut induk (I.1. / A.1. / a.1.)` | penanda induk + nomor sendiri |
+
+Daftar titik: `•` bulat, `–` strip, `◦` lingkaran, `▪` kotak. Pilihan **strip** memberi penanda
+`-` seperti yang dipakai pada butir akta perubahan.
+
+**Mulai** mengatur nomor awal sebuah daftar bernomor — berguna ketika satu daftar terputus oleh
+paragraf lalu dilanjutkan.
+
+Gaya "Ikut induk" mengambil penanda daftar induknya apa adanya, jadi induk romawi besar
+menghasilkan `I.1.`, induk huruf besar menghasilkan `A.1.`, dan seterusnya. Penomorannya dirakit
+dengan penghitung CSS, sehingga ikut berubah sendiri ketika butir ditambah, dihapus, atau diurut
+ulang — dan tampil sama di editor maupun di Rakit Naskah.
+
+---
+
+## v0.9.6 — Peran pengguna, dan pemilih daftar yang bisa diklik
+
+**Pemilih gaya daftar tidak bisa dibuka.** Bilah alat menahan `mousedown` pada seluruh tombol agar
+sorotan teks di dalam penyunting tidak lenyap saat tombol ditekan. Penahanan itu ikut mengenai
+`<select>`, dan pada Chromium hal tersebut menahan daftar pilihannya terbuka — jadi pemilih gaya
+penanda, ukuran huruf, dan spasi baris hanya bisa diubah lewat papan tik. Sekarang `<select>` dan
+`<input>` dilewati; sorotannya sudah direkam lebih dulu lewat mouseup/keyup/blur, jadi perubahannya
+tetap mengenai daftar yang benar.
+
+**Peran pengguna.** Kartu pengguna di bilah atas kini bisa diganti antara **Super Admin**,
+**Notaris / PPAT**, dan **Asisten**, supaya layar Template Akta bisa dilihat sebagaimana tiap peran
+melihatnya. Peran tersimpan bersama rancangan.
+
+Bagi PPAT dan Asisten:
+
+- panel kiri hanya menawarkan **+ Pasal** dan **+ Catatan**; **+ Bagian Otomatis** dan **Impor
+  Template** tidak ada;
+- bagian otomatis ditandai gembok, tidak bisa diurut ulang, diseret, diganti judulnya, maupun
+  dihapus, dan potongannya tidak bisa ditambah atau dibuang;
+- potongan yang dipilih hanya menampilkan **Tulisan** — syarat tampil, perulangan, penomoran, dan
+  grup pilih-satu tampil sebagai keterangan terkunci di sebelah judulnya;
+- sisipan bersyarat di dalam kalimat tetap bisa disunting tulisannya, syaratnya tidak;
+- di bawah editor tertulis **Dipakai pada** — bagian mana saja yang memakai potongan itu.
+
+Pasal dan Catatan tetap sepenuhnya milik kantor: bisa ditambah, disunting, diurut, dan dihapus oleh
+ketiga peran.
+
+---
+
+## v0.9.7 — Minuta sebagai ruang drafting
+
+Pembagian tugasnya sekarang tegas: **Template Akta** menyusun struktur dan syarat, **Minuta**
+merapikan tulisan.
+
+**Template Akta hanya untuk Super Admin.** Bagi Notaris dan Asisten menu itu mati, dan bila
+sempat dibuka layarnya langsung berpindah ke Minuta. Tampilan Template Akta kembali penuh tanpa
+cabang terbatas — memang hanya satu peran yang melihatnya.
+
+**Menu Minuta hidup.** Isinya ruang kerja drafting satu order:
+
+- panel kiri memuat seluruh bagian; **Pasal & Catatan** bisa ditambah, diurut, diganti judulnya,
+  dan dihapus, sedangkan **bagian otomatis** bergembok karena strukturnya milik Template Akta;
+- tab **Naskah** menampilkan hasil perakitan lengkap dengan panel *Kenapa ada yang kosong*;
+- tab **Tulisan** menyunting isi bagian terpilih. Pada bagian otomatis, potongannya bisa diklik
+  satu per satu dan hanya tulisannya yang terbuka — syarat tampil, perulangan, penomoran, dan grup
+  pilih-satu tampil sebagai keterangan terkunci;
+- tombol **⟳ Rakit ulang** menyusun naskahnya lagi sesudah tulisan diubah.
+
+Aturan ini berlaku untuk semua peran di Minuta, termasuk Super Admin: Minuta memang bukan tempat
+mengubah struktur.
+
+**Tombol di Order A berganti** dari *Rakit Naskah* menjadi **✎ Buka Drafting**, yang membawa
+langsung ke Minuta; dari sana **‹ Kembali ke Order** membawa balik. Modal hasil perakitan yang
+lama tidak dipakai lagi karena naskahnya sudah tampil utuh di dalam Minuta.

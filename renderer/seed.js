@@ -118,23 +118,19 @@ window.SEED = {
   halaman: { kertas:'F4 / Folio (21,5 × 33 cm)', orientasi:'Tegak (Portrait)',
     mAtas:'1,5', mBawah:'1,5', mKiri:'6', mKanan:'1',
     font:'Courier New (monospace, khas akta)', ukuran:'12', spasi:'2',
-    footerKiri:'{{ppat_nama}}', footerTengah:'', footerKanan:'Halaman {page} dari {total}' },
+    footerKiri:'{{notaris_nama_gelar}}', footerTengah:'', footerKanan:'Halaman {page} dari {total}' },
 
   /* ---- variabel yang tidak berasal dari formulir order ---- */
+  /* Variabel global bawaan (waktu, nomor, profil kantor) ditambahkan sendiri oleh
+     pastikanBentuk dari VAR_BAWAAN, jadi di sini cukup variabel khas dokumen ini. */
   varDokumen: [
-    { kode:'akta_hari',     label:'Nama hari pembuatan',  nilai:'', otomatis:'hari' },
-    { kode:'akta_tanggal',  label:'Tanggal pembuatan',    nilai:'', otomatis:'tanggal' },
-    { kode:'akta_terbilang',label:'Tanggal terbilang',    nilai:'', otomatis:'terbilang' },
-    { kode:'akta_nomor',    label:'Nomor dokumen',        nilai:'', otomatis:'' },
-    { kode:'lembar',        label:'Penanda lembar',       nilai:'Lembar Pertama', otomatis:'' },
-    { kode:'ppat_nama',     label:'Nama penanda tangan',  nilai:'Mochammad Raafi Dwi Nugraha, S.Tr.Kom.', otomatis:'' },
-    { kode:'ppat_wilayah',  label:'Wilayah kerja',        nilai:'Kota Bandung', otomatis:'' }
+    { kode:'lembar', label:'Penanda lembar', nilai:'Lembar Pertama', otomatis:'' }
   ],
 
   /* ---- bagian template ---- */
   bagian: [
     { id:'b1', judul:'PEMBUKAAN AKTA', jenis:'catatan',
-      teks:'Pada hari ini, {{akta_hari}}, tanggal {{akta_tanggal}}.\nHadir di hadapan saya, PPAT …' },
+      teks:'Pada hari ini, {{var_hari}}, tanggal {{var_tanggal}}.\nHadir di hadapan saya, PPAT …' },
     { id:'b2', judul:'Para Pihak', jenis:'otomatis',
       ulang:'para_pihak', kelompok:'tipe_pihak', nomor:'angka', nomorUlangKelompok:false,
       potongan:['identitas_pihak','persetujuan_pasangan','kedudukan_pt','riwayat_perubahan','peran_pihak'] },
@@ -203,6 +199,10 @@ window.SEED = {
 /* Contoh isi basis data KBLI — di aplikasi sebenarnya ditarik dari basis data,
    bukan disimpan di dalam rancangan formulir. Dipakai hanya agar pencariannya terlihat jalan. */
 window.KBLI_CONTOH = [
+  { kode:'01111', judul:'Pertanian Jagung',                golongan:'Pertanian Tanaman Semusim' },
+  { kode:'01132', judul:'Pertanian Buah Semusim',          golongan:'Pertanian Tanaman Semusim' },
+  { kode:'01262', judul:'Perkebunan Buah Kelapa Sawit',    golongan:'Pertanian Tanaman Tahunan' },
+  { kode:'10710', judul:'Industri Produk Roti dan Kue',    golongan:'Industri Pengolahan' },
   { kode:'41011', judul:'Konstruksi Gedung Hunian',        golongan:'Konstruksi' },
   { kode:'41012', judul:'Konstruksi Gedung Perkantoran',   golongan:'Konstruksi' },
   { kode:'42101', judul:'Konstruksi Jalan Raya',           golongan:'Konstruksi' },
