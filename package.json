@@ -1,6 +1,6 @@
 {
   "name": "eppat-lab",
-  "version": "0.9.7",
+  "version": "0.10.3",
   "private": true,
   "description": "Ruang coba internal Engine — pembangun Form Design tarik-lepas, penyusun template, dan perakit naskah.",
   "main": "main.js",

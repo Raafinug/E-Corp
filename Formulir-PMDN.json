@@ -1,0 +1,1308 @@
+{
+  "jenis": "formulir-engine",
+  "versi": 1,
+  "layanan": {
+    "kode": "PMDN",
+    "nama": "PMDN"
+  },
+  "tab": [
+    {
+      "id": "narahubung",
+      "nama": "Narahubung",
+      "mode": "daftar",
+      "tombolSimpan": "Simpan Narahubung",
+      "field": [
+        {
+          "id": "f1",
+          "tipe": "teks",
+          "label": "Nama",
+          "kode": "narahubung_nama",
+          "wajib": true,
+          "lebar": "sepertiga",
+          "contoh": "Test PT",
+          "sumber": "order",
+          "diGrid": true
+        },
+        {
+          "id": "f2",
+          "tipe": "teks",
+          "label": "No. HP",
+          "kode": "narahubung_hp",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "contoh": "08xxxx",
+          "sumber": "order",
+          "diGrid": true
+        },
+        {
+          "id": "f3",
+          "tipe": "teks",
+          "label": "Email",
+          "kode": "narahubung_email",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "contoh": "email@contoh.id",
+          "sumber": "order",
+          "diGrid": true
+        },
+        {
+          "id": "xlyxyln3",
+          "tipe": "panjang",
+          "label": "Catatan",
+          "kode": "catatan",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "diGrid": false
+        }
+      ],
+      "tombolTambah": "+ Tambah Narahubung",
+      "judulModal": "Tambah Narahubung",
+      "pesanKosong": "Belum ada data."
+    },
+    {
+      "id": "para_pihak",
+      "nama": "Para Pihak",
+      "mode": "daftar",
+      "tombolTambah": "+ Tambah Pihak",
+      "judulModal": "Tambah Para Pihak",
+      "pesanKosong": "Belum ada para pihak.",
+      "field": [
+        {
+          "id": "p2",
+          "tipe": "segmented",
+          "label": "Bentuk Pihak",
+          "kode": "bentuk_pihak",
+          "wajib": true,
+          "lebar": "penuh",
+          "opsi": [
+            "Perorangan",
+            "Badan Hukum (PT)",
+            "Saksi"
+          ],
+          "sumber": "order",
+          "kolom": "BENTUK",
+          "gaya": "chip",
+          "diGrid": true
+        },
+        {
+          "id": "xpppk7ge",
+          "tipe": "user",
+          "label": "User Klien",
+          "kode": "user_klien",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            }
+          ],
+          "diGrid": true,
+          "paket": [
+            "nama",
+            "nik",
+            "tempat_lahir",
+            "tanggal_lahir",
+            "tanggal_lahir_terbilang",
+            "jenis_kelamin",
+            "status_kawin",
+            "sapaan",
+            "pekerjaan",
+            "kewarganegaraan",
+            "jalan",
+            "rt",
+            "rw",
+            "label_kelurahan",
+            "kelurahan",
+            "kecamatan",
+            "label_kota",
+            "kota",
+            "provinsi",
+            "domisili_sementara",
+            "telepon",
+            "email"
+          ],
+          "awalan": "klien",
+          "kolom": "Nama"
+        },
+        {
+          "id": "xqybohlc",
+          "tipe": "pilihan",
+          "label": "Sebagai Penghadap",
+          "kode": "sebagai_penghadap",
+          "wajib": false,
+          "lebar": "seperempat",
+          "sumber": "order",
+          "opsi": [
+            "Ya",
+            "Tidak"
+          ],
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            }
+          ],
+          "diGrid": true
+        },
+        {
+          "id": "xt1cjl8s",
+          "tipe": "pilihan",
+          "label": "Sebagai Pemegang Saham",
+          "kode": "sebagai_pemegang_saham",
+          "wajib": false,
+          "lebar": "seperempat",
+          "sumber": "order",
+          "opsi": [
+            "Ya",
+            "Tidak"
+          ],
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            }
+          ],
+          "diGrid": true
+        },
+        {
+          "id": "xwxy8ecm",
+          "tipe": "pilihan",
+          "label": "Sebagai Direktur",
+          "kode": "sebagai_direktur",
+          "wajib": false,
+          "lebar": "seperempat",
+          "sumber": "order",
+          "opsi": [
+            "Ya",
+            "Tidak"
+          ],
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            }
+          ],
+          "diGrid": true
+        },
+        {
+          "id": "xhlcuzl9",
+          "tipe": "pilihan",
+          "label": "Sebagai Komisaris",
+          "kode": "sebagai_komisaris",
+          "wajib": false,
+          "lebar": "seperempat",
+          "sumber": "order",
+          "opsi": [
+            "Ya",
+            "Tidak"
+          ],
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            }
+          ],
+          "diGrid": true
+        },
+        {
+          "id": "xcyt9lny",
+          "tipe": "judul",
+          "label": "Kepemilikan Saham",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xke77znb",
+          "tipe": "angka",
+          "label": "Jumlah Saham",
+          "kode": "jumlah_saham",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "terbilang": "lembar",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xotrcg8m",
+          "tipe": "angka",
+          "label": "Nilai Nominal per Saham",
+          "kode": "nilai_nominal_per_saham",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "terbilang": "rupiah",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x5qxqzak",
+          "tipe": "angka",
+          "label": "Total Nominal",
+          "kode": "total_nominal",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "terbilang": "rupiah",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xy7ipqt3",
+          "tipe": "judul",
+          "label": "Jabatan",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_direktur",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xjf51xnq",
+          "tipe": "teks",
+          "label": "Jabatan Direktur",
+          "kode": "jabatan_direksi",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_direktur",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xyz89cey",
+          "tipe": "judul",
+          "label": "Jabatan Komisaris",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_komisaris",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "kolom": "",
+          "diGrid": false
+        },
+        {
+          "id": "xay0rtrg",
+          "tipe": "teks",
+          "label": "Jabatan Komisaris)",
+          "kode": "jabatan_direksi_salinan",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_komisaris",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "kolom": "",
+          "diGrid": false
+        },
+        {
+          "id": "xu0wzql4",
+          "tipe": "judul",
+          "label": "Kuasa",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "sebagai_penghadap",
+              "op": "=",
+              "nilai": "Tidak"
+            },
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xhc8abnn",
+          "tipe": "teks",
+          "label": "Dikuasakan Kepada",
+          "kode": "dikuasakan_kepada",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            },
+            {
+              "field": "sebagai_penghadap",
+              "op": "=",
+              "nilai": "Tidak"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x6mcmbsc",
+          "tipe": "tanggal",
+          "label": "Tanggal Surat Kuasa",
+          "kode": "tanggal_surat_kuasa",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "terbilang": "tanggal",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            },
+            {
+              "field": "sebagai_penghadap",
+              "op": "=",
+              "nilai": "Tidak"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xstcayvu",
+          "tipe": "teks",
+          "label": "Nomor Surat Kuasa",
+          "kode": "no_surat_kuasa",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Perorangan"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            },
+            {
+              "field": "sebagai_penghadap",
+              "op": "=",
+              "nilai": "Tidak"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xyddhnly",
+          "tipe": "teks",
+          "label": "Nama Perseroan",
+          "kode": "nama_perseroan",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x160yzh1",
+          "tipe": "teks",
+          "label": "Kedudukan Perseroan",
+          "kode": "kedudukan_perseroan",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xz2o3b5p",
+          "tipe": "tanggal",
+          "label": "Tanggal Akta Pendirian",
+          "kode": "tanggal_akta_pendirian",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "terbilang": "tanggal",
+          "diGrid": false
+        },
+        {
+          "id": "xd9xh3r0",
+          "tipe": "angka",
+          "label": "Nomor Akta Pendirian",
+          "kode": "no_akta_pendirian",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xra6tfa7",
+          "tipe": "tanggal",
+          "label": "Tanggal SK Pengesahan",
+          "kode": "tanggal_sk_pengesahan",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "terbilang": "tanggal",
+          "diGrid": false
+        },
+        {
+          "id": "xdprqlou",
+          "tipe": "teks",
+          "label": "No. SK Pengesahan",
+          "kode": "no_sk_pengesahan",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x2gdvzkj",
+          "tipe": "angka",
+          "label": "NIB",
+          "kode": "nib",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xu3bxcyn",
+          "tipe": "berkas",
+          "label": "Dokumen NIB",
+          "kode": "dok_nib",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xfgfy5wp",
+          "tipe": "teks",
+          "label": "Perseroan Didirikan untuk jangka waktu",
+          "kode": "jangka_waktu",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x3jb6afx",
+          "tipe": "yatidak",
+          "label": "Perubahan Akta",
+          "kode": "perubahan_akta",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x9bp9h1e",
+          "tipe": "ulang",
+          "label": "Akta Perubahan",
+          "kode": "akta_perubahan",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "keterangan": "",
+          "minBaris": 1,
+          "maksBaris": 0,
+          "tombolTambah": "+ Tambah Akta Perubahan",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xeswhmk1",
+          "tipe": "tanggal",
+          "label": "Tanggal Akta",
+          "kode": "tanggal_akta",
+          "wajib": false,
+          "lebar": "seperempat",
+          "sumber": "order",
+          "terbilang": "tanggal",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xxa813b6",
+          "tipe": "angka",
+          "label": "Nomor Akta",
+          "kode": "no_akta",
+          "wajib": false,
+          "lebar": "seperempat",
+          "sumber": "order",
+          "terbilang": "polos",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xg7az4f2",
+          "tipe": "teks",
+          "label": "Nama Notaris",
+          "kode": "nama_notaris_akta",
+          "wajib": false,
+          "lebar": "seperempat",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x08i51ih",
+          "tipe": "teks",
+          "label": "Daerah Kerja Notaris",
+          "kode": "daerah_kerja_notaris_akta",
+          "wajib": false,
+          "lebar": "seperempat",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xjn3cwqx",
+          "tipe": "teks",
+          "label": "Jenis Bukti",
+          "kode": "jenis_bukti",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xn2m9zri",
+          "tipe": "tanggal",
+          "label": "Tanggal Bukti",
+          "kode": "tanggal_bukti",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "terbilang": "tanggal",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xv64235c",
+          "tipe": "teks",
+          "label": "Nomor Bukti",
+          "kode": "no_bukti",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xxsnz8tn",
+          "tipe": "tutup",
+          "label": "Akhir grup",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "diGrid": false
+        },
+        {
+          "id": "xin0dxje",
+          "tipe": "segmented",
+          "label": "Wakil & Saham",
+          "kode": "pilihan_sejajar_18",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "opsi": [
+            "Direktur",
+            "Kuasa"
+          ],
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xeis5d0v",
+          "tipe": "user",
+          "label": "Diwakili Oleh (penerima kuasa)",
+          "kode": "diwakili_oleh",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xw2n49q7",
+          "tipe": "angka",
+          "label": "Jumlah Saham",
+          "kode": "jumlah_saham_direktur",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "terbilang": "lembar",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xextjql0",
+          "tipe": "judul",
+          "label": "Kuasa dari Direktur",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "pilihan_sejajar_18",
+              "op": "=",
+              "nilai": "Kuasa"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x0salj49",
+          "tipe": "teks",
+          "label": "Nama Pemberi Kuasa",
+          "kode": "nama_pemberi_kuasa",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "pilihan_sejajar_18",
+              "op": "=",
+              "nilai": "Kuasa"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xiwqbdlo",
+          "tipe": "teks",
+          "label": "Jabatan Pemberi Kuasa",
+          "kode": "jabatan_pemberi_kuasa",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "pilihan_sejajar_18",
+              "op": "=",
+              "nilai": "Kuasa"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x5obx0vz",
+          "tipe": "tanggal",
+          "label": "Tanggal Surat Kuasa",
+          "kode": "tanggal_surat_kuasa_perwakilan",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "tanggal",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "pilihan_sejajar_18",
+              "op": "=",
+              "nilai": "Kuasa"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "xmn1s17s",
+          "tipe": "teks",
+          "label": "Nomor Surat Kuasa",
+          "kode": "no_surat_kuasa_perwakilan",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Badan Hukum (PT)"
+            },
+            {
+              "field": "pilihan_sejajar_18",
+              "op": "=",
+              "nilai": "Kuasa"
+            }
+          ],
+          "diGrid": false
+        },
+        {
+          "id": "x92ysb4p",
+          "tipe": "user",
+          "label": "User Saksi",
+          "kode": "saksi",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "tampilBila": [
+            {
+              "field": "bentuk_pihak",
+              "op": "=",
+              "nilai": "Saksi"
+            }
+          ],
+          "diGrid": false
+        }
+      ]
+    },
+    {
+      "id": "objek",
+      "nama": "Data Perusahaan",
+      "mode": "formulir",
+      "tombolTambah": "+ Tambah Objek",
+      "judulModal": "Tambah Objek",
+      "pesanKosong": "Belum ada objek.",
+      "field": [
+        {
+          "id": "xh6fyzj7",
+          "tipe": "seksi",
+          "label": "Data Perseroan",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "keterangan": "",
+          "tertutup": true,
+          "diGrid": false
+        },
+        {
+          "id": "x2vdcfrf",
+          "tipe": "teks",
+          "label": "Nama Perseroan 1",
+          "kode": "teks_singkat_71",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "diGrid": false
+        },
+        {
+          "id": "xbaaqoig",
+          "tipe": "teks",
+          "label": "Nama Perseroan 2",
+          "kode": "teks_singkat_53",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "diGrid": false
+        },
+        {
+          "id": "xzkx4iwp",
+          "tipe": "teks",
+          "label": "Nama Perseroan 3",
+          "kode": "teks_singkat_39",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "diGrid": false
+        },
+        {
+          "id": "xaxoqubh",
+          "tipe": "teks",
+          "label": "Nama Perseroan Final",
+          "kode": "nama_perseroan_final",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "diGrid": false
+        },
+        {
+          "id": "xuwtxxzr",
+          "tipe": "teks",
+          "label": "Kedudukan Perseroan",
+          "kode": "kedudukan_perseroan_final",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "kolom": "",
+          "diGrid": false
+        },
+        {
+          "id": "xf5vd7gm",
+          "tipe": "teks",
+          "label": "Bidang Usaha Perseroan",
+          "kode": "bidang_usaha",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "diGrid": false
+        },
+        {
+          "id": "xfc13cwt",
+          "tipe": "tutup",
+          "label": "Akhir grup",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "diGrid": false
+        },
+        {
+          "id": "x4ep0bbo",
+          "tipe": "kbli",
+          "label": "KBLI",
+          "kode": "kbli",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "KBLI",
+          "keterangan": "Kegiatan usaha menurut Klasifikasi Baku Lapangan Usaha Indonesia",
+          "ganda": true,
+          "tampilBila": [],
+          "diGrid": false
+        },
+        {
+          "id": "xhrfhz5v",
+          "tipe": "seksi",
+          "label": "Modal & Saham",
+          "kode": "",
+          "wajib": false,
+          "lebar": "penuh",
+          "sumber": "order",
+          "keterangan": "",
+          "tertutup": true,
+          "diGrid": false
+        },
+        {
+          "id": "x3spve5n",
+          "tipe": "angka",
+          "label": "Modal Dasar Perseroan (Rupiah)",
+          "kode": "modal_dasar_rupiah",
+          "wajib": true,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "rupiah",
+          "diGrid": false
+        },
+        {
+          "id": "x22qqs2v",
+          "tipe": "angka",
+          "label": "Jumlah Saham",
+          "kode": "jumlah_saham",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "saham",
+          "diGrid": false
+        },
+        {
+          "id": "xz9mqcxd",
+          "tipe": "angka",
+          "label": "Nilai Nominal Per Saham (Rupiah)",
+          "kode": "nilai_nominal",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "rupiah",
+          "diGrid": false
+        },
+        {
+          "id": "xk2x5gwk",
+          "tipe": "angka",
+          "label": "Modal Ditempatkan & Disetorkan (Persen)",
+          "kode": "modal_disetorkan",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "persen",
+          "contoh": "",
+          "diGrid": false
+        },
+        {
+          "id": "xn9ervjf",
+          "tipe": "angka",
+          "label": "Jumlah Saham Ditempatkan & Disetorkan (lembar)",
+          "kode": "jumlah_saham_ditempatkan",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "lembar",
+          "diGrid": false
+        },
+        {
+          "id": "xbfwwk5s",
+          "tipe": "angka",
+          "label": "Total Nominal Saham (Rupiah)",
+          "kode": "total_nominal_saham",
+          "wajib": false,
+          "lebar": "setengah",
+          "sumber": "order",
+          "terbilang": "rupiah",
+          "diGrid": false
+        }
+      ],
+      "tombolSimpan": "Simpan Data Perusahaan"
+    },
+    {
+      "id": "dokumen",
+      "nama": "Dokumen",
+      "mode": "daftar",
+      "tombolTambah": "+ Tambah Dokumen",
+      "judulModal": "Tambah Dokumen",
+      "pesanKosong": "Belum ada dokumen.",
+      "field": [
+        {
+          "id": "d2",
+          "tipe": "teks",
+          "label": "Pemilik",
+          "kode": "dokumen_pemilik",
+          "wajib": false,
+          "lebar": "sepertiga",
+          "contoh": "Nama pihak pemilik dokumen",
+          "sumber": "order",
+          "kolom": "PEMILIK",
+          "gaya": "teks",
+          "diGrid": true
+        },
+        {
+          "id": "d1",
+          "tipe": "pilihan",
+          "label": "Jenis",
+          "kode": "dokumen_jenis",
+          "wajib": true,
+          "lebar": "sepertiga",
+          "opsi": [
+            "KTP",
+            "Kartu Keluarga",
+            "Sertipikat",
+            "SPPT PBB",
+            "Akta Nikah",
+            "Lainnya"
+          ],
+          "sumber": "order",
+          "kolom": "JENIS",
+          "gaya": "teks",
+          "tampilBila": [
+            {
+              "field": "dokumen_pemilik",
+              "op": "=",
+              "nilai": ""
+            }
+          ],
+          "diGrid": true
+        },
+        {
+          "id": "d3",
+          "tipe": "berkas",
+          "label": "File",
+          "kode": "dokumen_berkas",
+          "wajib": true,
+          "lebar": "sepertiga",
+          "sumber": "order",
+          "kolom": "FILE",
+          "gaya": "teks",
+          "diGrid": true
+        }
+      ],
+      "tombolSimpan": "Simpan Dokumen"
+    }
+  ]
+}

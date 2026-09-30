@@ -192,6 +192,7 @@ let nilaiForm = {};        // id tab formulir -> nilai yang sedang diisi
 /* ================= muat & simpan ================= */
 let jedaSimpan = null;
 function simpanNanti(){
+  sinkronAktif();
   clearTimeout(jedaSimpan);
   $('#status').textContent = 'menyimpan…';
   jedaSimpan = setTimeout(async () => {
@@ -246,6 +247,132 @@ const peranSah = k => PERAN.some(x => x[0] === k) ? k : 'super';
 /* true bila peran ini boleh menyusun struktur, syarat, dan bagian otomatis */
 const penuh = () => (rancangan && rancangan.peran ? rancangan.peran : 'super') === 'super';
 
+/* =====================================================================
+   Layanan, Form Design, dan Template
+   --------------------------------------------------------------------
+   Satu layanan (jenis akta) memiliki SATU rancangan formulir order dan
+   BEBERAPA template naskah. Order memilih salah satu templatenya; bila
+   tidak memilih, dipakai template bawaan layanan itu.
+
+   Supaya seluruh kode lama tetap berjalan, rancangan.tab dan
+   rancangan.bagian/potongan/grup/halaman adalah rujukan langsung ke
+   layanan dan template yang sedang dimuat — bukan salinan. sinkronAktif()
+   mengembalikan rujukan itu bila ada kode yang menggantinya utuh
+   (misalnya array.filter), dan dijalankan tiap kali rancangan disimpan.
+   ===================================================================== */
+let termuatLayanan = null, termuatTemplate = null;
+
+const layananIni   = () => (rancangan.layanan  || []).find(x => x.id === rancangan.layananAktif)  || null;
+const templateIni  = () => (rancangan.template || []).find(x => x.id === rancangan.templateAktif) || null;
+const templateById = id => (rancangan.template || []).find(x => x.id === id) || null;
+/* Satu layanan hanya boleh punya SATU template. templateLayanan tetap
+   mengembalikan daftar supaya sisa kode aman, tetapi isinya paling banyak satu. */
+const templateLayanan = idL => (rancangan.template || []).filter(x => x.layanan === idL);
+const templateDari = idL => templateLayanan(idL)[0] || null;
+const tplTerkunci = () => { const t = templateIni(); return !!t && t.milik === 'platform'; };
+
+function sinkronAktif(){
+  sinkronOrder();
+  const L = (rancangan.layanan  || []).find(x => x.id === termuatLayanan);
+  if (L && rancangan.tab) L.tab = rancangan.tab;
+  const T = (rancangan.template || []).find(x => x.id === termuatTemplate);
+  if (T){
+    T.isi = T.isi || {};
+    if (rancangan.bagian)   T.isi.bagian   = rancangan.bagian;
+    if (rancangan.potongan) T.isi.potongan = rancangan.potongan;
+    if (rancangan.grup)     T.isi.grup     = rancangan.grup;
+    if (rancangan.halaman)  T.isi.halaman  = rancangan.halaman;
+  }
+}
+/* arahkan rancangan.tab ke formulir sebuah layanan */
+function pakaiLayanan(id){
+  sinkronAktif();
+  const L = (rancangan.layanan || []).find(x => x.id === id) || (rancangan.layanan || [])[0];
+  if (!L) return;
+  rancangan.layananAktif = L.id;
+  if (!Array.isArray(L.tab)) L.tab = [];
+  rancangan.tab = L.tab;
+  termuatLayanan = L.id;
+  if (tabAktif >= rancangan.tab.length) tabAktif = 0;
+}
+/* arahkan bagian/potongan/grup/halaman ke isi sebuah template */
+function pakaiTemplate(id){
+  sinkronAktif();
+  const T = (rancangan.template || []).find(x => x.id === id) || (rancangan.template || [])[0];
+  if (!T) return;
+  rancangan.templateAktif = T.id;
+  T.isi = T.isi || {};
+  T.isi.bagian   = Array.isArray(T.isi.bagian)   ? T.isi.bagian   : [];
+  T.isi.potongan = Array.isArray(T.isi.potongan) ? T.isi.potongan : [];
+  T.isi.grup     = Array.isArray(T.isi.grup)     ? T.isi.grup     : [];
+  T.isi.halaman  = (T.isi.halaman && typeof T.isi.halaman === 'object') ? T.isi.halaman : {};
+  rancangan.bagian   = T.isi.bagian;
+  rancangan.potongan = T.isi.potongan;
+  rancangan.grup     = T.isi.grup;
+  rancangan.halaman  = T.isi.halaman;
+  termuatTemplate = T.id;
+  if (T.layanan && T.layanan !== rancangan.layananAktif) pakaiLayanan(T.layanan);
+  bagianAktif = null; potAktif = null; mnBagian = null;
+}
+/* ---------- order ----------
+   Tiap order melekat pada satu layanan: formulirnya dari layanan itu, naskahnya
+   dari template pilihannya. Isian order disimpan di dalam ordernya sendiri, jadi
+   berpindah order tidak menghapus isian order lain. */
+let termuatOrder = null;
+const orderIni  = () => (rancangan.order || []).find(o => o.id === rancangan.orderAktif) || null;
+const orderLayanan = idL => (rancangan.order || []).filter(o => o.layanan === idL);
+
+function sinkronOrder(){
+  const O = (rancangan.order || []).find(o => o.id === termuatOrder);
+  if (!O) return;
+  O.baris = barisPv;
+  O.form  = nilaiForm;
+}
+function pakaiOrder(id){
+  sinkronOrder();
+  const O = (rancangan.order || []).find(o => o.id === id) || (rancangan.order || [])[0];
+  if (!O) return;
+  rancangan.orderAktif = O.id;
+  O.baris = (O.baris && typeof O.baris === 'object') ? O.baris : {};
+  O.form  = (O.form  && typeof O.form  === 'object') ? O.form  : {};
+  barisPv  = O.baris;
+  nilaiForm = O.form;
+  termuatOrder = O.id;
+  if (O.layanan && O.layanan !== rancangan.layananAktif) pakaiLayanan(O.layanan);
+  pvTab = 0;
+}
+/* template yang dipakai order aktif: pilihannya sendiri, atau bawaan layanannya */
+function templateOrder(){
+  const O = orderIni();
+  return templateDari(O ? O.layanan : rancangan.layananAktif);
+}
+
+/* pembersihan isi satu template — dipakai pastikanBentuk untuk tiap template */
+function rapikanIsiTemplate(isi, tab){
+  (isi.potongan || []).forEach(p => {
+    p.slot   = Array.isArray(p.slot)   ? p.slot   : [];
+    p.syarat = Array.isArray(p.syarat) ? p.syarat : [];
+    p.slot.forEach(sl => { sl.syarat = Array.isArray(sl.syarat) ? sl.syarat : []; });
+    if (typeof p.tulis !== 'string') p.tulis = 'baris';
+    if (typeof p.teks  !== 'string') p.teks  = '';
+    p.teks = naskahKeHtml(p.teks);
+    p.slot.forEach(sl => { sl.teks = naskahKeHtml(sl.teks || '', true); });
+  });
+  (isi.grup || []).forEach(g => { if (!Array.isArray(g.anggota)) g.anggota = []; });
+  (isi.bagian || []).forEach(b => {
+    if (b.jenis === 'otomatis'){
+      if (!Array.isArray(b.potongan)) b.potongan = [];
+      if (typeof b.ulang    !== 'string') b.ulang = '';
+      if (typeof b.kelompok !== 'string') b.kelompok = '';
+      if (typeof b.nomor    !== 'string') b.nomor = 'tanpa';
+      b.nomorUlangKelompok = !!b.nomorUlangKelompok;
+    } else b.teks = naskahKeHtml(typeof b.teks === 'string' ? b.teks : '');
+  });
+  const sah = (isi.potongan || []).map(p => p.kode);
+  (isi.bagian || []).forEach(b => { if (b.potongan) b.potongan = b.potongan.filter(k => sah.includes(k)); });
+  (isi.grup   || []).forEach(g => { g.anggota = g.anggota.filter(k => sah.includes(k)); });
+}
+
 function pastikanBentuk(r){
   const S = window.SEED;
   if (!r || typeof r !== 'object') r = {};
@@ -255,6 +382,74 @@ function pastikanBentuk(r){
   if (!Array.isArray(r.bagian) || !r.bagian.length) r.bagian = JSON.parse(JSON.stringify(S.bagian));
   if (!r.halaman || typeof r.halaman !== 'object') r.halaman = JSON.parse(JSON.stringify(S.halaman));
   r.peran = peranSah(r.peran);
+
+  /* --- naikkan rancangan lama ke bentuk layanan + template --- */
+  if (!Array.isArray(r.layanan) || !r.layanan.length){
+    r.layanan = [{ id:'lyn_ajb', kode:'AJB', nama:'Akta Jual Beli', tab:r.tab, templateBawaan:'tpl_ajb' }];
+    r.layananAktif = 'lyn_ajb';
+  }
+  if (!Array.isArray(r.template) || !r.template.length){
+    r.template = [
+      { id:'tpl_ajb', kode:'AJB', nama:'AJB Standar', layanan:'lyn_ajb', milik:'kantor',
+        isi:{ bagian:r.bagian, potongan:r.potongan, grup:r.grup, halaman:r.halaman } }
+    ];
+    r.templateAktif = 'tpl_ajb';
+  }
+  r.layanan.forEach(L => {
+    if (!L.id) L.id = 'lyn_' + Math.random().toString(36).slice(2,8);
+    if (!Array.isArray(L.tab)) L.tab = [];
+    if (typeof L.kode !== 'string') L.kode = '';
+    if (typeof L.nama !== 'string') L.nama = L.kode || 'Layanan';
+  });
+  r.template.forEach(T => {
+    if (!T.id) T.id = 'tpl_' + Math.random().toString(36).slice(2,8);
+    if (typeof T.kode !== 'string') T.kode = '';
+    if (typeof T.nama !== 'string') T.nama = T.kode || 'Template';
+    if (T.milik !== 'platform') T.milik = 'kantor';
+    if (!T.layanan || !r.layanan.some(L => L.id === T.layanan)) T.layanan = r.layanan[0].id;
+    T.isi = T.isi || {};
+    ['bagian','potongan','grup'].forEach(k => { if (!Array.isArray(T.isi[k])) T.isi[k] = []; });
+    if (!T.isi.halaman || typeof T.isi.halaman !== 'object')
+      T.isi.halaman = JSON.parse(JSON.stringify(S.halaman));
+  });
+  /* satu layanan satu template: template berlebih dilepas, layanan tanpa template diberi satu */
+  r.layanan.forEach(L => {
+    const milik = r.template.filter(T => T.layanan === L.id);
+    if (milik.length > 1){
+      const simpan = milik.find(T => T.id === L.templateBawaan) ||
+                     milik.find(T => T.milik === 'kantor') || milik[0];
+      milik.forEach(T => { if (T !== simpan) r.template.splice(r.template.indexOf(T), 1); });
+    }
+    if (!r.template.some(T => T.layanan === L.id)){
+      r.template.push({ id:'tpl_' + Math.random().toString(36).slice(2,8), kode:L.kode || 'TPL',
+        nama:'Template ' + (L.nama || L.kode), layanan:L.id, milik:'kantor',
+        isi:{ bagian:[], potongan:[], grup:[], halaman:JSON.parse(JSON.stringify(S.halaman)) } });
+    }
+    L.templateBawaan = (r.template.find(T => T.layanan === L.id) || {}).id || '';
+  });
+  if (!r.layanan.some(L => L.id === r.layananAktif))   r.layananAktif  = r.layanan[0].id;
+  if (!r.template.some(T => T.id === r.templateAktif)) r.templateAktif = r.template[0].id;
+  if (!Array.isArray(r.order) || !r.order.length){
+    r.order = [{ id:'ord_1', nama:'Order ' + r.layanan[0].kode, layanan:r.layanan[0].id,
+      template:r.orderTemplate || '', baris:{}, form:{} }];
+  }
+  r.order.forEach(O => {
+    if (!O.id) O.id = 'ord_' + Math.random().toString(36).slice(2,8);
+    if (!O.layanan || !r.layanan.some(L => L.id === O.layanan)) O.layanan = r.layanan[0].id;
+    if (O.template && !r.template.some(T => T.id === O.template)) O.template = '';
+    if (typeof O.nama !== 'string' || !O.nama) O.nama = 'Order';
+    if (!O.baris || typeof O.baris !== 'object') O.baris = {};
+    if (!O.form  || typeof O.form  !== 'object') O.form  = {};
+  });
+  /* tiap layanan punya sedikitnya satu order */
+  r.layanan.forEach(L => {
+    if (r.order.some(O => O.layanan === L.id)) return;
+    r.order.push({ id:'ord_' + Math.random().toString(36).slice(2,8), nama:'Order ' + L.kode,
+      layanan:L.id, template:'', baris:{}, form:{} });
+  });
+  if (!r.order.some(O => O.id === r.orderAktif)) r.orderAktif = r.order[0].id;
+  delete r.orderTemplate;
+
   if (!Array.isArray(r.varDokumen)) r.varDokumen = JSON.parse(JSON.stringify(S.varDokumen || []));
   r.varDokumen.forEach(v => {
     if (typeof v.kode  !== 'string') v.kode = '';
@@ -274,7 +469,17 @@ function pastikanBentuk(r){
   });
   r.varDokumen.forEach(v => { if (!v.bawaan){ v.bawaan = false; v.kelompok = ''; } });
 
-  r.tab.forEach(t => { if (!Array.isArray(t.field)) t.field = []; });
+  r.tab.forEach(t => {
+    if (!Array.isArray(t.field)) t.field = [];
+    /* rancangan lama menandai kolom lewat judulnya; sekarang lewat sakelar tersendiri */
+    t.field.forEach(f => { if (typeof f.diGrid !== 'boolean') f.diGrid = !!f.kolom; });
+  });
+  /* Normalisasi berlaku untuk isi SEMUA template, bukan hanya yang sedang dimuat. */
+  (r.template || []).forEach(T => {
+    if (T.isi.potongan === r.potongan) return;   /* yang aktif ditangani di bawah */
+    rapikanIsiTemplate(T.isi, r.tab);
+  });
+
   r.potongan.forEach(p => {
     p.slot = Array.isArray(p.slot) ? p.slot : [];
     p.syarat = Array.isArray(p.syarat) ? p.syarat : [];
@@ -315,6 +520,9 @@ async function mulai(){
   let tersimpan = null;
   try { tersimpan = await api.muat(); } catch { tersimpan = null; }
   rancangan = pastikanBentuk(tersimpan && tersimpan.tab ? tersimpan : JSON.parse(JSON.stringify(window.SEED)));
+  pakaiOrder(rancangan.orderAktif);
+  pakaiLayanan(rancangan.layananAktif);
+  pakaiTemplate(rancangan.templateAktif);
   gambarPalet();
   gambarSemua();
   $('#status').textContent = tersimpan ? 'rancangan tersimpan dimuat' : 'rancangan bawaan';
@@ -418,6 +626,8 @@ function sesamaPaket(f, t){
   return (tt.field || []).filter(x => x.id !== f.id && x.tipe === 'user' && x.kode &&
     (x.awalan || '').trim() === aw);
 }
+const lencanaGrid = f => (f.diGrid && tabIni().mode === 'daftar' && !TANPA_NILAI.includes(f.tipe))
+  ? '<span class="tanda-grid" title="Muncul sebagai kolom pada tabel layar Order">di tabel</span>' : '';
 const lencanaPaket = f => sesamaPaket(f).length
   ? '<span class="tanda-ganda" title="Field Referensi user lain di tab ini memakai awalan yang sama, ' +
     'jadi keduanya menghasilkan {{nama}}, {{nik}}, dan seterusnya yang sama.">paket bentrok</span>' : '';
@@ -488,7 +698,7 @@ function kartuMedan(f){
     '<button class="m-hapus" data-hapus="' + f.id + '">×</button>' +
     '<span class="m-jenis">' + esc(jenis) + '</span>' +
     '<div class="m-label">' + esc(f.label || '(tanpa label)') +
-      (f.wajib ? ' <span class="bintang">*</span>' : '') + lencanaGanda(f) + lencanaPaket(f) +
+      (f.wajib ? ' <span class="bintang">*</span>' : '') + lencanaGrid(f) + lencanaGanda(f) + lencanaPaket(f) +
       ((f.tampilBila && f.tampilBila.length)
         ? '<span class="tanda-syarat" title="' + esc(ringkasSyarat(f.tampilBila)) + '">bersyarat</span>' : '') +
       '</div>' +
@@ -864,10 +1074,29 @@ function htmlProperti(f, t){
     /* tampil bersyarat */
     h += blokTampilBilaHtml(f, t, 'Field ini');
 
+    /* Kolom tabel hanya relevan pada tab bermode daftar — tabel + tombol Tambah. */
     if (t.mode === 'daftar'){
-      h += '<div class="f"><label class="j">Tampil sebagai kolom tabel</label>' +
-        '<input type="text" data-p="kolom" value="' + esc(f.kolom || '') + '" placeholder="kosongkan bila tidak jadi kolom"></div>';
-      if (f.kolom){
+      h += '<div class="f blok-lebar" style="margin-top:4px;border-top:1px solid var(--garis);padding-top:14px">' +
+        '<label class="sakelar"><input type="checkbox" data-p="diGrid"' + (f.diGrid ? ' checked' : '') +
+        '> Tampilkan di tabel</label>' +
+        '<p class="hampa" style="margin:6px 0 0">Tabel pada layar Order hanya memuat field yang ' +
+        'sakelarnya hidup, menurut urutannya di kanvas. Bawaannya mati.</p></div>';
+      if (f.diGrid && f.tipe === 'user'){
+        const pilihPaket = Array.isArray(f.paket) ? f.paket : PAKET_SEMUA;
+        h += '<div class="f blok-lebar"><label class="j">Data yang ditampilkan di kolom</label>' +
+          '<select data-p="kolomVar">' +
+          PAKET_ORANG.filter(x => pilihPaket.includes(x[0])).map(x =>
+            '<option value="' + esc(x[0]) + '"' + ((f.kolomVar || 'nama') === x[0] ? ' selected' : '') +
+            '>' + esc(x[1]) + '  ·  {{' + esc((f.awalan ? f.awalan + '.' : '') + x[0]) + '}}</option>').join('') +
+          '</select>' +
+          '<p class="hampa" style="margin:6px 0 0">Satu field Referensi user memekarkan banyak ' +
+          'variabel; pilih salah satunya untuk ditampilkan di kolom tabel. Isian di dalam modal ' +
+          'tetap berupa pencarian user, tidak berubah.</p></div>';
+      }
+      if (f.diGrid){
+        h += '<div class="f"><label class="j">Judul kolom</label>' +
+          '<input type="text" data-p="kolom" value="' + esc(f.kolom || '') + '" placeholder="' +
+          esc((f.label || '').toUpperCase()) + '"></div>';
         h += '<div class="f"><label class="j">Gaya kolom</label><select data-p="gaya">' +
           [['teks','Teks biasa'],['pil','Pil biru'],['chip','Chip hijau']].map(g =>
             '<option value="' + g[0] + '"' + ((f.gaya||'teks') === g[0] ? ' selected' : '') + '>' + g[1] + '</option>').join('') +
@@ -938,7 +1167,7 @@ function pasangProperti(box, f, t){
         $('#mp-judul').textContent = f.label || 'Properti Elemen';
         $('#mp-sub').textContent = jenis + (f.kode ? '  ·  {{' + f.kode + '}}' : '');
       }
-      if (k === 'kolom' || k === 'awalan' || k === 'terbilang' || k === 'satuan') isiModalProperti(f.id);
+      if (k === 'diGrid' || k === 'awalan' || k === 'terbilang' || k === 'satuan') isiModalProperti(f.id);
       simpanNanti();
     });
   });
@@ -1143,12 +1372,13 @@ function isiFormulir(t){
 }
 
 function isiDaftar(t){
-  const kolom = t.field.filter(f => f.kolom);
+  const kolom = t.field.filter(f => f.diGrid && !TANPA_NILAI.includes(f.tipe));
   const baris = barisPv[t.id] || [];
   let h = '<div class="bar-daftar"><button class="btn btn-utama" data-tambah>' +
     esc(t.tombolTambah || '+ Tambah') + '</button></div>';
   h += '<div class="tabel-bungkus"><table><thead><tr>' +
-    (kolom.length ? kolom.map(k => '<th>' + esc(k.kolom) + '</th>').join('') : '<th>Data</th>') +
+    (kolom.length ? kolom.map(k => '<th>' + esc(k.kolom || (k.label || '').toUpperCase()) + '</th>').join('')
+                  : '<th>Ringkasan</th>') +
     '<th></th></tr></thead><tbody>';
   if (!baris.length){
     h += '<tr><td colspan="' + (Math.max(kolom.length,1) + 1) + '" class="kosong-tabel">' +
@@ -1159,7 +1389,10 @@ function isiDaftar(t){
       if (kolom.length){
         kolom.forEach(k => {
           let v = r[k.kode] || '—';
-          if (k.tipe === 'user'){ const u = userById(r[k.kode]); v = u ? u.nama : (r[k.kode] || '—'); }
+          if (k.tipe === 'user'){
+            const u = userById(r[k.kode]);
+            v = u ? (nilaiPaketOrang(u, k.kolomVar || 'nama') || '—') : (r[k.kode] || '—');
+          }
           const g = k.gaya || 'teks';
           h += '<td class="utama">' +
             (g === 'pil'  ? '<span class="pil">' + esc(String(v).toUpperCase()) + '</span>' :
@@ -1173,6 +1406,9 @@ function isiDaftar(t){
     });
   }
   h += '</tbody></table></div>';
+  if (!kolom.length)
+    h += '<p class="hampa" style="margin:8px 2px 0">Belum ada field yang ditandai <b>Tampilkan di ' +
+      'tabel</b> di Form Design, jadi isinya diringkas dalam satu kolom.</p>';
   return h;
 }
 
@@ -1547,7 +1783,349 @@ function gambarKartuKantor(){
     baris('⌂', c.notaris_alamat);
 }
 
+/* =====================================================================
+   Layar Layanan & Template, dan daftar template di Template Akta
+   ===================================================================== */
+let tplBuka = false;            /* true bila editor template sedang terbuka */
+
+function idBaruAwalan(aw){ return aw + Math.random().toString(36).slice(2,8); }
+
+function gambarLayarTemplate(){
+  const daftar = $('#tpl-daftar'), editor = $('#tpl-editor');
+  if (!daftar || !editor) return;
+  daftar.hidden = tplBuka;
+  editor.hidden = !tplBuka;
+  if (tplBuka){ gambarDaftarBagian(); gambarKanan(); gambarKepalaTemplate(); return; }
+
+  $('#tpl-tabel tbody').innerHTML = (rancangan.layanan || []).map(L => {
+    const T = templateDari(L.id);
+    if (!T) return '<tr><td class="utama"><b>' + esc(L.kode) + '</b> ' + esc(L.nama) + '</td>' +
+      '<td class="utama"><span class="hampa">belum ada template</span></td><td></td></tr>';
+    const platform = T.milik === 'platform';
+    return '<tr><td class="utama"><b>' + esc(L.kode) + '</b> ' + esc(L.nama) + '</td>' +
+      '<td class="utama">' + esc(T.nama) +
+        (platform ? ' <span class="pil-kecil">Bawaan platform</span>'
+                  : ' <span class="pil-kecil milik">Milik kantor</span>') + '</td>' +
+      '<td class="kanan">' +
+        (platform
+          ? '<button class="btn btn-kecil" data-tsalin="' + T.id + '">⧉ Salin &amp; Sunting</button> ' +
+            '<button class="btn btn-kecil btn-utama" data-tbuka="' + T.id + '">Lihat</button>'
+          : '<button class="btn btn-kecil" data-tubah="' + T.id + '">⚙ Ubah</button> ' +
+            '<button class="btn btn-kecil btn-utama" data-tbuka="' + T.id + '">Pasal</button>') +
+      '</td></tr>';
+  }).join('') || '<tr><td colspan="3" class="kosong-tabel">Belum ada layanan.</td></tr>';
+
+  const keLyn = $('#tpl-ke-layanan');
+  if (keLyn) keLyn.onclick = () => pilihMode('layanan');
+  $$('#tpl-tabel [data-tbuka]').forEach(b => b.addEventListener('click', () => {
+    pakaiTemplate(b.dataset.tbuka); tplBuka = true;
+    gambarSemua(); gambarLayarTemplate();
+  }));
+  /* Satu layanan satu template: menyalin berarti menggantikan template platform
+     dengan salinan milik kantor pada layanan yang sama. */
+  $$('#tpl-tabel [data-tsalin]').forEach(b => b.addEventListener('click', () => {
+    const asal = templateById(b.dataset.tsalin);
+    if (!asal) return;
+    if (!window.confirm('Salin “' + asal.nama + '” menjadi template milik kantor? ' +
+      'Template platform ini akan digantikan oleh salinannya pada layanan tersebut.')) return;
+    const T = { id:idBaruAwalan('tpl_'), kode:asal.kode.replace(/-P$/,''),
+      nama:asal.nama.replace(/ Bawaan Platform$/,'') + ' (kantor)',
+      layanan:asal.layanan, milik:'kantor', isi:JSON.parse(JSON.stringify(asal.isi)) };
+    rancangan.template.splice(rancangan.template.indexOf(asal), 1, T);
+    (rancangan.layanan || []).forEach(L => { if (L.templateBawaan === asal.id) L.templateBawaan = T.id; });
+    (rancangan.order || []).forEach(O => { if (O.template === asal.id) O.template = T.id; });
+    pakaiTemplate(T.id); tplBuka = true;
+    gambarSemua(); gambarLayarTemplate(); simpanNanti();
+  }));
+  $$('#tpl-tabel [data-tubah]').forEach(b => b.addEventListener('click', () => ubahTemplate(b.dataset.tubah)));
+}
+
+async function ubahTemplate(id){
+  const T = templateById(id); if (!T) return;
+  const L = (rancangan.layanan || []).find(x => x.id === T.layanan);
+  const h = await tanyaIsian('Ubah template', [
+    { kunci:'kode', label:'Kode template', nilai:T.kode, petunjuk:'mis. AJB' },
+    { kunci:'nama', label:'Nama template', nilai:T.nama, petunjuk:'mis. AJB Standar' }
+  ], L ? 'Template layanan ' + L.nama : '');
+  if (!h) return;
+  T.kode = h.kode || T.kode;
+  T.nama = h.nama || T.nama;
+  if (L) L.templateBawaan = T.id;
+  gambarLayarTemplate(); gambarLayarLayanan(); gambarKepalaTemplate(); simpanNanti();
+}
+
+function gambarKepalaTemplate(){
+  const T = templateIni(), L = layananIni();
+  const nm = $('#tpl-nama'), lc = $('#tpl-lencana'), kt = $('#tpl-editor .bj-ket');
+  if (nm) nm.textContent = T ? T.nama : '—';
+  if (lc) lc.textContent = T ? T.kode : '—';
+  if (kt) kt.textContent = T && T.milik === 'platform'
+    ? 'Template bawaan platform — hanya bisa dilihat. Salin dulu untuk menyuntingnya.'
+    : 'Template milik kantor pada layanan ' + (L ? L.kode : '—') + '.';
+  document.body.classList.toggle('tpl-kunci', tplTerkunci());
+}
+
+/* ---------- daftar formulir per layanan ---------- */
+let fdBuka = false;
+
+function gambarLayarForm(){
+  const daftar = $('#fd-daftar'), editor = $('#fd-editor');
+  if (!daftar || !editor) return;
+  daftar.hidden = fdBuka;
+  editor.hidden = !fdBuka;
+  if (fdBuka){ gambarKepalaForm(); gambarDaftarTab(); gambarKanvas(); return; }
+
+  $('#fd-tabel tbody').innerHTML = (rancangan.layanan || []).map(L => {
+    const T = templateDari(L.id);
+    const nField = (L.tab || []).reduce((n, t) => n + (t.field || []).length, 0);
+    return '<tr><td class="utama"><b>' + esc(L.kode) + '</b> ' + esc(L.nama) +
+        (L.id === rancangan.layananAktif ? ' <span class="pil-kecil default">Aktif</span>' : '') + '</td>' +
+      '<td>' + (L.tab || []).length + ' tab</td>' +
+      '<td>' + nField + ' field</td>' +
+      '<td>' + (T ? esc(T.nama) : '<span class="hampa">—</span>') + '</td>' +
+      '<td class="kanan"><button class="btn btn-kecil btn-utama" data-fdbuka="' + esc(L.id) +
+      '">Rancang formulir</button></td></tr>';
+  }).join('') || '<tr><td colspan="5" class="kosong-tabel">Belum ada layanan.</td></tr>';
+
+  $$('#fd-tabel [data-fdbuka]').forEach(b => b.addEventListener('click', () => {
+    pakaiLayanan(b.dataset.fdbuka);
+    const T = templateDari(b.dataset.fdbuka);
+    if (T) pakaiTemplate(T.id);
+    fdBuka = true; tabAktif = 0; pilih = null;
+    gambarSemua(); gambarLayarForm(); simpanNanti();
+  }));
+  const ke = $('#fd-ke-layanan');
+  if (ke) ke.onclick = () => pilihMode('layanan');
+}
+
+function gambarKepalaForm(){
+  const L = layananIni();
+  const nm = $('#fd-nama'), lc = $('#fd-lencana');
+  if (nm) nm.textContent = 'Formulir ' + (L ? L.nama : '—');
+  if (lc) lc.textContent = L ? L.kode : '—';
+}
+
+function gambarLayarLayanan(){
+  const tb = $('#lyn-tabel tbody'); if (!tb) return;
+  tb.innerHTML = (rancangan.layanan || []).map(L => {
+    const milik = templateLayanan(L.id);
+    return '<tr><td class="utama"><b>' + esc(L.kode) + '</b></td>' +
+      '<td class="utama">' + esc(L.nama) + '</td>' +
+      '<td>' + (L.tab || []).length + ' tab</td>' +
+      '<td>' + (milik[0] ? esc(milik[0].nama) : '<span class="hampa">—</span>') + '</td>' +
+      '<td>' + orderLayanan(L.id).length + ' order ' +
+        '<button class="btn btn-kecil" data-ltambahorder="' + esc(L.id) + '">+</button></td>' +
+      '<td class="kanan"><button class="btn btn-kecil" data-lubah="' + esc(L.id) + '">⚙ Ubah</button> ' +
+      '<button class="btn btn-kecil" data-lbuka="' + esc(L.id) + '">Formulir</button> ' +
+      '<button class="btn btn-kecil" data-lhapus="' + esc(L.id) + '">Hapus</button></td></tr>';
+  }).join('') || '<tr><td colspan="6" class="kosong-tabel">Belum ada layanan.</td></tr>';
+
+  tb.querySelectorAll('[data-ltambahorder]').forEach(b => b.addEventListener('click', () => {
+    const L = (rancangan.layanan || []).find(x => x.id === b.dataset.ltambahorder); if (!L) return;
+    tambahOrder(L.id);
+    gambarLayarLayanan(); gambarMenuOrder(); simpanNanti();
+  }));
+  tb.querySelectorAll('[data-lhapus]').forEach(b => b.addEventListener('click', () => {
+    const L = (rancangan.layanan || []).find(x => x.id === b.dataset.lhapus); if (!L) return;
+    if ((rancangan.layanan || []).length <= 1){ window.alert('Sisakan sedikitnya satu layanan.'); return; }
+    if (!window.confirm('Hapus layanan “' + L.nama + '” beserta template dan ordernya?')) return;
+    rancangan.template = rancangan.template.filter(T => T.layanan !== L.id);
+    rancangan.order    = rancangan.order.filter(O => O.layanan !== L.id);
+    rancangan.layanan  = rancangan.layanan.filter(x => x.id !== L.id);
+    termuatLayanan = termuatTemplate = termuatOrder = null;
+    pakaiOrder(rancangan.order[0] && rancangan.order[0].id);
+    pakaiLayanan(rancangan.layanan[0].id);
+    const T0 = templateDari(rancangan.layanan[0].id);
+    if (T0) pakaiTemplate(T0.id);
+    gambarSemua(); gambarLayarLayanan(); gambarMenuOrder(); simpanNanti();
+  }));
+  tb.querySelectorAll('[data-lubah]').forEach(b => b.addEventListener('click', async () => {
+    const L = (rancangan.layanan || []).find(x => x.id === b.dataset.lubah); if (!L) return;
+    const T = templateDari(L.id);
+    const h = await tanyaIsian('Ubah layanan', [
+      { kunci:'kode', label:'Kode layanan', nilai:L.kode, petunjuk:'mis. AJB' },
+      { kunci:'nama', label:'Nama layanan', nilai:L.nama, petunjuk:'mis. Akta Jual Beli' },
+      { kunci:'tkode', label:'Kode template', nilai:T ? T.kode : '', petunjuk:'mis. AJB' },
+      { kunci:'tnama', label:'Nama template', nilai:T ? T.nama : '', petunjuk:'mis. AJB Standar' }
+    ], 'Nama layanan dan nama templatenya sekaligus.');
+    if (!h) return;
+    L.kode = h.kode || L.kode;
+    L.nama = h.nama || L.nama;
+    if (T){ T.kode = h.tkode || T.kode; T.nama = h.tnama || T.nama; }
+    gambarSemua(); gambarLayarLayanan(); gambarLayarTemplate(); simpanNanti();
+  }));
+  tb.querySelectorAll('[data-lbuka]').forEach(b => b.addEventListener('click', () => {
+    pakaiLayanan(b.dataset.lbuka);
+    const T = templateDari(b.dataset.lbuka);
+    if (T) pakaiTemplate(T.id);
+    fdBuka = true; tabAktif = 0; pilih = null;
+    gambarSemua(); pilihMode('rancang'); simpanNanti();
+  }));
+  const tbh = $('#lyn-tambah');
+  if (tbh) tbh.onclick = () => {
+    const n = (rancangan.layanan || []).length + 1;
+    const L = { id:idBaruAwalan('lyn_'), kode:'LYN' + n, nama:'Layanan ' + n,
+      tab:[{ id:idBaru(), nama:'Tab baru', mode:'formulir', tombolSimpan:'Simpan', field:[] }],
+      templateBawaan:'' };
+    rancangan.layanan.push(L);
+    const T = { id:idBaruAwalan('tpl_'), kode:L.kode, nama:'Template ' + L.nama, layanan:L.id,
+      milik:'kantor',
+      isi:{ bagian:[], potongan:[], grup:[], halaman:JSON.parse(JSON.stringify(rancangan.halaman)) } };
+    rancangan.template.push(T);
+    L.templateBawaan = T.id;
+    tambahOrder(L.id);
+    pakaiLayanan(L.id); gambarSemua(); gambarLayarLayanan(); gambarMenuOrder(); simpanNanti();
+  };
+}
+
+/* ---------- daftar order ---------- */
+let orBuka = false;                 /* true bila satu order sedang dibuka */
+let layananDaftarOrder = null;      /* layanan yang daftarnya sedang ditampilkan; null = semua */
+
+function tambahOrder(idL){
+  const L = (rancangan.layanan || []).find(x => x.id === idL); if (!L) return null;
+  const n = orderLayanan(L.id).length + 1;
+  const O = { id:idBaruAwalan('ord_'), nama:'Order ' + L.kode + ' ' + String.fromCharCode(64 + n),
+    layanan:L.id, template:'', baris:{}, form:{} };
+  rancangan.order.push(O);
+  return O;
+}
+function ringkasIsiOrder(O){
+  const L = (rancangan.layanan || []).find(x => x.id === O.layanan);
+  if (!L) return '—';
+  const bagian = (L.tab || []).map(t => t.mode === 'daftar'
+    ? t.nama + ' ' + (((O.baris || {})[t.id] || []).length) : null).filter(Boolean);
+  return bagian.length ? bagian.join(' · ') : 'formulir tunggal';
+}
+
+function gambarDaftarOrder(){
+  const daftar = $('#or-daftar'), isi = $('#or-isi');
+  if (!daftar || !isi) return;
+  daftar.hidden = orBuka;
+  isi.hidden = !orBuka;
+  if (orBuka){ gambarKepalaOrder(); gambarPratinjau(); return; }
+
+  const L = layananDaftarOrder
+    ? (rancangan.layanan || []).find(x => x.id === layananDaftarOrder) : null;
+  const baris = L ? orderLayanan(L.id) : (rancangan.order || []);
+  $('#or-daftar-judul').textContent = L ? 'Order ' + L.kode : 'Semua order';
+  $('#or-daftar-ket').textContent = L
+    ? 'Order layanan ' + L.nama + '. Naskahnya dirakit dengan template layanan ini.'
+    : 'Tiap order melekat pada satu layanan; formulir dan templatenya mengikuti layanan itu.';
+
+  $('#or-tabel tbody').innerHTML = baris.length ? baris.map(O => {
+    const LO = (rancangan.layanan || []).find(x => x.id === O.layanan);
+    const T  = templateDari(O.layanan);
+    return '<tr><td class="utama"><b>' + esc(O.nama) + '</b>' +
+        (O.id === rancangan.orderAktif ? ' <span class="pil-kecil default">Aktif</span>' : '') + '</td>' +
+      '<td>' + (LO ? esc(LO.kode) + ' · ' + esc(LO.nama) : '—') + '</td>' +
+      '<td>' + (T ? esc(T.nama) : '<span class="hampa">belum ada</span>') + '</td>' +
+      '<td>' + esc(ringkasIsiOrder(O)) + '</td>' +
+      '<td class="kanan"><button class="btn btn-kecil" data-oubah="' + esc(O.id) + '">⚙ Ubah</button> ' +
+      '<button class="btn btn-kecil" data-ohapus="' + esc(O.id) + '">Hapus</button> ' +
+      '<button class="btn btn-kecil btn-utama" data-obuka="' + esc(O.id) + '">Buka</button></td></tr>';
+  }).join('') : '<tr><td colspan="5" class="kosong-tabel">Belum ada order.</td></tr>';
+
+  $$('#or-tabel [data-obuka]').forEach(b => b.addEventListener('click', () => {
+    pakaiOrder(b.dataset.obuka);
+    const T = templateOrder(); if (T) pakaiTemplate(T.id);
+    orBuka = true; gambarSemua(); gambarDaftarOrder(); simpanNanti();
+  }));
+  $$('#or-tabel [data-oubah]').forEach(b => b.addEventListener('click', async () => {
+    const O = (rancangan.order || []).find(x => x.id === b.dataset.oubah); if (!O) return;
+    const h = await tanyaIsian('Ubah order', [
+      { kunci:'nama', label:'Nama order', nilai:O.nama, petunjuk:'mis. Order AJB A' }
+    ]);
+    if (!h) return;
+    O.nama = h.nama || O.nama;
+    gambarDaftarOrder(); gambarKepalaOrder(); simpanNanti();
+  }));
+  $$('#or-tabel [data-ohapus]').forEach(b => b.addEventListener('click', () => {
+    const O = (rancangan.order || []).find(x => x.id === b.dataset.ohapus); if (!O) return;
+    if ((rancangan.order || []).length <= 1){ window.alert('Sisakan sedikitnya satu order.'); return; }
+    if (!window.confirm('Hapus “' + O.nama + '” beserta isiannya?')) return;
+    rancangan.order = rancangan.order.filter(x => x.id !== O.id);
+    if (rancangan.orderAktif === O.id){ termuatOrder = null; pakaiOrder(rancangan.order[0].id); }
+    gambarDaftarOrder(); gambarMenuOrder(); simpanNanti();
+  }));
+  const tbh = $('#or-tambah');
+  if (tbh) tbh.onclick = () => {
+    const idL = L ? L.id : rancangan.layananAktif;
+    const O = tambahOrder(idL);
+    if (!O) return;
+    gambarDaftarOrder(); gambarMenuOrder(); simpanNanti();
+  };
+}
+
+function gambarKepalaOrder(){
+  const O = orderIni(), T = templateOrder();
+  const L = O ? (rancangan.layanan || []).find(x => x.id === O.layanan) : null;
+  const nm = $('#or-nama'), lay = $('#or-layanan');
+  if (nm) nm.textContent = O ? O.nama : 'Order';
+  if (lay) lay.innerHTML = 'Layanan <b>' + esc(L ? L.kode : '—') + '</b>' +
+    ' · Template <b>' + esc(T ? T.nama : 'belum ada') + '</b>';
+}
+
+/* menu sidebar: satu butir per layanan, membuka daftar ordernya */
+function gambarMenuOrder(){
+  const wadah = $('#menu-order');
+  if (!wadah) return;
+  wadah.innerHTML = (rancangan.layanan || []).map(L =>
+    '<button class="m-item" data-order-layanan="' + esc(L.id) + '"><i>▸</i>Order ' +
+    esc(L.kode) + '</button>').join('') ||
+    '<button class="m-item mati"><i>▸</i>Belum ada layanan</button>';
+  wadah.querySelectorAll('[data-order-layanan]').forEach(b => b.addEventListener('click', () => {
+    layananDaftarOrder = b.dataset.orderLayanan;
+    orBuka = false;
+    pilihMode('pratinjau');
+  }));
+}
+
+/* =====================================================================
+   Modal isian ringkas — Electron tidak menyediakan window.prompt, jadi
+   semua permintaan isian singkat lewat sini.
+   medan: [{kunci, label, nilai, petunjuk}] · hasil: objek {kunci: nilai} atau null
+   ===================================================================== */
+function tanyaIsian(judul, medan, keterangan){
+  return new Promise(resolve => {
+    const tirai = $('#tirai-tanya');
+    if (!tirai) return resolve(null);
+    $('#tanya-judul').textContent = judul;
+    $('#tanya-ket').textContent = keterangan || '';
+    $('#tanya-isi').innerHTML = medan.map(m =>
+      '<div class="f"><label class="j">' + esc(m.label) + '</label>' +
+      '<input type="text" data-tanya="' + esc(m.kunci) + '" value="' + esc(m.nilai == null ? '' : m.nilai) +
+      '" placeholder="' + esc(m.petunjuk || '') + '"></div>').join('');
+    tirai.hidden = false;
+    const kotak = $('#tanya-isi');
+    const pertama = kotak.querySelector('input');
+    if (pertama){ pertama.focus(); pertama.select(); }
+
+    const bersih = () => {
+      tirai.hidden = true;
+      $('#tanya-ok').removeEventListener('click', simpan);
+      tirai.removeEventListener('keydown', kunci);
+      $$('#tirai-tanya [data-tanya-batal]').forEach(b => b.removeEventListener('click', batal));
+    };
+    const simpan = () => {
+      const hasil = {};
+      kotak.querySelectorAll('[data-tanya]').forEach(el => { hasil[el.dataset.tanya] = el.value.trim(); });
+      bersih(); resolve(hasil);
+    };
+    const batal = () => { bersih(); resolve(null); };
+    const kunci = ev => {
+      if (ev.key === 'Enter'){ ev.preventDefault(); simpan(); }
+      if (ev.key === 'Escape'){ ev.preventDefault(); batal(); }
+    };
+    $('#tanya-ok').addEventListener('click', simpan);
+    tirai.addEventListener('keydown', kunci);
+    $$('#tirai-tanya [data-tanya-batal]').forEach(b => b.addEventListener('click', batal));
+  });
+}
+
 const KEPALA = {
+  layanan:   ['Engine Module › Layanan & Template', 'Layanan & Template',
+              'Tiap layanan punya satu formulir order dan beberapa template naskah.'],
   minuta:    ['Engine Module › Minuta', 'Minuta Order A',
               'Naskah hasil perakitan order — Notaris dan Asisten merapikan tulisannya di sini.'],
   kantor:    ['Engine Module › Profil Kantor', 'Profil Kantor',
@@ -1560,14 +2138,26 @@ const KEPALA = {
 };
 function pilihMode(mode){
   $$('.m-item[data-mode]').forEach(x => x.setAttribute('aria-current', String(x.dataset.mode === mode)));
+  $$('#menu-order .m-item').forEach(x => x.setAttribute('aria-current',
+    String(mode === 'pratinjau' && x.dataset.orderLayanan === layananDaftarOrder)));
   $$('.layar').forEach(l => { l.hidden = l.dataset.layar !== mode; });
   const k = KEPALA[mode] || ['','',''];
   $('#remah').textContent = k[0];
   $('#judul-halaman').textContent = k[1];
   $('#sub-halaman').textContent = k[2];
-  if (mode === 'pratinjau') gambarPratinjau();
-  if (mode === 'kantor') gambarPanelKantor();
-  if (mode === 'minuta') gambarMinuta();
+  if (mode === 'pratinjau'){
+    const L = layananDaftarOrder
+      ? (rancangan.layanan || []).find(x => x.id === layananDaftarOrder) : null;
+    $('#remah').textContent = 'Layanan Engine › ' + (L ? 'Order ' + L.kode : 'Order');
+    $('#judul-halaman').textContent = L ? 'Order ' + L.kode : 'Order';
+    $('#sub-halaman').textContent = L ? L.nama : 'Daftar order';
+    gambarDaftarOrder();
+  }
+  if (mode === 'kantor')  gambarPanelKantor();
+  if (mode === 'layanan') gambarLayarLayanan();
+  if (mode === 'kondisi') gambarLayarTemplate();
+  if (mode === 'rancang') gambarLayarForm();
+  if (mode === 'minuta'){ pakaiTemplateOrder(); gambarMinuta(); }
   terapkanPeranLayar();
   if (mode === 'kondisi'){ gambarDaftarBagian(); gambarKanan(); }
   window.scrollTo(0,0);
@@ -1643,13 +2233,36 @@ function gambarKartuPeran(){
 
 function gambarSemua(){
   gambarKartuPeran();
+  gambarMenuOrder();
   gambarKartuKantor();
-  gambarDaftarTab();
-  gambarKanvas();
-  if (rancangan.bagian && !$('.layar[data-layar="kondisi"]').hidden){ gambarDaftarBagian(); gambarKanan(); }
-  if (!$('.layar[data-layar="pratinjau"]').hidden) gambarPratinjau();
+  if (fdBuka){ gambarKepalaForm(); gambarDaftarTab(); gambarKanvas(); }
+  if (rancangan.bagian && !$('.layar[data-layar="kondisi"]').hidden && tplBuka){
+    gambarDaftarBagian(); gambarKanan(); gambarKepalaTemplate();
+  }
+  if (!$('.layar[data-layar="pratinjau"]').hidden && orBuka) gambarPratinjau();
   if (!$('.layar[data-layar="kantor"]').hidden) gambarPanelKantor();
 }
+
+(function pasangImporFormulir(){
+  const i = $('#btn-impor-form'), e = $('#btn-ekspor-form');
+  if (i) i.addEventListener('click', imporFormulir);
+  if (e) e.addEventListener('click', eksporFormulir);
+})();
+
+(function pasangKembaliForm(){
+  const b = $('#fd-kembali');
+  if (b) b.addEventListener('click', () => { fdBuka = false; gambarLayarForm(); });
+})();
+
+(function pasangKembaliOrder(){
+  const b = $('#or-kembali');
+  if (b) b.addEventListener('click', () => { orBuka = false; gambarDaftarOrder(); });
+})();
+
+(function pasangKembaliTemplate(){
+  const b = $('#tpl-kembali');
+  if (b) b.addEventListener('click', () => { tplBuka = false; gambarLayarTemplate(); });
+})();
 
 (function pasangPilihPeran(){
   const sel = $('#pilih-peran');
@@ -2180,7 +2793,7 @@ function pasangPenyunting(akar, kunci, simpan){
     if (ev.target.closest('button')) ev.preventDefault();
   });
 
-  bilah.addEventListener('click', ev => {
+  bilah.addEventListener('click', async ev => {
     const laci = ev.target.closest('[data-laci]');
     if (laci){
       const k = laci.dataset.laci;
@@ -2211,12 +2824,14 @@ function pasangPenyunting(akar, kunci, simpan){
       return perintah('formatBlock', (n && n.nodeName === tag) ? 'P' : tag);
     }
     if (a === 'tautan'){
-      const u = window.prompt('Alamat tautan', 'https://');
+      const u = (await tanyaIsian('Sisipkan tautan',
+        [{ kunci:'url', label:'Alamat tautan', nilai:'https://' }]) || {}).url;
       if (u) perintah('createLink', u);
       return;
     }
     if (a === 'gambar'){
-      const u = window.prompt('Alamat gambar (URL)', 'https://');
+      const u = (await tanyaIsian('Sisipkan gambar',
+        [{ kunci:'url', label:'Alamat gambar (URL)', nilai:'https://' }]) || {}).url;
       if (u) perintah('insertImage', u);
       return;
     }
@@ -3452,15 +4067,25 @@ function rakitAkta(){
    ===================================================================== */
 let mnBagian = null, mnTab = 'naskah';
 
+/* Minuta selalu merakit template yang dipakai order, bukan template yang
+   kebetulan sedang dibuka di layar Template Akta. */
+function pakaiTemplateOrder(){
+  const T = templateOrder();
+  if (T && T.id !== termuatTemplate) pakaiTemplate(T.id);
+}
+
 function gambarMinuta(){
+  pakaiTemplateOrder();
   if (!Array.isArray(rancangan.bagian)) rancangan.bagian = [];
   if (!mnBagian || !rancangan.bagian.some(b => b.id === mnBagian))
     mnBagian = rancangan.bagian.length ? rancangan.bagian[0].id : null;
   gambarMinutaDaftar();
   gambarMinutaKanan();
-  const p = PERAN.find(x => x[0] === (rancangan.peran || 'super')) || PERAN[0];
+  const T = templateOrder(), L = layananIni();
   const lc = $('#mn-lencana');
-  if (lc) lc.textContent = p[2];
+  if (lc) lc.textContent = T ? T.kode : '—';
+  const nm = $('#minuta-nama') || $('.layar[data-layar="minuta"] .bj-nama');
+  if (nm) nm.textContent = 'Minuta ' + (L ? L.kode : '') + ' · ' + (T ? T.nama : 'tanpa template');
 }
 
 function gambarMinutaDaftar(){
@@ -3575,7 +4200,7 @@ $$('[data-mtab]').forEach(b => b.addEventListener('click', () => {
   mnTab = b.dataset.mtab; gambarMinutaKanan();
 }));
 $('#mn-rakit-ulang').addEventListener('click', () => { mnTab = 'naskah'; gambarMinutaKanan(); });
-$('[data-ke-order]').addEventListener('click', () => pilihMode('pratinjau'));
+$('[data-ke-order]').addEventListener('click', () => { orBuka = true; pilihMode('pratinjau'); });
 $('#mn-tambah-pasal').addEventListener('click', () => {
   tambahBagian('pasal'); mnBagian = bagianAktif; mnTab = 'tulisan'; gambarMinuta();
 });
@@ -3803,6 +4428,75 @@ async function imporTemplate(){
   if (n) window.alert('Template dimuat. ' + n + ' variabel berikut belum ada di Form Design:\n\n' +
     Object.keys(asing).map(k => '{{' + k + '}}  — dipakai di ' + asing[k].join(', ')).join('\n'));
 }
+/* ---------- impor / ekspor FORMULIR saja ----------
+   Kebalikan dari impor template: hanya menukar rancangan formulir layanan yang
+   sedang dibuka, sementara template naskahnya sama sekali tidak disentuh. */
+function bentukFormulir(){
+  const L = layananIni();
+  return {
+    jenis: 'formulir-engine',
+    versi: 1,
+    layanan: { kode: L ? L.kode : '', nama: L ? L.nama : '' },
+    tab: JSON.parse(JSON.stringify(rancangan.tab || []))
+  };
+}
+async function imporFormulir(){
+  if (!api.impor){ $('#status').textContent = 'impor hanya tersedia di aplikasi'; return; }
+  const d = await api.impor();
+  if (!d) return;
+  if (!d || !Array.isArray(d.tab) || !d.tab.length){
+    $('#status').textContent = 'berkas itu bukan rancangan formulir — tidak ada tab di dalamnya';
+    return;
+  }
+  const L = layananIni();
+  if (!L){ $('#status').textContent = 'belum ada layanan yang dibuka'; return; }
+  const nField = d.tab.reduce((n, t) => n + ((t.field || []).length), 0);
+  if (!window.confirm('Ganti rancangan formulir layanan “' + L.nama + '” dengan ' + d.tab.length +
+      ' tab / ' + nField + ' elemen dari berkas ini?\n\nTemplate naskahnya tidak ikut berubah.')) return;
+
+  L.tab = JSON.parse(JSON.stringify(d.tab));
+  rancangan.tab = L.tab;
+  termuatLayanan = L.id;
+  if (d.layanan){
+    if (d.layanan.kode) L.kode = d.layanan.kode;
+    if (d.layanan.nama) L.nama = d.layanan.nama;
+  }
+  /* isian order layanan ini tidak lagi cocok dengan formulirnya */
+  (rancangan.order || []).forEach(O => { if (O.layanan === L.id){ O.baris = {}; O.form = {}; } });
+  termuatOrder = null;
+  pakaiOrder(rancangan.orderAktif);
+  rancangan.tab.forEach(t => {
+    if (!Array.isArray(t.field)) t.field = [];
+    t.field.forEach(f => { if (typeof f.diGrid !== 'boolean') f.diGrid = !!f.kolom; });
+  });
+  tabAktif = 0; pilih = null; fdBuka = true;
+  gambarSemua(); gambarLayarForm(); simpanNanti();
+
+  const T = templateDari(L.id);
+  const sah = semuaField().map(f => f.kode)
+    .concat((rancangan.varDokumen || []).map(v => v.kode).filter(Boolean));
+  const asing = {};
+  if (T) (T.isi.potongan || []).concat((T.isi.bagian || []).filter(b => b.jenis !== 'otomatis'))
+    .forEach(p => {
+      const teks = [p.teks].concat((p.slot || []).map(x => x.teks)).join(' ');
+      (teks.match(/\{\{[^}]+\}\}/g) || []).forEach(v => {
+        const k = v.slice(2, -2).trim();
+        if (!sah.includes(k)) asing[k] = true;
+      });
+    });
+  const n = Object.keys(asing).length;
+  setTimeout(() => {
+    $('#status').textContent = n
+      ? 'formulir dimuat · ' + n + ' variabel templatenya kini tanpa field'
+      : 'formulir dimuat — seluruh variabel templatenya masih dikenali';
+  }, 700);
+}
+async function eksporFormulir(){
+  if (!api.ekspor){ $('#status').textContent = 'ekspor hanya tersedia di aplikasi'; return; }
+  const hasil = await api.ekspor(bentukFormulir());
+  if (hasil) $('#status').textContent = 'formulir diekspor ke ' + hasil;
+}
+
 async function eksporTemplate(){
   if (!api.ekspor){ $('#status').textContent = 'ekspor hanya tersedia di aplikasi'; return; }
   const hasil = await api.ekspor(bagianTemplate(rancangan));

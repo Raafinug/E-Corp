@@ -423,3 +423,177 @@ mengubah struktur.
 **Tombol di Order A berganti** dari *Rakit Naskah* menjadi **✎ Buka Drafting**, yang membawa
 langsung ke Minuta; dari sana **‹ Kembali ke Order** membawa balik. Modal hasil perakitan yang
 lama tidak dipakai lagi karena naskahnya sudah tampil utuh di dalam Minuta.
+
+---
+
+## v0.9.8 — Tampilkan di tabel
+
+Kolom tabel pada layar Order dulu ditentukan secara tersirat: sebuah field menjadi kolom kalau
+kotak *Tampil sebagai kolom tabel* diisi, dan berhenti menjadi kolom kalau dikosongkan. Judul
+kolom merangkap sakelar — tidak terbaca sebagai pilihan, dan tidak terlihat dari kanvas.
+
+Sekarang ada sakelar tersendiri di modal properti: **Tampilkan di tabel**, bawaannya mati. Sakelar
+itu hanya muncul pada tab bermode **Daftar + modal tambah** — tab bermode formulir tidak punya
+tabel, jadi tidak ada yang perlu dipilih. Elemen tanpa nilai (judul bagian, bagian lipat, grup
+berulang, KBLI, akhir grup) juga tidak menawarkannya.
+
+Ketika sakelarnya hidup, dua isian menyusul:
+
+- **Judul kolom** — kosong berarti memakai label fieldnya dalam huruf besar;
+- **Gaya kolom** — teks biasa, pil biru, atau chip hijau.
+
+Urutan kolom mengikuti urutan field di kanvas, jadi memindahkan kartunya sekaligus memindahkan
+kolomnya. Di kanvas, field yang tampil di tabel diberi lencana **di tabel** supaya susunan
+tabelnya terbaca tanpa membuka satu per satu.
+
+Bila tidak ada satu pun field yang dinyalakan, tabel jatuh ke satu kolom **Ringkasan** berisi semua
+isian baris itu, disertai keterangan cara menyalakannya.
+
+Rancangan lama ikut terbawa: field yang sudah punya judul kolom otomatis dianggap menyala.
+
+---
+
+## v0.9.9 — Layanan, banyak template, dan template yang dipakai order
+
+Selama ini lab hanya mengenal satu template. Sekarang susunannya bertingkat, seperti aplikasi
+aslinya:
+
+```
+LAYANAN (jenis akta)
+├─ Form Design        satu rancangan formulir order per layanan
+└─ Template           beberapa naskah untuk formulir yang sama
+   ├─ AJB Standar     ← template bawaan, otomatis dipakai order
+   ├─ AJB Bawaan Platform
+   └─ AJB (salinan kantor)
+```
+
+**Template Akta kini dibuka lewat daftar.** Layarnya dimulai dari pemilih *Layanan (jenis akta)*
+dan tabel template layanan itu — kode, nama, dan lencana *Bawaan platform* / *Milik kantor* /
+*Dipakai order*. Template milik kantor dibuka lewat **Pasal**; template bawaan platform hanya bisa
+**Lihat**, dan **⧉ Salin & Sunting** membuat salinan milik kantor lalu langsung membukanya.
+**+ Tambah Template** membuat template kosong untuk layanan yang sedang dipilih. Di dalam editor,
+**‹ Kembali** membawa balik ke daftarnya.
+
+**Menu baru: Layanan & Template.** Inilah tempat menetapkan template mana yang otomatis dipakai
+order sebuah layanan — kolom *Template bawaan untuk order*. Di sini juga terlihat berapa tab
+formulir dan berapa template yang dimiliki tiap layanan, dan tombol **Formulir** membawa ke Form
+Design layanan itu.
+
+**Order A memilih layanannya dan templatenya.** Di bilah judulnya ada dua pemilih: *Layanan*
+menentukan formulir mana yang diisi, dan *Template* menentukan naskah mana yang dirakit —
+bawaannya mengikuti template bawaan layanan, dan bisa ditimpa khusus untuk order itu.
+
+**Minuta mengikuti pilihan order,** bukan template yang kebetulan sedang dibuka di Template Akta.
+Judulnya menyebutkan layanan dan template yang sedang dirakit.
+
+Rancangan lama ikut naik sendiri: isinya menjadi layanan **AJB** dengan template **AJB Standar**
+(milik kantor, dipakai order) ditambah satu salinan **AJB Bawaan Platform** sebagai contoh template
+platform yang hanya bisa dilihat.
+
+**Satu cacat lama ikut terbongkar:** kelas `.utama` dipakai untuk dua hal berbeda — kolom isi
+aplikasi (yang memang `display:flex`) dan sel tabel `td.utama`. Akibatnya setiap sel tabel
+sebenarnya adalah kotak flex; baru terlihat sekarang karena sel template memuat lebih dari satu
+elemen, dan kolomnya bertumpuk ke bawah. `td.utama` kini dikembalikan menjadi sel tabel biasa.
+
+---
+
+## v0.10.0 — Satu layanan satu template, dan order sebagai daftar
+
+**Satu layanan hanya boleh punya satu template.** Aturannya dipaksakan di tiga tempat: normaliser
+melepas template berlebih saat berkas dimuat dan memberi template kosong kepada layanan yang belum
+punya; layar Template Akta tidak lagi menawarkan *+ Tambah Template*; dan **⧉ Salin & Sunting**
+pada template bawaan platform kini *menggantikan* template layanan itu dengan salinan milik kantor,
+bukan menambah satu lagi. Karena tiap layanan hanya punya satu, order tidak perlu memilih template
+— ia otomatis memakai template layanannya.
+
+**Daftar template kini satu baris per layanan.** Kolomnya Layanan, Template, dan aksinya; pemilih
+layanan di atasnya tidak diperlukan lagi.
+
+**Order menjadi daftar, bukan dropdown.** Kelompok *Layanan Engine* di sidebar memuat satu butir
+per layanan — *Order AJB*, *Order LYN2*, dan seterusnya. Membukanya menampilkan **daftar order**
+layanan itu: nama order, layanan, template yang dipakai, ringkasan isian, dan tombol **Buka** /
+**Hapus**, ditambah **+ Tambah Order**. Satu layanan boleh punya beberapa order. Tombol **‹ Kembali**
+di dalam order membawa balik ke daftarnya.
+
+**Tiap order menyimpan isiannya sendiri.** Baris tabel dan isian formulir kini melekat pada
+ordernya, jadi berpindah order tidak lagi menghapus isian order lain — sebelumnya isian order
+bersifat global dan tertimpa begitu formulir berganti.
+
+**Menambah layanan sekarang lengkap sekali jalan:** layanan baru langsung memperoleh rancangan
+formulirnya, satu template kosong, satu order, dan butir menunya sendiri di sidebar. Menghapus
+layanan ikut menghapus template dan ordernya, dengan konfirmasi.
+
+Tabel *Layanan & Template* menyesuaikan: kolom *Template bawaan untuk order* diganti nama template
+layanan itu (karena tinggal satu), ditambah kolom **Order** berisi jumlah order dan tombol
+menambah, serta tombol **Hapus** layanan.
+
+---
+
+## v0.10.1 — Mengganti nama layanan, template, dan order
+
+Tombol **⚙ Ubah** sebelumnya memakai `window.prompt`. **Electron tidak menyediakan fungsi itu** —
+ia melempar *"prompt() is and will not be supported."* — jadi selama ini tombol tersebut tidak
+melakukan apa pun di aplikasi lab, meskipun berjalan normal di peramban biasa. Dua tombol pada
+bilah penyunting, **Sisipkan tautan** dan **Sisipkan gambar**, terkena cacat yang sama.
+
+Semuanya kini lewat modal isian sendiri:
+
+- **⚙ Ubah** pada baris layanan mengubah **kode layanan, nama layanan, kode template, dan nama
+  template** sekaligus — karena satu layanan hanya punya satu template, keduanya memang selalu
+  diubah bersamaan;
+- **⚙ Ubah** pada daftar Template Akta mengubah kode dan nama templatenya saja;
+- **⚙ Ubah** pada daftar order mengubah nama ordernya;
+- **Sisipkan tautan** dan **Sisipkan gambar** meminta alamatnya lewat modal yang sama.
+
+Modalnya menerima **Enter** untuk menyimpan dan **Esc** untuk batal. Perubahan nama langsung
+terlihat di butir menu sidebar, daftar template, daftar order, judul layar Minuta, dan kepala
+editor template.
+
+---
+
+## v0.10.2 — Form Design sebagai daftar, dan kolom dari paket user
+
+**Form Design kini dimulai dari daftar**, sejalan dengan Template Akta dan Order. Tabelnya memuat
+satu baris per layanan: kode dan nama layanan, jumlah tab, jumlah field, nama templatenya, dan
+tombol **Rancang formulir**. Di dalam editornya, **‹ Kembali** membawa balik ke daftar itu.
+
+**Lencana "AJB" di kepala layar ternyata ditulis tetap di berkas HTML**, jadi ia tidak pernah ikut
+berubah meskipun layanannya sudah diganti nama — hal yang sama pada kepala editor Template Akta.
+Keduanya kini dibaca dari layanan dan template yang sedang dibuka: judulnya menjadi
+*Formulir &lt;nama layanan&gt;* dengan lencana kode layanan, dan *&lt;nama template&gt;* dengan
+lencana kode template.
+
+**Kolom tabel dari field Referensi user bisa memilih datanya.** Satu field Referensi user
+memekarkan 22 variabel identitas; dulu kolomnya selalu mencetak nama. Sekarang, begitu
+**Tampilkan di tabel** dinyalakan pada field bertipe Referensi user, muncul pemilih **Data yang
+ditampilkan di kolom** berisi seluruh variabel paketnya — nama, NIK, tempat lahir, pekerjaan,
+alamat, dan seterusnya, masing-masing disertai kode variabelnya. Isian di dalam modal tetap berupa
+pencarian user; yang berubah hanya apa yang dicetak di kolom.
+
+Bila fieldnya membatasi paket (lewat daftar centang pada propertinya), pemilih ini hanya menawarkan
+variabel yang dicentang.
+
+---
+
+## v0.10.3 — Impor & Ekspor Formulir
+
+**Impor JSON** mengganti seluruh rancangan, termasuk template naskahnya. Untuk memasukkan rancangan
+formulir dari luar tanpa menyentuh template, bilah Form Design kini punya dua tombol baru:
+
+- **Impor Formulir** — menukar rancangan formulir layanan yang sedang dibuka dengan isi berkas,
+  setelah konfirmasi yang menyebut berapa tab dan berapa elemen yang akan masuk. Template naskah
+  layanan itu tidak disentuh sama sekali. Isian order layanan tersebut dikosongkan, karena
+  formulirnya berganti. Sesudah impor, lab menghitung berapa variabel template yang kini tidak lagi
+  punya field.
+- **Ekspor Formulir** — kebalikannya, mengeluarkan rancangan formulir layanan yang sedang dibuka.
+
+Bentuk berkasnya:
+
+```json
+{ "jenis": "formulir-engine", "versi": 1,
+  "layanan": { "kode": "AJB", "nama": "Akta Jual Beli" },
+  "tab": [ … ] }
+```
+
+Kode dan nama layanan pada berkas ikut menimpa layanan tujuannya, sehingga satu berkas sudah cukup
+untuk memindahkan seluruh rancangan formulir sebuah layanan.

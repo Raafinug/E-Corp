@@ -1,0 +1,815 @@
+{
+  "jenis": "template-engine",
+  "bagian": [
+    {
+      "id": "b1",
+      "judul": "KEPALA AKTA",
+      "jenis": "catatan",
+      "teks": "<p style=\"text-align: center;\"><b>PENDIRIAN PERSEROAN TERBATAS</b></p><p style=\"text-align: center;\"><b>{{nama_perseroan_final}}</b></p><p style=\"text-align: center;\">Nomor:</p><p style=\"text-align: center;\"><br></p><p>- Pada hari ini, {{var_hari}}, tanggal \"{{var_tanggal}}\"&nbsp;<span style=\"color: var(--tinta);\">({{var_terbilang_tanggal}})&nbsp;</span><span style=\"color: var(--tinta);\">Pukul {{var_pukul}}&nbsp;</span><span style=\"color: var(--tinta);\">({{var_terbilang_pukul}}).</span></p><p>- Berhadapan dengan saya, {{notaris_nama}}, Sarjana Hukum, Magister Kenotariatan,&nbsp;<span style=\"color: var(--tinta);\">Notaris Propinsi Jawa Barat berkedudukan di&nbsp;</span><span style=\"color: var(--tinta);\">{{notaris_wilayah}} dengan dihadiri oleh saksi-saksi yang akan disebut pada akhir akta ini :</span></p>"
+    },
+    {
+      "id": "b2",
+      "judul": "KOMPARISI",
+      "jenis": "otomatis",
+      "ulang": "para_pihak",
+      "kelompok": "bentuk_pihak",
+      "nomor": "angka",
+      "nomorUlangKelompok": false,
+      "potongan": [
+        "bh_pendirian",
+        "bh_perubahan",
+        "bh_wakil",
+        "bh_kapasitas_direktur",
+        "bh_kapasitas_kuasa",
+        "bh_saham",
+        "per_identitas",
+        "per_bertindak"
+      ]
+    },
+    {
+      "id": "b3",
+      "judul": "Pasal 1",
+      "jenis": "pasal",
+      "teks": "<p></p><ol><li><span style=\"color: var(--tinta);\">Perseroan Terbatas ini bernama&nbsp;\"<b>{{nama_perseroan_final}}</b>\" (selanjutnya disebut Perseroan), berkedudukan&nbsp;di {{kedudukan_perseroan_final}}</span></li><li><span style=\"color: var(--tinta);\">Perseroan dapat membuka cabang atau perwakilan di&nbsp;</span><span style=\"color: var(--tinta);\">tempat lain, baik di dalam maupun di luar wilayah&nbsp;</span><span style=\"color: var(--tinta);\">Republik Indonesia, sebagaimana ditetapkan oleh&nbsp;</span><span style=\"color: var(--tinta);\">Direksi, dengan persetujuan dari Dewan Komisaris.</span></li></ol>"
+    },
+    {
+      "id": "b179075731910459",
+      "judul": "Pasal 2",
+      "jenis": "pasal",
+      "teks": "Perseroan didirikan untuk jangka waktu {{jangka_waktu}},&nbsp;<span style=\"color: var(--tinta);\">dimulai pada tanggal pengesahan Menteri Hukum dan Hak&nbsp;</span><span style=\"color: var(--tinta);\">Asasi Manusia Republik Indonesia atas Anggaran Dasar&nbsp;</span><span style=\"color: var(--tinta);\">ini.</span>"
+    },
+    {
+      "id": "b179075743255456",
+      "judul": "Pasal 3",
+      "jenis": "pasal",
+      "teks": "<ol><li><span style=\"color: var(--tinta);\">Maksud dan tujuan dari Perseroan ini berusaha dalam bidang usaha {{bidang_usaha}}</span></li><li>Untuk mencapai maksud dan tujuan tersebut di atas,&nbsp;Perseroan dapat melaksanakan kegiatan usaha sebagai berikut:<br>[[ulang:kbli]]{{nomor_baris}}. {{kbli_kode}} - {{kbli_judul}};<br>[[/ulang]]</li></ol>"
+    },
+    {
+      "id": "b179075755993257",
+      "judul": "Pasal 4",
+      "jenis": "pasal",
+      "teks": "<ol><li>Modal dasar Perseroan berjumlah Rp.{{modal_dasar_rupiah}} ({{modal_dasar_rupiah_terbilang}}),- terbagi atas {{jumlah_saham}}({{jumlah_saham_terbilang}}) saham, masing-masing saham bernilai nominal Rp.{{nilai_nominal_per_saham}} ({{nilai_nominal_per_saham_terbilang}}),-.</li><li>Dari modal dasar tersebut telah ditempatkan dan disetor {{modal_disetorkan}}% ({{modal_disetorkan_terbilang}}) atau sejumlah {{jumlah_saham_ditempatkan}} saham dengan nilai nominal seluruhnya sebesar Rp.,- {{total_nominal_saham}} ({{total_nominal_saham_terbilang}}) oleh para pendiri yang telah mengambil bagian saham dan rincian serta nilai nominal saham akan disebutkan pada akhir akta.</li><li>Saham-saham yang masih di dalam simpanan akan dikeluarkan oleh Perseroan menurut keperluan modal Perseroan dengan persetujuan Rapat Umum Pemegang Saham (RUPS). Para Pemegang Saham yang namanya tercatat dalam daftar pemegang saham mempunyai hak terlebih dahulu untuk mengambil bagian atas saham yang hendak dikeluarkan itu dalam jangka waktu 14 (empat belas) hari sejak tanggal penawaran dilakukan, dan masing-masing pemegang saham berhak mengambil bagian seimbang dengan jumlah saham yang mereka miliki (proporsional). Apabila setelah lewat jangka waktu 14 (empat belas) hari tersebut ternyata masih ada sisa saham yang belum diambil bagian, maka Direksi berhak menawarkan sisa saham tersebut kepada pihak ketiga.</li></ol>"
+    },
+    {
+      "id": "b179075791681263",
+      "judul": "Pasal 5",
+      "jenis": "pasal",
+      "teks": "<ol><li>Semua saham yang dikeluarkan oleh Perseroan adalah saham atas nama.</li><li>Yang boleh memiliki dan mempergunakan hak atas satu saham hanyalah seorang Warga Negara Indonesia, atau suatu badan hukum Indonesia.</li><li>Bukti pemilikan saham dapat berupa surat saham.</li><li>Dalam hal Perseroan tidak menerbitkan surat saham, pemilikan saham dapat dibuktikan dengan surat&nbsp;keterangan atau catatan yang dikeluarkan oleh&nbsp;Perseroan.</li><li>Jika dikeluarkan surat saham, maka untuk setiap saham diberi sehelai surat saham.</li><li>Surat kolektif saham dapat dikeluarkan sebagai bukti pemilikan 2 (dua) atau lebih saham yang dimiliki oleh seorang pemegang saham.</li><li>Pada surat saham harus dicantumkan sekurangnya:</li><ol style=\"list-style-type: lower-alpha;\"><li><span style=\"color: var(--tinta);\">nama dan alamat pemegang saham;</span></li><li><span style=\"color: var(--tinta);\">nomor surat saham;</span></li><li><span style=\"color: var(--tinta);\">nilai nominal saham;</span></li><li><span style=\"color: var(--tinta);\">tanggal pengeluaran surat saham.</span></li></ol><li><span style=\"color: var(--tinta);\">Pada Surat kolektif saham sekurangnya harus dicantumkan:</span></li><ol style=\"list-style-type: lower-alpha;\"><li><span style=\"color: var(--tinta);\">nama dan alamt pemegang saham;</span></li><li><span style=\"color: var(--tinta);\">nomor surat kolektif saham;</span></li><li><span style=\"color: var(--tinta);\">nomor surat saham dan jumlah saham;</span></li><li><span style=\"color: var(--tinta);\">nilai nominal saham;</span></li><li><span style=\"color: var(--tinta);\">tanggal pengeluaran surat kolektif saham;</span></li></ol><li>Surat saham dan surat kolektif saham harus ditandatangani oleh seorang anggota Direksi dan Dewan Komisaris.</li><li>a. Saham memberikan hak kepada pemiliknya untuk:</li><ol><li>menghadiri dan mengeluarkan suara dalam Rapat Umum Pemegang Saham;</li><li>menerima pembayaran dividen dan sisa kekayaan hasil likuidasi;</li><li>menjalankan hak lainnya berdasarkan Undang-Undang Nomor 40 tahun 2007 tentang Perseroan Terbatas (selanjutnya disebut Undang-Undang).</li></ol><ul><li><span style=\"color: var(--tinta);\">Ketentuan huruf a tersebut berlaku setelah saham dicatat dalam Daftar Pemegang Saham atas nama pemiliknya.</span></li><li><span style=\"color: var(--tinta);\">Ketentuan huruf a butir (i) dan butir (iii) tidak berlaku bagi klasifikasi saham tertentu sebagaimana ditetapkan dalam Undang-undang.</span></li><li><span style=\"color: var(--tinta);\">Setiap saham memberikan kepada pemiliknya hak yang tidak dapat dibagi.</span></li><li><span style=\"color: var(--tinta);\">Dalam hal 1 (satu) saham dimiliki oleh lebih dari 1 (satu) orang, hak yang dimiliki dari saham tersebut digunakan dengan cara menunjuk 1 (satu) orang sebagai wakil bersama.</span></li></ul></ol>"
+    },
+    {
+      "id": "b179075816562422",
+      "judul": "Pasal 6",
+      "jenis": "pasal",
+      "teks": "<ol><li>Jika surat saham rusak atau tidak dapat dipakai, atas permintaan mereka yang berkepentingan, Direksi mengeluarkan surat saham pengganti, setelah surat saham yang rusak atau tidak dapat dipakai tersebut diserahkan kembali kepada Direksi.</li><li>Surat saham sebagaimana dimaksud pada ayat (1) harus dimusnahkan dan dibuat berita acara oleh Direksi untuk dilaporkan dalam Rapat Umum Pemegang Saham berikutnya.</li><li>Jika surat saham hilang, atas permintaan mereka yang berkepentingan, Direksi mengeluarkan surat saham pengganti setelah menurut pendapat Direksi kehilangan tersebut cukup dibuktikan dan dengan jaminan yang dipandang perlu oleh Direksi untuk tiap peristiwa yang khusus.</li><li>Setelah surat saham pengganti dikeluarkan, surat saham yang dinyatakan hilang tersebut tidak berlaku lagi terhadap Perseroan.</li><li>Semua biaya yang berhubungan dengan pengeluaran surat saham pengganti, ditanggung oleh pemegang saham yang berkepentingan.</li><li>Ketentuan sebagaimana dimaksud pada ayat (1), ayat (2), ayat (3), ayat (4) dan ayat (5) mutatis mutandis berlaku bagi pengeluaran surat kolektif saham pengganti.</li></ol>"
+    },
+    {
+      "id": "b179075821553068",
+      "judul": "Pasal 7",
+      "jenis": "pasal",
+      "teks": "<ol><li>Pemindahan hak atas saham harus berdasarkan akta pemindahan hak yang ditandatangani oleh yang memindahkan dan yang menerima pemindahan atau kuasanya yang sah.</li><li>Pemegang saham yang hendak memindahkan hak atas saham harus menawarkan terlebih dahulu kepada pemegang saham lain dengan menyebutkan harga serta persyaratan pemindahan hak dan memberitahukan kepada Direksi secara tertulis tentang penawaran tersebut. Dalam waktu 30 (tiga puluh) hari sejak penawaran, para pemegang saham lainnya dapat menyetujui pemindahan hak, dengan ketentuan apabila telah lewat waktu 30 (tiga puluh) hari ternyata saham yang ditawarkan tidak disetujui pemindahan haknya oleh pemegang saham lainnya, saham tersebut dapat ditawarkan kepada pihak ketiga yang disetujui oleh Rapat Umum Pemegang Saham.</li><li>Pemindahan hak atas saham harus mendapat persetujuan dari instansi yang berwenang, jika peraturan perundang-undangan mensyaratkan hal tersebut.</li><li>Mulai hari panggilan Rapat Umum Pemegang Saham sampai dengan hari dilaksanakan Rapat Umum Pemegang Saham, pemindahan hak atas saham tidak diperkenankan.</li></ol>"
+    },
+    {
+      "id": "b179075825398046",
+      "judul": "Pasal 8",
+      "jenis": "pasal",
+      "teks": "<ol><li>Rapat Umum Pemegang Saham (selanjutnya disebut “RUPS”) adalah:</li><ol style=\"list-style-type: lower-alpha;\"><li>RUPS tahunan;</li><li>RUPS lainnya, yang dalam Anggaran Dasar ini disebut juga RUPS luar biasa.</li></ol><li>Istilah RUPS dalam Anggaran Dasar ini berarti keduanya, yaitu RUPS tahunan dan RUPS luar biasa, kecuali dengan tegas ditentukan lain.</li><li>Dalam RUPS tahunan:</li><ol><li>Direksi mengajukan perhitungan tahunan yang terdiri dari neraca dan perhitungan laba rugi dari tahun buku yang bersangkutan serta penjelasan atas dokumen tersebut untuk mendapat pengesahan rapat;</li><li>Direksi mengajukan laporan tahunan mengenai keadaan dan jalannya Perseroan, hasil yang telah dicapai, perkiraan mengenai perkembangan Perseroan di masa yang akan datang, kegiatan utama Perseroan dan perubahannya selama tahun buku yang mempengaruhi kegiatan Perseroan untuk mendapatkan persetujuan rapat;</li><li>Diputuskan penggunaan laba Perseroan;</li><li>Dapat diputuskan hal-hal lain yang telah diajukan dengan tidak mengurangi ketentuan dalam anggaran dasar.</li></ol><li>Persetujuan laporan tahunan dan pengesahan laporan keuangan oleh RUPS tahunan berarti memberikan pelunasan dan pembebasan tanggung jawab sepenuhnya kepada anggota Direksi dan Dewan Komisaris atas pengurusan dan pengawasan yang telah dijalankan selama tahun buku yang lalu, sejauh tindakan tersebut tercermin dalam Laporan Tahunan dan Laporan Keuangan.</li><li>RUPS luar biasa dapat diselenggarakan sewaktu-waktu berdasarkan kebutuhan untuk membicarakan dan memutuskan mata acara rapat kecuali mata acara rapat yang dimaksud pada ayat (3) huruf a, huruf b dan huruf c, dengan memperhatikan peraturan perundang-undangan serta Anggaran Dasar.</li></ol>"
+    },
+    {
+      "id": "b179075831888156",
+      "judul": "Pasal 9",
+      "jenis": "pasal",
+      "teks": "<ol><li>RUPS diadakan di tempat kedudukan Perseroan atau di tempat Perseroan melakukan kegiatan usahanya yang utama.</li><li>RUPS diadakan dengan melakukan pemanggilan terlebih dahulu kepada para pemegang saham dengan surat tercatat dan/atau dengan iklan dalam surat kabar.</li><ol><li>Jika pemanggilan kepada pemegang saham belum dilakukan, penyelenggaraan RUPS tidak dapat dilakukan.</li><li>Dalam hal tersebut, sebagaimana diatur dalam Undang-Undang, maka RUPS dapat dilakukan oleh Dewan Komisaris atau pemegang saham atas persetujuan pengadilan.</li></ol><li>Pemanggilan dilakukan paling lambat 14 (empat belas) hari sebelum tanggal RUPS diadakan dengan tidak memperhitungkan tanggal pemanggilan dan tanggal RUPS diadakan.</li><li>Panggilan Rapat Umum Pemegang Saham harus mencantumkan tanggal, waktu, tempat dan mata acara rapat, dengan disertai pemberitahuan bahwa bahan yang akan dibicarakan dalam rapat tersedia di kantor Perseroan mulai sejak tanggal dilakukan pemanggilan RUPS sampai dengan tanggal rapat diadakan.</li><li>Dalam hal pemanggilan tidak sesuai dengan ketentuan sebagaimana dimaksud dalam ayat (2), ayat (4) dan ayat (5), keputusan RUPS tetap sah jika semua pemegang saham hadir atau diwakili dalam RUPS dan keputusan tersebut disetujui dengan suara bulat.</li><li>RUPS dipimpin oleh Direktur Utama. Dalam hal Direktur Utama tidak ada atau berhalangan karena sebab apapun, hal tersebut tidak perlu dibuktikan kepada pihak ketiga, rapat dipimpin oleh seorang Direktur. Dalam hal Direktur tidak ada atau berhalangan karena sebab apapun, hal tersebut tidak perlu dibuktikan kepada pihak ketiga, rapat dipimpin oleh salah seorang anggota Dewan Komisaris. Dalam hal semua anggota Dewan Komisaris tidak ada atau berhalangan karena sebab apapun, hal tersebut tidak perlu dibuktikan kepada pihak ketiga, maka rapat dipimpin oleh seorang yang dipilih oleh dan dari antara mereka yang hadir dalam rapat.</li></ol>"
+    },
+    {
+      "id": "b179075836977221",
+      "judul": "Pasal 10",
+      "jenis": "pasal",
+      "teks": "<ol><li>RUPS dapat dilangsungkan apabila dihadiri oleh pemegang saham yang mewakili lebih dari 50% (lima puluh persen) dari jumlah saham yang telah dikeluarkan Perseroan kecuali apabila ditentukan lain dalam anggaran dasar ini.</li><li>Pemungutan suara mengenai diri orang dilakukan dengan surat tertutup yang tidak ditandatangani dan mengenai hal lain secara lisan, kecuali apabila ketua RUPS menentukan lain tanpa ada keberatan dari pemegang saham yang hadir dalam RUPS.</li><li>Suara blanko atau suara yang tidak sah dianggap tidak ada dan tidak dihitung dalam menentukan jumlah suara yang dikeluarkan dalam RUPS.</li><li>RUPS dapat mengambil keputusan berdasarkan musyawarah untuk mufakat atau berdasarkan suara setuju dari jumlah suara yang dikeluarkan dalam RUPS sebagaimana ditentukan dalam Undang-Undang.</li><li>Kuorum untuk perubahan Anggaran Dasar, penggabungan, peleburan, pengambilalihan atau pemisahan, pembubaran Perseroan, dan mengalihkan atau menjadikan jaminan utang yang melebihi dari 50% (lima puluh persen) jumlah kekayaan Perseroan diatur berdasarkan ketentuan anggaran dasar ini dan Undang-Undang Nomor 40 Tahun 2007 tentang Perseroan Terbatas.</li></ol>"
+    },
+    {
+      "id": "b179075840800190",
+      "judul": "Pasal 11",
+      "jenis": "pasal",
+      "teks": "<ol><li>Perseroan diurus dan dipimpin oleh Direksi yang terdiri dari 1 (satu) orang atau lebih anggota Direksi, yang masing-masing diantaranya diangkat sebagai Direktur Utama.</li><li>Yang boleh diangkat sebagai anggota Direksi ialah Warga Negara Indonesia dan/atau Warga Negara Asing yang memenuhi persyaratan sesuai Peraturan perundang-undangan yang berlaku.</li><li>Anggota Direksi diangkat oleh RUPS, untuk jangka waktu 5 (lima) tahun dengan tidak mengurangi hak RUPS untuk memberhentikannya sewaktu-waktu.</li><li>Jika oleh suatu sebab apapun jabatan seorang atau lebih atau semua anggota Direksi lowong, maka dalam jangka waktu 30 (tiga puluh) hari sejak terjadi lowongan harus diselenggarakan RUPS untuk mengisi lowongan itu dengan memperhatikan ketentuan peraturan perundang-undangan dan Anggaran Dasar.</li><li>Jika oleh suatu sebab apapun semua jabatan anggota Direksi lowong, untuk sementara Perseroan diurus oleh anggota Dewan Komisaris yang ditunjuk oleh Rapat Dewan Komisaris.</li><li>Anggota Direksi berhak mengundurkan diri dari jabatannya dengan memberitahukan secara tertulis kepada Perseroan sekurang-kurangnya 30 (tiga puluh) hari sebelum tanggal pengunduran dirinya.</li><li>Jabatan anggota Direksi berakhir, jika:</li><ol><li>mengundurkan diri sesuai ketentuan ayat (6);</li><li>tidak lagi memenuhi persyaratan peraturan perundang-undangan;</li><li>meninggal dunia;</li><li>diberhentikan berdasarkan keputusan RUPS.</li></ol></ol>"
+    },
+    {
+      "id": "b179075845592566",
+      "judul": "Pasal 12",
+      "jenis": "pasal",
+      "teks": "<ol><li>Direksi berhak mewakili Perseroan didalam dan diluar Pengadilan mengenai segala hal dan dalam segala kejadian, mengikat Perseroan dengan pihak lain dan pihak lain dengan Perseroan, serta menjalankan segala tindakan baik yang mengenai kepengurusan maupun kepemilikan, akan tetapi dengan pembatasan bahwa untuk:</li><ol><li>meminjam atau meminjamkan uang atas nama Perseroan (tidak termasuk mengambil uang Perseroan di Bank yang jumlahnya melebihi jumlah yang dari waktu ke waktu ditentukan oleh Dewan Komisaris);</li><li>mendirikan suatu badan usaha atau turut serta pada perusahaan lain baik di dalam maupun di luar negeri; harus dengan persetujuan Dewan Komisaris.</li></ol><li>Direktur Utama berhak dan berwenang bertindak untuk dan atas nama Direksi serta mewakili Perseroan.</li><ol><li>dalam hal Direktur Utama tidak hadir atau berhalangan karena sebab apapun juga, yang tidak perlu dibuktikan kepada pihak ketiga, maka salah seorang anggota Direksi lainnya berhak dan berwenang bertindak untuk dan atas nama Direksi serta mewakili Perseroan;</li></ol><li>Dalam hal hanya ada seorang Direktur, segala tugas dan wewenang yang diberikan kepada Direktur Utama atau Anggota Direksi ini berlaku pula baginya.</li></ol>"
+    },
+    {
+      "id": "b179075853872083",
+      "judul": "Pasal 13",
+      "jenis": "pasal",
+      "teks": "<ol><li>Penyelenggaraan Rapat Direksi dapat dilakukan setiap waktu apabila dipandang perlu oleh:</li><ol><li>oleh seorang atau lebih anggota Direksi;</li><li>atas permintaan tertulis dari seorang atau lebih anggota Dewan Komisaris; atau</li><li>atas permintaan tertulis dari 1 (satu) orang atau lebih pemegang saham Perseroan mewakili 1/10 (satu per sepuluh) atau lebih dari jumlah seluruh saham dengan hak suara.</li></ol><li>Panggilan Rapat Direksi dilakukan oleh anggota Direksi yang berhak bertindak untuk dan atas nama Direksi.</li><li>Panggilan Rapat Direksi disampaikan dengan surat tercatat atau dengan surat yang disampaikan langsung kepada setiap anggota Direksi dengan mendapat tanda terima paling lambat 3 (tiga) hari sebelum rapat diadakan, dengan tidak memperhitungkan tanggal panggilan dan tanggal rapat.</li><li>Panggilan rapat itu harus mencantumkan acara, tanggal, waktu dan tempat rapat.</li><li>Rapat Direksi diadakan di tempat kedudukan Perseroan atau di tempat kegiatan usaha Perseroan. Apabila semua anggota Direksi hadir atau diwakili, panggilan terlebih dahulu tersebut tidak disyaratkan dan Rapat Direksi dapat diadakan dimanapun juga dan berhak mengambil keputusan yang sah mengikat.</li><li>Rapat Direksi dipimpin oleh Direktur Utama. Dalam hal Direktur Utama tidak dapat hadir atau berhalangan yang tidak perlu dibuktikan kepada pihak ketiga, Rapat Direksi dipimpin oleh seorang anggota Direksi yang dipilih oleh dan dari antara anggota Direksi yang hadir.</li><li>Seorang anggota Direksi dapat diwakili dalam Rapat Direksi hanya oleh anggota Direksi lainnya berdasarkan surat kuasa.</li><li>Rapat Direksi adalah sah dan berhak mengambil keputusan yang mengikat apabila lebih dari 1/2 (satu per dua) dari jumlah anggota Direksi hadir atau diwakili dalam rapat.</li><li>Keputusan Rapat Direksi harus diambil berdasarkan musyawarah untuk mufakat. Apabila tidak tercapai maka keputusan diambil dengan pemungutan suara berdasarkan suara setuju paling sedikit lebih dari 1/2 (satu per dua) dari jumlah suara yang dikeluarkan dalam rapat.</li><li>Apabila suara yang setuju dan yang tidak setuju berimbang, maka Ketua Rapat Direksi yang akan menentukan.</li><li>a. Setiap anggota Direksi yang hadir berhak mengeluarkan 1 (satu) suara dan tambahan 1 (satu) suara untuk setiap anggota Direksi lain yang diwakilinya.<br>b. Pemungutan suara mengenai diri orang dilakukan dengan surat suara tertutup tanpa tanda tangan, sedangkan pemungutan suara mengenai hal-hal lain dilakukan secara lisan kecuali Ketua Rapat menentukan lain tanpa ada keberatan dari peserta rapat lainnya.<br>c. Suara blanko dan suara yang tidak sah dianggap tidak dikeluarkan secara sah dan dianggap tidak ada serta tidak dihitung dalam menentukan jumlah suara yang dikeluarkan dalam rapat.</li><li>Direksi dapat juga mengambil keputusan yang sah tanpa mengadakan Rapat Direksi, dengan ketentuan semua anggota Direksi telah diberitahu secara tertulis dan semua anggota Direksi memberikan persetujuan mengenai usul yang dimaksud secara tertulis dengan menandatangani persetujuan tersebut. Keputusan yang diambil dengan cara demikian mempunyai kekuatan yang sama dengan keputusan yang diambil dengan sah dalam Rapat Direksi.</li></ol>"
+    },
+    {
+      "id": "b179075875457267",
+      "judul": "Pasal 14",
+      "jenis": "pasal",
+      "teks": "<ol><li>Dewan Komisaris terdiri dari seorang atau lebih anggota Komisaris, apabila diangkat lebih dari seorang anggota Dewan Komisaris, maka seorang diantaranya dapat diangkat sebagai Komisaris Utama.</li><li>Yang boleh diangkat sebagai anggota Dewan Komisaris ialah Warga Negara Indonesia dan/atau Warga Negara Asing yang memenuhi persyaratan sesuai Peraturan Perundang-undangan yang berlaku.</li><li>Anggota Dewan Komisaris diangkat oleh RUPS, untuk jangka waktu 5 (lima) tahun dengan tidak mengurangi hak RUPS untuk memberhentikan sewaktu-waktu.</li><li>Jika oleh suatu sebab jabatan anggota Dewan Komisaris lowong, maka dalam jangka waktu 30 (tiga puluh) hari setelah terjadinya lowongan, harus diselenggarakan RUPS untuk mengisi lowongan itu dengan memperhatikan ketentuan ayat (2) Pasal ini.</li><li>Seorang anggota Dewan Komisaris berhak mengundurkan diri dari jabatannya dengan memberitahukan secara tertulis mengenai maksud tersebut kepada Perseroan sekurang-kurangnya 30 (tiga puluh) hari sebelum tanggal pengunduran dirinya.</li><li>Jabatan anggota Dewan Komisaris berakhir apabila:</li><ol><li>mengundurkan diri sesuai dengan ketentuan ayat (5);</li><li>tidak lagi memenuhi persyaratan perundang-undangan yang berlaku;</li><li>meninggal dunia;</li><li>diberhentikan berdasarkan keputusan RUPS.</li></ol></ol>"
+    },
+    {
+      "id": "b179075879508498",
+      "judul": "Pasal 15",
+      "jenis": "pasal",
+      "teks": "<ol><li>Dewan Komisaris setiap waktu dalam jam kerja kantor Perseroan berhak memasuki bangunan dan halaman atau tempat lain yang dipergunakan atau yang dikuasai oleh Perseroan dan berhak memeriksa semua pembukuan, surat dan alat bukti lainnya, memeriksa dan mencocokkan keadaan uang kas dan lain-lain serta berhak untuk mengetahui segala tindakan yang telah dijalankan oleh Direksi.</li><li>Direksi dan setiap anggota Direksi wajib untuk memberikan penjelasan tentang segala hal yang ditanyakan oleh Dewan Komisaris.</li><li>Apabila seluruh anggota Direksi diberhentikan sementara dan Perseroan tidak mempunyai seorangpun anggota Direksi maka untuk sementara Dewan Komisaris diwajibkan untuk mengurus Perseroan. Dalam hal demikian Dewan Komisaris berhak untuk memberikan kekuasaan sementara kepada seorang atau lebih diantara anggota Dewan Komisaris atas tanggungan Dewan Komisaris.</li><li>Dalam hal hanya ada seorang anggota Dewan Komisaris, segala tugas dan wewenang yang diberikan kepada Komisaris Utama atau anggota Dewan Komisaris dalam Anggaran Dasar ini berlaku pula baginya.</li></ol>"
+    },
+    {
+      "id": "b179075882352274",
+      "judul": "Pasal 16",
+      "jenis": "pasal",
+      "teks": "<div>Ketentuan sebagaimana dimaksud dalam Pasal 13 mutatis mutandis berlaku bagi rapat Dewan Komisaris.</div>"
+    },
+    {
+      "id": "b179075884195429",
+      "judul": "Pasal 17",
+      "jenis": "pasal",
+      "teks": "<ol><li>Direksi menyampaikan rencana kerja yang memuat juga anggaran tahunan Perseroan kepada Dewan Komisaris untuk mendapat persetujuan, sebelum tahun buku dimulai.</li><li>Rencana kerja sebagaimana dimaksud pada ayat (1) harus disampaikan paling lambat 90 (sembilan puluh) hari sebelum dimulainya tahun buku yang akan datang.</li><li>Tahun buku Perseroan berjalan dari tanggal 1 (satu) Januari sampai dengan tanggal 31 (tiga puluh satu) Desember.</li><ul><li>Pada akhir bulan Desember tiap tahun, buku Perseroan ditutup.</li><li>Untuk pertama kalinya buku Perseroan dimulai pada tanggal dari akta pendirian ini dan ditutup pada tanggal 31 (tiga puluh satu) Desember.</li></ul><li>Direksi menyusun laporan tahunan dan menyediakannya di kantor Perseroan untuk dapat diperiksa oleh para pemegang saham terhitung sejak tanggal panggilan RUPS tahunan.</li></ol>"
+    },
+    {
+      "id": "b179075888007594",
+      "judul": "Pasal 18",
+      "jenis": "pasal",
+      "teks": "<ol><li>Laba bersih Perseroan dalam suatu tahun buku seperti tercantum dalam neraca dan perhitungan laba rugi yang telah disahkan oleh RUPS tahunan dan merupakan saldo laba yang positif, dibagi menurut cara penggunaannya yang ditentukan oleh RUPS tersebut.</li><li>Jika perhitungan laba rugi pada suatu tahun buku menunjukkan kerugian yang tidak dapat ditutup dengan dana cadangan, maka kerugian itu akan tetap dicatat dan dimasukkan dalam perhitungan laba rugi dan dalam tahun buku selanjutnya Perseroan dianggap tidak mendapat laba selama kerugian yang tercatat dan dimasukkan dalam perhitungan laba rugi itu belum sama sekali tertutup.</li></ol>"
+    },
+    {
+      "id": "b179075890598582",
+      "judul": "Pasal 19",
+      "jenis": "pasal",
+      "teks": "<ol><li>Penyisihan laba bersih untuk cadangan dilakukan sampai mencapai 20% (dua puluh persen) dari jumlah modal ditempatkan dan disetor hanya boleh dipergunakan untuk menutup kerugian yang tidak dipenuhi oleh cadangan lain.</li><li>Jika jumlah cadangan telah melebihi jumlah 20% (dua puluh persen), RUPS dapat memutuskan agar jumlah kelebihannya digunakan bagi keperluan Perseroan.</li><li>Cadangan sebagaimana dimaksud pada ayat (1) yang belum dipergunakan untuk menutup kerugian dan kelebihan cadangan sebagaimana dimaksud pada ayat (2) yang penggunaannya belum ditentukan oleh RUPS harus dikelola oleh Direksi dengan cara yang tepat menurut pertimbangan Direksi, setelah memperoleh persetujuan Dewan Komisaris dan memperhatikan Peraturan perundang-undangan agar memperoleh laba.</li></ol>"
+    },
+    {
+      "id": "b3b",
+      "judul": "Pasal 20",
+      "jenis": "catatan",
+      "teks": "<p>Para pendiri Perseroan telah mengambil bagian saham sebagai berikut:</p>"
+    },
+    {
+      "id": "b4",
+      "judul": "Pasal 20 — Pendiri",
+      "jenis": "otomatis",
+      "ulang": "para_pihak",
+      "kelompok": "",
+      "nomor": "huruf",
+      "nomorUlangKelompok": false,
+      "potongan": [
+        "pendiri_badan",
+        "pendiri_orang"
+      ]
+    },
+    {
+      "id": "b4b",
+      "judul": "Susunan Direksi",
+      "jenis": "catatan",
+      "teks": "<p>Susunan anggota Direksi Perseroan adalah sebagai berikut:</p>"
+    },
+    {
+      "id": "b5",
+      "judul": "Pasal 20 — Susunan Direksi",
+      "jenis": "otomatis",
+      "ulang": "para_pihak",
+      "kelompok": "",
+      "nomor": "tanpa",
+      "potongan": [
+        "direksi_baris"
+      ],
+      "nomorUlangKelompok": false
+    },
+    {
+      "id": "b5b",
+      "judul": "Susunan Dewan Komisaris",
+      "jenis": "catatan",
+      "teks": "<p>Susunan anggota Dewan Komisaris Perseroan adalah sebagai berikut:</p>"
+    },
+    {
+      "id": "b6",
+      "judul": "Pasal 20 — Susunan Dewan Komisaris",
+      "jenis": "otomatis",
+      "ulang": "para_pihak",
+      "kelompok": "",
+      "nomor": "tanpa",
+      "potongan": [
+        "komisaris_baris"
+      ],
+      "nomorUlangKelompok": false
+    },
+    {
+      "id": "b7",
+      "judul": "PENUTUP",
+      "jenis": "catatan",
+      "teks": "<p>- Pengangkatan anggota Direksi dan Dewan Komisaris tersebut telah diterima oleh masing-masing yang bersangkutan.</p><p>- Para Penghadap dengan ini juga menjamin akan kebenaran identitas, dan/atau asli tanda-tangan serta keabsahan atas dokumen-dokumen asli serta fotokopinya yang diserahkan oleh Para Penghadap sesuai dengan tanda pengenal dan/atau sesuai dengan dokumen-dokumen yang disampaikan kepada saya, Notaris, dan bertanggung jawab sepenuhnya atas hal-hal tersebut dan selanjutnya Para Penghadap juga menyatakan telah mengetahui dan memahami seluruh isi Akta ini, dan apabila dikemudian hari timbul tuntutan hukum mengenai hal tersebut yang menimbulkan suatu sengketa atas hal-hal tersebut karena sebab apapun juga, maka Para Penghadap akan membebaskan Notaris dan saksi-saksi yang menandatangani akta ini dari segala tuntutan hukum.</p>"
+    },
+    {
+      "id": "b7b",
+      "judul": "TANDA TANGAN",
+      "jenis": "catatan",
+      "teks": "<p>Minuta akta ini ditandatangani oleh para Penghadap, para saksi, dan saya, Notaris.</p>"
+    },
+    {
+      "id": "b8",
+      "judul": "TANDA TANGAN — penghadap",
+      "jenis": "otomatis",
+      "ulang": "para_pihak",
+      "kelompok": "",
+      "nomor": "tanpa",
+      "potongan": [
+        "ttd_baris"
+      ],
+      "nomorUlangKelompok": false
+    },
+    {
+      "id": "b179076565621843",
+      "judul": "Pasal 20",
+      "jenis": "pasal",
+      "teks": ""
+    }
+  ],
+  "potongan": [
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "pembuka_perubahan",
+          "label": "Pembuka daftar akta perubahan",
+          "syarat": [
+            {
+              "field": "perubahan_akta",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "teks": "<br>Anggaran dasar dan data perseroan mana telah mengalami perubahan, yang mana:"
+        }
+      ],
+      "teks": "<p><b>{{nama_perseroan}}</b>, berkedudukan di {{kedudukan_perseroan}}, suatu perseroan terbatas yang didirikan berdasarkan Akta tertanggal {{tanggal_akta_pendirian}} Nomor {{no_akta_pendirian}}, dan telah mendapat pengesahan dari Menteri Hukum dan Hak Asasi Manusia Republik Indonesia sebagaimana tercantum dalam Surat Keputusannya tertanggal {{tanggal_sk_pengesahan}} Nomor: {{no_sk_pengesahan}}.[[slot:pembuka_perubahan]]</p>",
+      "kode": "bh_pendirian",
+      "judul": "Badan hukum — pendirian & pengesahan"
+    },
+    {
+      "grup": null,
+      "ulang": "perubahan_akta",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "bukti_penerimaan",
+          "label": "Bukti — Surat Penerimaan Pemberitahuan",
+          "syarat": [
+            {
+              "field": "jenis_bukti",
+              "op": "=",
+              "nilai": "Surat Penerimaan Pemberitahuan"
+            }
+          ],
+          "teks": " telah diterima dan dicatat di dalam Sistem Administrasi Badan Hukum Kementerian Hukum Republik Indonesia berdasarkan Surat Penerimaan Pemberitahuan Perubahan Data Perseroan tertanggal {{tanggal_bukti}} Nomor: {{no_bukti}};"
+        },
+        {
+          "kode": "bukti_sk",
+          "label": "Bukti — Surat Keputusan Persetujuan",
+          "syarat": [
+            {
+              "field": "jenis_bukti",
+              "op": "=",
+              "nilai": "Surat Keputusan Persetujuan"
+            }
+          ],
+          "teks": " telah mendapat persetujuan dari Menteri Hukum Republik Indonesia berdasarkan Surat Keputusan tertanggal {{tanggal_bukti}} Nomor: {{no_bukti}};"
+        }
+      ],
+      "teks": "<p>[[ulang:akta_perubahan]]- {{cakupan_perubahan}} termuat dalam Akta tertanggal\r</p><p>{{tanggal_akta}} Nomor {{no_akta}}, dibuat di hadapan {{nama_notaris_akta}},\r</p><p>Sarjana Hukum, Notaris di {{daerah_kerja_notaris_akta}},\r</p><p>dan[[slot:bukti_penerimaan]][[slot:bukti_sk]]&lt;br&gt;[[/ulang]]</p>",
+      "kode": "bh_perubahan",
+      "judul": "Badan hukum — butir akta perubahan"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum"
+        }
+      ],
+      "slot": [],
+      "teks": "<p>- yang dalam hal ini diwakili oleh:<br>{{diwakili_oleh}};</p>",
+      "kode": "bh_wakil",
+      "judul": "Badan hukum — wakil"
+    },
+    {
+      "grup": "kapasitas_wakil",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum"
+        },
+        {
+          "field": "pilihan_sejajar_18",
+          "op": "=",
+          "nilai": "Direktur"
+        }
+      ],
+      "slot": [],
+      "teks": "<p>- Menurut keterangannya dalam hal ini bertindak dalam jabatannya selaku {{jabatan_wakil_pt}} dari dan oleh karena itu untuk dan atas nama serta mewakili <b>{{nama_perseroan}}</b>;</p>",
+      "kode": "bh_kapasitas_direktur",
+      "judul": "Badan hukum — wakil selaku Direktur"
+    },
+    {
+      "grup": "kapasitas_wakil",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum"
+        },
+        {
+          "field": "pilihan_sejajar_18",
+          "op": "=",
+          "nilai": "Kuasa"
+        }
+      ],
+      "slot": [],
+      "teks": "<p>- Menurut keterangannya dalam hal ini bertindak berdasarkan Surat Kuasa tanggal {{tanggal_surat_kuasa}} Nomor {{no_surat_kuasa}} selaku kuasa dari {{nama_pemberi_kuasa}} selaku {{jabatan_pemberi_kuasa}} <b>{{nama_perseroan}}</b>, oleh karena itu bertindak untuk dan atas nama serta mewakili <b>{{nama_perseroan}}</b>;</p>",
+      "kode": "bh_kapasitas_kuasa",
+      "judul": "Badan hukum — wakil selaku Kuasa"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum"
+        },
+        {
+          "field": "jumlah_saham",
+          "op": "terisi",
+          "nilai": ""
+        }
+      ],
+      "slot": [],
+      "teks": "<p>- selaku pemilik dan pemegang {{jumlah_saham}} ({{jumlah_saham_terbilang}}) saham dalam Perseroan;</p>",
+      "kode": "bh_saham",
+      "judul": "Badan hukum — kepemilikan saham"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "sebagai_penghadap",
+          "op": "=",
+          "nilai": "Ya"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "domisili",
+          "label": "Domisili sementara bila terisi",
+          "syarat": [
+            {
+              "field": "domisili_sementara",
+              "op": "terisi",
+              "nilai": ""
+            }
+          ],
+          "teks": "; untuk sementara berada di {{domisili_sementara}}"
+        }
+      ],
+      "teks": "<p><b>{{sapaan}} {{nama}}</b>, lahir di {{tempat_lahir}}, pada tanggal {{tanggal_lahir}} ({{tanggal_lahir_terbilang}}), Warga Negara {{kewarganegaraan}}, {{pekerjaan}}, bertempat tinggal di {{jalan}}, Rukun Tetangga {{rt}}, Rukun Warga {{rw}}, {{label_kelurahan}} {{kelurahan}}, Kecamatan {{kecamatan}}, {{label_kota}} {{kota}}, Provinsi {{provinsi}}, pemegang kartu tanda penduduk dengan nomor induk kependudukan (NIK) : {{nik}}[[slot:domisili]];</p>",
+      "kode": "per_identitas",
+      "judul": "Penghadap perorangan — identitas"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "sebagai_penghadap",
+          "op": "=",
+          "nilai": "Ya"
+        },
+        {
+          "field": "sebagai_pemegang_saham",
+          "op": "=",
+          "nilai": "Ya"
+        }
+      ],
+      "slot": [],
+      "teks": "<p>- Menurut keterangannya dalam hal ini bertindak untuk diri sendiri;</p>",
+      "kode": "per_bertindak",
+      "judul": "Penghadap perorangan — bertindak"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum"
+        },
+        {
+          "field": "jumlah_saham",
+          "op": "terisi",
+          "nilai": ""
+        }
+      ],
+      "slot": [],
+      "teks": "<p><b>{{nama_perseroan}}</b>, tersebut, sebanyak {{jumlah_saham}} ({{jumlah_saham_terbilang}}) saham dengan nilai nominal seluruhnya sebesar Rp{{total_nominal}},- ({{total_nominal_terbilang}});</p>",
+      "kode": "pendiri_badan",
+      "judul": "Pendiri — badan hukum"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "sebagai_pemegang_saham",
+          "op": "=",
+          "nilai": "Ya"
+        }
+      ],
+      "slot": [],
+      "teks": "<p><b>{{nama}}</b>, tersebut, sebanyak {{jumlah_saham}} ({{jumlah_saham_terbilang}}) saham dengan nilai nominal seluruhnya sebesar Rp{{total_nominal}},- ({{total_nominal_terbilang}});</p>",
+      "kode": "pendiri_orang",
+      "judul": "Pendiri — perorangan"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "sebagai_direktur",
+          "op": "=",
+          "nilai": "Ya"
+        }
+      ],
+      "slot": [],
+      "teks": "<p>- {{jabatan_direksi}} : <b>{{nama}}</b>, tersebut.</p>",
+      "kode": "direksi_baris",
+      "judul": "Direksi — satu baris"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "sebagai_komisaris",
+          "op": "=",
+          "nilai": "Ya"
+        }
+      ],
+      "slot": [],
+      "teks": "<p>- {{jabatan_direksi_salinan}} : <b>{{nama}}</b>, tersebut.</p>",
+      "kode": "komisaris_baris",
+      "judul": "Dewan Komisaris — satu baris"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "sebagai_penghadap",
+          "op": "=",
+          "nilai": "Ya"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "ttd_jabatan",
+          "label": "Baris jabatan pengurus",
+          "syarat": [
+            {
+              "field": "sebagai_direktur",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "teks": "<br>{{jabatan_direksi_komisaris}}"
+        },
+        {
+          "kode": "ttd_saham",
+          "label": "Baris pemegang saham",
+          "syarat": [
+            {
+              "field": "sebagai_direktur",
+              "op": "=",
+              "nilai": "Tidak"
+            },
+            {
+              "field": "sebagai_pemegang_saham",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "teks": "<br>Pemegang Saham"
+        }
+      ],
+      "teks": "<p>{{sapaan}} <b>{{nama}}</b>[[slot:ttd_jabatan]][[slot:ttd_saham]]</p>",
+      "kode": "ttd_baris",
+      "judul": "Blok tanda tangan — satu penghadap"
+    }
+  ],
+  "grup": [
+    {
+      "kode": "kapasitas_wakil",
+      "judul": "Kapasitas wakil badan hukum",
+      "anggota": [
+        "bh_kapasitas_direktur",
+        "bh_kapasitas_kuasa"
+      ]
+    }
+  ],
+  "varDokumen": [
+    {
+      "kode": "akta_jenis",
+      "label": "Jenis akta",
+      "nilai": "Jual Beli",
+      "otomatis": "",
+      "bawaan": false,
+      "kelompok": ""
+    },
+    {
+      "kode": "akta_jenis_kapital",
+      "label": "Jenis akta — huruf besar",
+      "nilai": "JUAL BELI",
+      "otomatis": "",
+      "bawaan": false,
+      "kelompok": ""
+    },
+    {
+      "kode": "akta_jenis_kecil",
+      "label": "Jenis akta — huruf kecil",
+      "nilai": "jual beli",
+      "otomatis": "",
+      "bawaan": false,
+      "kelompok": ""
+    },
+    {
+      "kode": "akta_tahun",
+      "label": "Tahun akta",
+      "nilai": "2026",
+      "otomatis": "",
+      "bawaan": false,
+      "kelompok": ""
+    },
+    {
+      "kode": "lembar",
+      "label": "Penanda lembar",
+      "nilai": "Pertama",
+      "otomatis": "",
+      "bawaan": false,
+      "kelompok": ""
+    },
+    {
+      "kode": "kantor_pertanahan",
+      "label": "Tujuan lembar kedua",
+      "nilai": "Kepala Kantor Pertanahan Kota Bandung",
+      "otomatis": "",
+      "bawaan": false,
+      "kelompok": ""
+    },
+    {
+      "kode": "var_hari",
+      "label": "Nama hari penandatanganan",
+      "nilai": "",
+      "otomatis": "hari",
+      "bawaan": true,
+      "kelompok": "waktu"
+    },
+    {
+      "kode": "var_tanggal",
+      "label": "Tanggal penandatanganan",
+      "nilai": "",
+      "otomatis": "tanggal",
+      "bawaan": true,
+      "kelompok": "waktu"
+    },
+    {
+      "kode": "var_terbilang_tanggal",
+      "label": "Tanggal penandatanganan terbilang",
+      "nilai": "",
+      "otomatis": "terbilang",
+      "bawaan": true,
+      "kelompok": "waktu"
+    },
+    {
+      "kode": "var_pukul",
+      "label": "Pukul penandatanganan",
+      "nilai": "",
+      "otomatis": "pukul",
+      "bawaan": true,
+      "kelompok": "waktu"
+    },
+    {
+      "kode": "var_terbilang_pukul",
+      "label": "Pukul penandatanganan terbilang",
+      "nilai": "",
+      "otomatis": "terbilangPukul",
+      "bawaan": true,
+      "kelompok": "waktu"
+    },
+    {
+      "kode": "deed_number",
+      "label": "Nomor dokumen",
+      "nilai": "",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "waktu"
+    },
+    {
+      "kode": "kantor_label",
+      "label": "Label kartu kantor",
+      "nilai": "Kantor Notaris & PPAT",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_nama",
+      "label": "Nama NOTARIS (tanpa gelar)",
+      "nilai": "Mochammad Raafi Dwi Nugraha",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_gelar",
+      "label": "Gelar disingkat",
+      "nilai": "S.Tr.Kom.",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_gelar_panjang",
+      "label": "Gelar tidak disingkat",
+      "nilai": "Sarjana Terapan Komputer",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_nama_gelar",
+      "label": "Nama + gelar disingkat",
+      "nilai": "",
+      "otomatis": "namaGelar",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_nama_gelar_panjang",
+      "label": "Nama + gelar tidak disingkat",
+      "nilai": "",
+      "otomatis": "namaGelarPanjang",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_sk_nomor",
+      "label": "Nomor SK Pengangkatan",
+      "nilai": "112/KEP-17.3/PPAT/XI/2021",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_sk_tanggal",
+      "label": "Tanggal SK Pengangkatan",
+      "nilai": "2021-11-08",
+      "otomatis": "tanggalNilai",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_sk_tanggal_terbilang",
+      "label": "Tanggal SK terbilang",
+      "nilai": "",
+      "otomatis": "terbilangDari",
+      "bawaan": true,
+      "kelompok": "kantor",
+      "dari": "notaris_sk_tanggal"
+    },
+    {
+      "kode": "notaris_wilayah",
+      "label": "Wilayah kerja",
+      "nilai": "Kota Bandung",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_telepon",
+      "label": "Telepon kantor",
+      "nilai": "(022) 86012345",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_email",
+      "label": "Email kantor",
+      "nilai": "kantor@notaris.id",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    },
+    {
+      "kode": "notaris_alamat",
+      "label": "Alamat kantor",
+      "nilai": "Jl. Ir. H. Juanda No. 128",
+      "otomatis": "",
+      "bawaan": true,
+      "kelompok": "kantor"
+    }
+  ],
+  "halaman": {
+    "kertas": "F4 / Folio (21,5 × 33 cm)",
+    "orientasi": "Tegak (Portrait)",
+    "mAtas": "1,5",
+    "mBawah": "1,5",
+    "mKiri": "6",
+    "mKanan": "1",
+    "font": "Courier New (monospace, khas akta)",
+    "ukuran": "12",
+    "spasi": "2",
+    "footerKiri": "{{ppat_nama}}",
+    "footerTengah": "",
+    "footerKanan": "Halaman {page} dari {total}"
+  }
+}

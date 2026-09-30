@@ -22,6 +22,7 @@
       <div class="m-grup buka"><i>▤</i>Engine Module<span class="pnh">⌄</span></div>
       <button class="m-item mati"><i>▣</i>Dashboard</button>
       <button class="m-item" data-mode="kantor"><i>▤</i>Profil Kantor</button>
+      <button class="m-item" data-mode="layanan" id="menu-layanan"><i>◈</i>Layanan &amp; Template</button>
       <button class="m-item" data-mode="rancang"><i>◧</i>Form Design</button>
       <button class="m-item mati"><i>✔</i>Verifikasi</button>
       <button class="m-item" data-mode="minuta"><i>▦</i>Minuta</button>
@@ -32,10 +33,10 @@
       <button class="m-item mati"><i>◈</i>Aktivasi E-Materai</button>
 
       <div class="m-grup buka"><i>▤</i>Layanan Engine<span class="pnh">⌄</span></div>
-      <button class="m-item" data-mode="pratinjau"><i>▸</i>Order A</button>
+      <div id="menu-order"></div>
     </nav>
 
-    <div class="sisi-kaki">Engine <span id="versi-lab">v0.9.7</span></div>
+    <div class="sisi-kaki">Engine <span id="versi-lab">v0.10.3</span></div>
   </aside>
 
   <!-- ============ ISI ============ -->
@@ -71,14 +72,30 @@
       </main>
 
       <main class="layar" data-layar="rancang" hidden>
+
+        <div id="fd-daftar">
+          <div class="bar-tpl">
+            <span class="bj-nama">Formulir per layanan</span>
+            <span class="kanan"><button class="btn" id="fd-ke-layanan">+ Tambah Layanan</button></span>
+          </div>
+          <p class="ket">Tiap layanan memiliki satu rancangan formulir order. Field yang dirancang
+            di dalamnya menjadi isian layar order sekaligus kamus variabel bagi template layanan itu.</p>
+          <div class="kartu-order"><div class="tabel-bungkus"><table id="fd-tabel">
+            <thead><tr><th>Layanan</th><th>Tab</th><th>Field</th><th>Template</th><th></th></tr></thead>
+            <tbody></tbody></table></div></div>
+        </div>
+
+        <div id="fd-editor" hidden>
         <div class="bar-judul">
-          <button class="btn">‹ Kembali</button>
-          <span class="bj-nama">Rancangan Form Order</span>
-          <span class="lencana">AJB</span>
+          <button class="btn" id="fd-kembali">‹ Kembali</button>
+          <span class="bj-nama" id="fd-nama">Rancangan Form Order</span>
+          <span class="lencana" id="fd-lencana">—</span>
           <span class="bj-ket">Field yang dirancang di sini menjadi isian layar order sekaligus kamus variabel.</span>
           <span class="kanan"><span class="status" id="status">siap</span>
             <button class="btn" id="btn-ekspor">Ekspor JSON</button>
             <button class="btn" id="btn-impor">Impor JSON</button>
+            <button class="btn" id="btn-impor-form">Impor Formulir</button>
+            <button class="btn" id="btn-ekspor-form">Ekspor Formulir</button>
             <button class="btn" id="btn-ekspor-docx">Ekspor Word</button></span>
         </div>
 
@@ -113,14 +130,29 @@
             <div class="kanvas" id="kanvas"></div>
           </section>
         </div>
+        </div>
       </main>
 
       <!-- ======================= TEMPLATE AKTA ======================= -->
       <main class="layar" data-layar="kondisi" hidden>
+
+        <div id="tpl-daftar">
+          <div class="bar-tpl">
+            <span class="bj-nama">Template per layanan</span>
+            <span class="kanan"><button class="btn" id="tpl-ke-layanan">+ Tambah Layanan</button></span>
+          </div>
+          <p class="ket">Satu layanan memiliki satu template. Template bawaan platform hanya bisa
+            dilihat — salin dulu untuk menyuntingnya. Order layanan itu otomatis memakai templatenya.</p>
+          <div class="kartu-order"><div class="tabel-bungkus"><table id="tpl-tabel">
+            <thead><tr><th>Layanan</th><th>Template</th><th></th></tr></thead>
+            <tbody></tbody></table></div></div>
+        </div>
+
+        <div id="tpl-editor" hidden>
         <div class="bar-judul">
-          <button class="btn">‹ Kembali</button>
-          <span class="bj-nama">AJB Standar</span>
-          <span class="lencana">AJB</span>
+          <button class="btn" id="tpl-kembali">‹ Kembali</button>
+          <span class="bj-nama" id="tpl-nama">AJB Standar</span>
+          <span class="lencana" id="tpl-lencana">—</span>
           <span class="bj-ket">Template bawaan platform — dipakai semua kantor, jadi hanya bisa dilihat. Salin dulu untuk menyuntingnya.</span>
           <span class="kanan">
             <button class="btn" id="btn-impor-template">Impor Template</button>
@@ -166,6 +198,21 @@
             </div>
           </section>
         </div>
+        </div>
+      </main>
+
+      <!-- ======================= LAYANAN ======================= -->
+      <main class="layar" data-layar="layanan" hidden>
+        <div class="bar-tpl">
+          <span class="bj-nama">Layanan &amp; template</span>
+          <span class="kanan"><button class="btn btn-utama" id="lyn-tambah">+ Tambah Layanan</button></span>
+        </div>
+        <p class="ket">Satu layanan memiliki satu rancangan formulir order dan beberapa template
+          naskah. <b>Template bawaan</b> di bawah inilah yang otomatis dipakai order layanan itu.</p>
+        <div class="kartu-order"><div class="tabel-bungkus"><table id="lyn-tabel">
+          <thead><tr><th>Kode</th><th>Nama layanan</th><th>Formulir</th><th>Template</th>
+            <th>Order</th><th></th></tr></thead>
+          <tbody></tbody></table></div></div>
       </main>
 
       <!-- ======================= MINUTA ======================= -->
@@ -207,15 +254,29 @@
 
       <!-- ======================= ORDER ======================= -->
       <main class="layar" data-layar="pratinjau" hidden>
-        <div class="bar-judul">
-          <button class="btn">‹ Kembali</button>
-          <span class="bj-nama">Order A</span>
-          <span class="bj-ket">Isi seperti pengguna sungguhan, lalu rakit naskahnya.</span>
-          <span class="kanan"><button class="btn btn-utama" id="btn-rakit">✎ Buka Drafting</button></span>
+
+        <div id="or-daftar">
+          <div class="bar-tpl">
+            <span class="bj-nama" id="or-daftar-judul">Order</span>
+            <span class="kanan"><button class="btn btn-utama" id="or-tambah">+ Tambah Order</button></span>
+          </div>
+          <p class="ket" id="or-daftar-ket"></p>
+          <div class="kartu-order"><div class="tabel-bungkus"><table id="or-tabel">
+            <thead><tr><th>Order</th><th>Layanan</th><th>Template</th><th>Isian</th><th></th></tr></thead>
+            <tbody></tbody></table></div></div>
         </div>
-        <div class="kartu-order">
-          <div class="tab-strip" id="pv-tabs"></div>
-          <div class="tab-isi" id="pv-isi"></div>
+
+        <div id="or-isi" hidden>
+          <div class="bar-judul">
+            <button class="btn" id="or-kembali">‹ Kembali</button>
+            <span class="bj-nama" id="or-nama">Order</span>
+            <span class="or-pilih"><span class="or-layanan" id="or-layanan"></span></span>
+            <span class="kanan"><button class="btn btn-utama" id="btn-rakit">✎ Buka Drafting</button></span>
+          </div>
+          <div class="kartu-order">
+            <div class="tab-strip" id="pv-tabs"></div>
+            <div class="tab-isi" id="pv-isi"></div>
+          </div>
         </div>
       </main>
 
@@ -271,6 +332,19 @@
     <footer>
       <span class="rk-catatan" id="rk-catatan"></span>
       <button class="btn" data-tutup-rakit>Tutup</button>
+    </footer>
+  </div>
+</div>
+
+<!-- modal isian ringkas: pengganti window.prompt yang tidak ada di Electron -->
+<div class="tirai" id="tirai-tanya" hidden>
+  <div class="modal modal-tanya" role="dialog" aria-modal="true">
+    <header><h2 id="tanya-judul">Ubah</h2><button class="tutup" data-tanya-batal>&#215;</button></header>
+    <div class="isi" id="tanya-isi"></div>
+    <footer>
+      <span class="hampa" id="tanya-ket"></span>
+      <button class="btn" data-tanya-batal>Batal</button>
+      <button class="btn btn-utama" id="tanya-ok">Simpan</button>
     </footer>
   </div>
 </div>

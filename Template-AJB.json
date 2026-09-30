@@ -1,0 +1,896 @@
+{
+  "jenis": "template-engine",
+  "versi": 1,
+  "sumber": "Redaksi baku dari simulator-para-pihak.html",
+  "bagian": [
+    {
+      "id": "b_kop",
+      "judul": "KOP AKTA",
+      "jenis": "catatan",
+      "teks": "<p style=\"text-align:center\"><b>PEJABAT PEMBUAT AKTA TANAH</b><br>(PPAT)<br><b>{{notaris_nama_gelar}}</b><br>DAERAH KERJA {{notaris_wilayah}}<br>SK Menteri Agraria dan Tata Ruang/Kepala Badan Pertanahan Nasional Republik Indonesia<br>Nomor : {{notaris_sk_nomor}}, Tanggal : {{notaris_sk_tanggal}}<br>{{notaris_alamat}},<br>Telp. {{notaris_telepon}}, E-mail : {{notaris_email}}</p>"
+    },
+    {
+      "id": "b_judul",
+      "judul": "JUDUL AKTA",
+      "jenis": "catatan",
+      "teks": "<p style=\"text-align:center\"><b>AKTA {{akta_jenis_kapital}}</b><br>Nomor : {{deed_number}}/{{akta_tahun}}</p><p style=\"text-align:center\">Lembar {{lembar}}</p>"
+    },
+    {
+      "id": "b_komparisi",
+      "judul": "KOMPARISI PPAT",
+      "jenis": "catatan",
+      "teks": "<p>- Pada hari ini, {{var_hari}}, tanggal {{var_tanggal}} ({{var_terbilang_tanggal}}).</p><p>- Hadir di hadapan saya, <b>{{notaris_nama_gelar_panjang}}</b>, yang berdasarkan Surat Keputusan Kepala Badan Pertanahan Nasional Republik Indonesia tanggal {{notaris_sk_tanggal}}, Nomor : {{notaris_sk_nomor}}, diangkat/ditunjuk sebagai Pejabat Pembuat Akta Tanah, yang selanjutnya disebut PPAT, yang dimaksud dalam Pasal 7 Peraturan Pemerintah Nomor 24 Tahun 1997 tentang Pendaftaran Tanah, dengan daerah kerja {{notaris_wilayah}}, dan berkantor di {{notaris_alamat}}, dengan dihadiri oleh saksi - saksi yang, Saya, PPAT kenal dan akan disebut pada bagian akhir akta ini :</p>"
+    },
+    {
+      "id": "b_pihak",
+      "judul": "PARA PIHAK",
+      "jenis": "otomatis",
+      "ulang": "para_pihak",
+      "kelompok": "tipe_pihak",
+      "nomor": "romawi",
+      "nomorUlangKelompok": false,
+      "potongan": [
+        "per_kuasa_identitas",
+        "per_kuasa_dasar",
+        "per_identitas",
+        "pasangan_persetujuan",
+        "pt_wakil_identitas",
+        "pt_kedudukan",
+        "pt_perubahan_pembuka",
+        "pt_perubahan_baris",
+        "pt_kuasa",
+        "peran_penjual",
+        "peran_pembeli"
+      ]
+    },
+    {
+      "id": "b_kenal",
+      "judul": "PENGENALAN",
+      "jenis": "catatan",
+      "teks": "<p>- Para Penghadap dikenal oleh Saya, PPAT, dari identitasnya.</p>"
+    },
+    {
+      "id": "b_objek",
+      "judul": "OBJEK",
+      "jenis": "otomatis",
+      "ulang": "objek",
+      "kelompok": "",
+      "nomor": "tanpa",
+      "nomorUlangKelompok": false,
+      "potongan": [
+        "obj_b14",
+        "obj_b15",
+        "obj_b16",
+        "obj_b16_bukti",
+        "obj_elektronik",
+        "obj_letak",
+        "obj_meliputi_bebas",
+        "obj_meliputi_benda",
+        "obj_meliputi_bersama"
+      ]
+    },
+    {
+      "id": "b_objek_sebutan",
+      "judul": "SEBUTAN OBJEK",
+      "jenis": "catatan",
+      "teks": "<p>Selanjutnya semua yang diuraikan di atas dalam akta ini disebut “<b>Objek {{akta_jenis}}</b>”.</p>"
+    },
+    {
+      "id": "b_tutup1",
+      "judul": "PENUTUP — pembuka saksi",
+      "jenis": "catatan",
+      "teks": "<p>- Akhirnya hadir juga di hadapan saya, dengan dihadiri oleh saksi-saksi yang sama dan disebutkan pada bagian akhir akta ini :</p><p>- Demikianlah akta ini dibuat di hadapan PARA PIHAK dan Saksi:</p>"
+    },
+    {
+      "id": "b_saksi",
+      "judul": "SAKSI",
+      "jenis": "otomatis",
+      "ulang": "para_pihak",
+      "kelompok": "",
+      "nomor": "angka",
+      "nomorUlangKelompok": false,
+      "potongan": [
+        "saksi_identitas"
+      ]
+    },
+    {
+      "id": "b_tutup2",
+      "judul": "PENUTUP — akhir akta",
+      "jenis": "catatan",
+      "teks": "<p>- Sebagai saksi-saksi, dan setelah dibacakan serta dijelaskan, maka sebagai bukti kebenaran pernyataan yang dikemukakan oleh PIHAK PERTAMA dan PIHAK KEDUA tersebut di atas, akta ini ditandatangani oleh PIHAK PERTAMA, PIHAK KEDUA, para saksi dan saya, PPAT, sebanyak 2 (dua) rangkap asli, yaitu 1 (satu) rangkap lembar pertama disimpan di kantor saya, PPAT dan 1 (satu) rangkap lembar kedua disampaikan kepada {{kantor_pertanahan}}.</p><p>- Untuk keperluan pendaftaran peralihan hak akibat {{akta_jenis_kecil}} dalam akta ini.</p>"
+    },
+    {
+      "id": "b_ttd_judul",
+      "judul": "TANDA TANGAN",
+      "jenis": "catatan",
+      "teks": "<p><b>Tanda tangan</b></p>"
+    },
+    {
+      "id": "b_ttd",
+      "judul": "TANDA TANGAN — kolom",
+      "jenis": "otomatis",
+      "ulang": "para_pihak",
+      "kelompok": "tipe_pihak",
+      "nomor": "tanpa",
+      "nomorUlangKelompok": false,
+      "potongan": [
+        "ttd_orang",
+        "ttd_pt",
+        "ttd_saksi"
+      ]
+    },
+    {
+      "id": "b_ttd_ppat",
+      "judul": "TANDA TANGAN — PPAT",
+      "jenis": "catatan",
+      "teks": "<p>PEJABAT PEMBUAT AKTA TANAH</p><p>( {{notaris_nama_gelar}} )</p>"
+    }
+  ],
+  "potongan": [
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "pihak_dikuasakan",
+          "op": "=",
+          "nilai": "Ya"
+        },
+        {
+          "field": "tipe_pihak",
+          "op": "≠",
+          "nilai": "Saksi"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "domisili",
+          "label": "Untuk sementara berada di …",
+          "syarat": [
+            {
+              "field": "kuasa.domisili_sementara",
+              "op": "terisi",
+              "nilai": ""
+            }
+          ],
+          "teks": "; untuk sementara berada di {{kuasa.domisili_sementara}}"
+        }
+      ],
+      "kode": "per_kuasa_identitas",
+      "judul": "Kuasa perorangan — identitas penerima kuasa",
+      "teks": "<p><b>{{kuasa.sapaan}} {{kuasa.nama}}</b>, lahir di {{kuasa.tempat_lahir}}, pada tanggal {{kuasa.tanggal_lahir}} ({{kuasa.tanggal_lahir_terbilang}}), Warga Negara {{kuasa.kewarganegaraan}}, {{kuasa.pekerjaan}}, bertempat tinggal di {{kuasa.jalan}}, Rukun Tetangga {{kuasa.rt}}, Rukun Warga {{kuasa.rw}}, {{kuasa.label_kelurahan}} {{kuasa.kelurahan}}, Kecamatan {{kuasa.kecamatan}}, {{kuasa.label_kota}} {{kuasa.kota}}, Provinsi {{kuasa.provinsi}}, Pemegang Kartu Tanda Penduduk Nomor: {{kuasa.nik}}[[slot:domisili]].</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "pihak_dikuasakan",
+          "op": "=",
+          "nilai": "Ya"
+        },
+        {
+          "field": "tipe_pihak",
+          "op": "≠",
+          "nilai": "Saksi"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "bawah_tangan",
+          "label": "Surat kuasa di bawah tangan",
+          "syarat": [
+            {
+              "field": "bentuk_kuasa",
+              "op": "=",
+              "nilai": "Surat Kuasa di bawah tangan"
+            }
+          ],
+          "teks": "Surat Kuasa di bawah tangan, bermeterai cukup, tertanggal {{tanggal_kuasa}} ({{tanggal_kuasa_terbilang}}), yang aslinya"
+        },
+        {
+          "kode": "notariil",
+          "label": "Akta kuasa notariil",
+          "syarat": [
+            {
+              "field": "bentuk_kuasa",
+              "op": "=",
+              "nilai": "Akta Kuasa notariil"
+            }
+          ],
+          "teks": "Akta Kuasa tertanggal {{tanggal_kuasa}} ({{tanggal_kuasa_terbilang}}) Nomor {{no_akta_kuasa}}, yang dibuat di hadapan {{notaris_kuasa}}, Notaris di {{notaris_kuasa_kota}}, yang salinannya"
+        }
+      ],
+      "kode": "per_kuasa_dasar",
+      "judul": "Kuasa perorangan — dasar kuasa",
+      "teks": "<p>- Menurut keterangannya dalam melakukan tindakan hukum yang dimaksud dalam akta ini bertindak berdasarkan [[slot:bawah_tangan]][[slot:notariil]] dilekatkan pada minuta akta ini, dari dan oleh karena itu sah bertindak untuk dan atas nama:</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        },
+        {
+          "field": "tipe_pihak",
+          "op": "≠",
+          "nilai": "Saksi"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "domisili",
+          "label": "Untuk sementara berada di …",
+          "syarat": [
+            {
+              "field": "domisili_sementara",
+              "op": "terisi",
+              "nilai": ""
+            }
+          ],
+          "teks": "; untuk sementara berada di {{domisili_sementara}}"
+        }
+      ],
+      "kode": "per_identitas",
+      "judul": "Perorangan — identitas",
+      "teks": "<p><b>{{sapaan}} {{nama}}</b>, lahir di {{tempat_lahir}}, pada tanggal {{tanggal_lahir}} ({{tanggal_lahir_terbilang}}), Warga Negara {{kewarganegaraan}}, {{pekerjaan}}, bertempat tinggal di {{jalan}}, Rukun Tetangga {{rt}}, Rukun Warga {{rw}}, {{label_kelurahan}} {{kelurahan}}, Kecamatan {{kecamatan}}, {{label_kota}} {{kota}}, Provinsi {{provinsi}}, Pemegang Kartu Tanda Penduduk Nomor: {{nik}}[[slot:domisili]].</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "tipe_pihak",
+          "op": "=",
+          "nilai": "Pasangan (harta bersama)"
+        }
+      ],
+      "slot": [],
+      "kode": "pasangan_persetujuan",
+      "judul": "Pasangan — kalimat persetujuan",
+      "teks": "<p>- Menurut keterangannya dalam melakukan tindakan hukum yang dimaksud dalam akta ini turut hadir di hadapan saya, PPAT, dan menandatangani akta ini sebagai bukti persetujuannya.</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum (PT)"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "domisili",
+          "label": "Untuk sementara berada di …",
+          "syarat": [
+            {
+              "field": "wakil.domisili_sementara",
+              "op": "terisi",
+              "nilai": ""
+            }
+          ],
+          "teks": "; untuk sementara berada di {{wakil.domisili_sementara}}"
+        }
+      ],
+      "kode": "pt_wakil_identitas",
+      "judul": "Badan hukum — identitas wakil",
+      "teks": "<p><b>{{wakil.sapaan}} {{wakil.nama}}</b>, lahir di {{wakil.tempat_lahir}}, pada tanggal {{wakil.tanggal_lahir}} ({{wakil.tanggal_lahir_terbilang}}), Warga Negara {{wakil.kewarganegaraan}}, {{wakil.pekerjaan}}, bertempat tinggal di {{wakil.jalan}}, Rukun Tetangga {{wakil.rt}}, Rukun Warga {{wakil.rw}}, {{wakil.label_kelurahan}} {{wakil.kelurahan}}, Kecamatan {{wakil.kecamatan}}, {{wakil.label_kota}} {{wakil.kota}}, Provinsi {{wakil.provinsi}}, Pemegang Kartu Tanda Penduduk Nomor: {{wakil.nik}}[[slot:domisili]].</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum (PT)"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "komisaris",
+          "label": "Persetujuan Dewan Komisaris",
+          "syarat": [
+            {
+              "field": "persetujuan_komisaris",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "teks": "dan telah memperoleh persetujuan dari Komisaris Perseroan tersebut, "
+        },
+        {
+          "kode": "uu40",
+          "label": "Penyesuaian UU 40/2007",
+          "syarat": [
+            {
+              "field": "ad_sesuai_uu40",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "teks": ", anggaran dasar mana telah disesuaikan dengan Undang-Undang Nomor 40 tahun 2007 (dua ribu tujuh) tentang Perseroan Terbatas"
+        }
+      ],
+      "kode": "pt_kedudukan",
+      "judul": "Badan hukum — kedudukan wakil perseroan",
+      "teks": "<p>- Menurut keterangannya dalam melakukan tindakan hukum yang dimaksud dalam akta ini bertindak dalam jabatannya selaku {{jabatan_wakil}} dari perseroan terbatas <b>{{nama_perseroan}}</b>, [[slot:komisaris]]dari dan oleh karena itu sah bertindak mewakili untuk dan atas nama <b>{{nama_perseroan}}</b>, berkedudukan di {{kota_kedudukan}}, yang didirikan berdasarkan Akta tertanggal {{tanggal_akta_pendirian}} ({{tanggal_akta_pendirian_terbilang}}) Nomor {{no_akta_pendirian}}, yang dibuat di hadapan {{notaris_pendirian}}, Notaris di {{notaris_pendirian_kota}}, dan telah mendapat pengesahan dari {{pejabat_pengesah}} Republik Indonesia sebagaimana tercantum dalam Surat Keputusannya tertanggal {{tanggal_sk_menkumham}} ({{tanggal_sk_menkumham_terbilang}}), Nomor: {{nomor_ahu}}[[slot:uu40]].</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum (PT)"
+        }
+      ],
+      "slot": [],
+      "kode": "pt_perubahan_pembuka",
+      "judul": "Badan hukum — pembuka daftar perubahan",
+      "teks": "<p>- Anggaran Dasar dan data perseroan mana telah mengalami perubahan, yang mana:</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "akta_perubahan",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum (PT)"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "bukti_sk",
+          "label": "Bukti — Surat Keputusan persetujuan",
+          "syarat": [
+            {
+              "field": "jenis_bukti",
+              "op": "=",
+              "nilai": "Surat Keputusan persetujuan"
+            }
+          ],
+          "teks": "mendapatkan persetujuan dari {{instansi_bukti}} Republik Indonesia sebagaimana tercantum dalam Surat Keputusannya"
+        },
+        {
+          "kode": "bukti_terima",
+          "label": "Bukti — Surat Penerimaan Pemberitahuan",
+          "syarat": [
+            {
+              "field": "jenis_bukti",
+              "op": "=",
+              "nilai": "Surat Penerimaan Pemberitahuan"
+            }
+          ],
+          "teks": "diterima dan dicatat di dalam Sistem Administrasi Badan Hukum {{instansi_bukti}} Republik Indonesia sebagaimana tercantum dalam Surat Penerimaan Pemberitahuan Perubahan Data"
+        }
+      ],
+      "kode": "pt_perubahan_baris",
+      "judul": "Badan hukum — butir akta perubahan",
+      "teks": "<p>- {{jenis_perubahan}} terakhir termuat dalam Akta tertanggal {{tanggal_akta}} ({{tanggal_akta_terbilang}}) Nomor {{no_akta}}, yang dibuat di hadapan {{notaris_akta}}, Notaris di {{notaris_akta_kota}}, yang telah [[slot:bukti_sk]][[slot:bukti_terima]] tertanggal {{tanggal_bukti}} ({{tanggal_bukti_terbilang}}) Nomor {{no_bukti}};</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum (PT)"
+        },
+        {
+          "field": "wakil_dikuasakan",
+          "op": "=",
+          "nilai": "Ya"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "pt_bawah_tangan",
+          "label": "Surat kuasa di bawah tangan",
+          "syarat": [
+            {
+              "field": "pt_bentuk_kuasa",
+              "op": "=",
+              "nilai": "Surat Kuasa di bawah tangan"
+            }
+          ],
+          "teks": "Surat Kuasa di bawah tangan, bermeterai cukup, tertanggal {{pt_tanggal_kuasa}} ({{pt_tanggal_kuasa_terbilang}}), yang aslinya"
+        },
+        {
+          "kode": "pt_notariil",
+          "label": "Akta kuasa notariil",
+          "syarat": [
+            {
+              "field": "pt_bentuk_kuasa",
+              "op": "=",
+              "nilai": "Akta Kuasa notariil"
+            }
+          ],
+          "teks": "Akta Kuasa tertanggal {{pt_tanggal_kuasa}} ({{pt_tanggal_kuasa_terbilang}}) Nomor {{pt_no_akta_kuasa}}, yang dibuat di hadapan {{pt_notaris_kuasa}}, Notaris di {{pt_notaris_kuasa_kota}}, yang salinannya"
+        }
+      ],
+      "kode": "pt_kuasa",
+      "judul": "Badan hukum — wakil diwakili penerima kuasa",
+      "teks": "<p>- Yang dalam hal ini diwakili oleh <b>{{kuasapt.sapaan}} {{kuasapt.nama}}</b>, {{pt_ket_penerima_kuasa}}, berdasarkan [[slot:pt_bawah_tangan]][[slot:pt_notariil]] dilekatkan pada minuta akta ini.</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "akhirKelompok",
+      "syarat": [
+        {
+          "field": "tipe_pihak",
+          "op": "=",
+          "nilai": "Penjual"
+        }
+      ],
+      "slot": [],
+      "kode": "peran_penjual",
+      "judul": "Peran — Penjual",
+      "teks": "<p>Selaku Penjual, selanjutnya disebut “<b>PIHAK PERTAMA</b>”.</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "akhirKelompok",
+      "syarat": [
+        {
+          "field": "tipe_pihak",
+          "op": "=",
+          "nilai": "Pembeli"
+        }
+      ],
+      "slot": [],
+      "kode": "peran_pembeli",
+      "judul": "Peran — Pembeli",
+      "teks": "<p>Selaku Pembeli, selanjutnya disebut “<b>PIHAK KEDUA</b>”.</p>"
+    },
+    {
+      "grup": "uraian_objek",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "objek_status_sertipikat",
+          "op": "=",
+          "nilai": "Sudah Terdaftar"
+        },
+        {
+          "field": "objek_status",
+          "op": "=",
+          "nilai": "Utuh"
+        },
+        {
+          "field": "objek_input_sertipikat",
+          "op": "=",
+          "nilai": "Analog"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "bagian_bersama",
+          "label": "Bagian dari hak bersama",
+          "syarat": [
+            {
+              "field": "objek_bagian_bersama",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "teks": "“{{objek_bagian}}” "
+        }
+      ],
+      "kode": "obj_b14",
+      "judul": "Butir 14 — bidang terdaftar",
+      "teks": "<p>- [[slot:bagian_bersama]]<b>{{objek_jenis_hak}}</b>: Nomor {{objek_no_hak}} atas sebidang tanah sebagaimana diuraikan dalam {{objek_dokumen_ukur}} tanggal {{objek_tanggal_surat_ukur}} Nomor {{objek_no_surat_ukur}} seluas {{objek_luas}} m2 ({{objek_luas_terbilang}}) dengan Nomor Identifikasi Bidang Tanah (NIB) : {{objek_nib}} dan Surat Pemberitahuan Pajak Terhutang Pajak Bumi dan Bangunan (SPPTPBB) Nomor Objek Pajak (NOP) : {{objek_nop_pbb}}</p>"
+    },
+    {
+      "grup": "uraian_objek",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "objek_status_sertipikat",
+          "op": "=",
+          "nilai": "Sudah Terdaftar"
+        },
+        {
+          "field": "objek_status",
+          "op": "=",
+          "nilai": "Sebagian"
+        }
+      ],
+      "slot": [],
+      "kode": "obj_b15",
+      "judul": "Butir 15 — sebagian bidang",
+      "teks": "<p>- <b>{{objek_jenis_hak}}</b>: atas sebagian tanah Nomor {{objek_no_hak_asal}} dengan Nomor Identifikasi Bidang Tanah (NIB) {{objek_nib_asal}} dan Surat Pemberitahuan Pajak Terhutang Pajak Bumi dan Bangunan (SPPTPBB) Nomor Objek Pajak (NOP) : {{objek_nop_asal}}<br>yaitu seluas {{objek_luas}} m2 ({{objek_luas_terbilang}}), dengan batas-batas :<br>- Utara : {{batas_utara}};<br>- Timur : {{batas_timur}};<br>- Selatan : {{batas_selatan}};<br>- Barat : {{batas_barat}};<br>sebagaimana diuraikan dalam {{objek_dokumen_ukur}} pada tanggal {{objek_tanggal_surat_ukur}} Nomor {{objek_no_surat_ukur}} yang dilampirkan pada akta ini, dengan Nomor Identifikasi Bidang Tanah (NIB) : {{objek_nib}}</p>"
+    },
+    {
+      "grup": "uraian_objek",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "objek_status_sertipikat",
+          "op": "=",
+          "nilai": "Belum Terdaftar (bekas Hak Milik Adat)"
+        }
+      ],
+      "slot": [],
+      "kode": "obj_b16",
+      "judul": "Butir 16 — bekas Hak Milik Adat",
+      "teks": "<p>- <b>Hak Milik</b> atas sebidang tanah :<br>Persil Nomor {{objek_persil_nomor}} Blok {{objek_persil_blok}} Kohir Nomor {{objek_kohir_nomor}} seluas {{objek_luas}} m2 ({{objek_luas_terbilang}}), dengan batas-batas :<br>- Utara : {{batas_utara}};<br>- Timur : {{batas_timur}};<br>- Selatan : {{batas_selatan}};<br>- Barat : {{batas_barat}};<br>sebagaimana diuraikan dalam Peta Bidang tanggal {{objek_peta_tanggal}} Nomor {{objek_peta_nomor}} yang dilampirkan pada akta ini, dengan Nomor Identifikasi Bidang Tanah (NIB) : {{objek_nib}} dan Surat Pemberitahuan Pajak Terhutang Pajak Bumi dan Bangunan (SPPTPBB) Nomor Objek Pajak (NOP) : {{objek_nop_pbb}}<br>berdasarkan alat-alat bukti berupa :</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "alat_bukti",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "objek_status_sertipikat",
+          "op": "=",
+          "nilai": "Belum Terdaftar (bekas Hak Milik Adat)"
+        }
+      ],
+      "slot": [],
+      "kode": "obj_b16_bukti",
+      "judul": "Butir 16f — baris alat bukti",
+      "teks": "<p>- {{bukti_jenis}} nomor {{bukti_nomor}}, tanggal {{bukti_tanggal}} ({{bukti_tanggal_terbilang}}), yang dibuat dihadapan {{bukti_pejabat}}, selaku {{bukti_selaku}};</p>"
+    },
+    {
+      "grup": "uraian_objek",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "objek_status_sertipikat",
+          "op": "=",
+          "nilai": "Sudah Terdaftar"
+        },
+        {
+          "field": "objek_input_sertipikat",
+          "op": "=",
+          "nilai": "Elektronik"
+        }
+      ],
+      "slot": [],
+      "kode": "obj_elektronik",
+      "judul": "Sertipikat elektronik",
+      "teks": "<p>- <b>{{objek_jenis_hak}}</b> Sertipikat Elektronik dengan Nomor Identifikasi Bidang Tanah (NIB) : {{objek_nib}}, Nomor Kode Sertipikat : {{objek_kode_sertipikat}}, atas sebidang tanah seluas {{objek_luas}} ({{objek_luas_terbilang}}) M2 (meter persegi), terdaftar atas nama {{objek_atas_nama}} dan Surat Pemberitahuan Pajak Terhutang Pajak Bumi dan Bangunan (SPPT PBB) Nomor Objek Pajak (NOP) : {{objek_nop_pbb}}</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [],
+      "slot": [],
+      "kode": "obj_letak",
+      "judul": "Butir 18 — letak objek",
+      "teks": "<p>- terletak di :<br>- Provinsi : {{objek_provinsi}};<br>- {{objek_label_kota}} : {{objek_kota}};<br>- Kecamatan : {{objek_kecamatan}};<br>- {{objek_label_kelurahan}} : {{objek_kelurahan}};<br>- Jalan : {{objek_jalan}}.</p>"
+    },
+    {
+      "grup": "meliputi_pula",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "objek_meliputi",
+          "op": "=",
+          "nilai": "Diisi sendiri (blanko butir 19)"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "setempat",
+          "label": "Nama setempat",
+          "syarat": [
+            {
+              "field": "objek_nama_setempat",
+              "op": "terisi",
+              "nilai": ""
+            }
+          ],
+          "teks": ", setempat dikenal sebagai “{{objek_nama_setempat}}”"
+        }
+      ],
+      "kode": "obj_meliputi_bebas",
+      "judul": "Butir 19 — diisi sendiri",
+      "teks": "<p>Jual beli ini meliputi pula : {{objek_meliputi_isi}}[[slot:setempat]];</p>"
+    },
+    {
+      "grup": "meliputi_pula",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "objek_meliputi",
+          "op": "=",
+          "nilai": "Benda tidak bergerak (pola draf 4)"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "setempat",
+          "label": "Nama setempat",
+          "syarat": [
+            {
+              "field": "objek_nama_setempat",
+              "op": "terisi",
+              "nilai": ""
+            }
+          ],
+          "teks": ", setempat dikenal sebagai “{{objek_nama_setempat}}”"
+        }
+      ],
+      "kode": "obj_meliputi_benda",
+      "judul": "Butir 19 — benda tidak bergerak",
+      "teks": "<p>Jual beli ini meliputi pula :<br>- Segala sesuatu yang berada, berdiri, tertanam atau terpasang di atas tanah tersebut dan/atau di dalam tanah tersebut yang karena sifat, guna dan peruntukannya atau menurut penetapan Undang-undang dapat dianggap sebagai barang tidak bergerak, serta segala sesuatu yang berkaitan dengan tanah tidak ada yang dikecualikan[[slot:setempat]];</p>"
+    },
+    {
+      "grup": "meliputi_pula",
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "objek_meliputi",
+          "op": "=",
+          "nilai": "Bagian bersama satuan rumah susun (pola draf 2 & 3)"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "setempat",
+          "label": "Nama setempat",
+          "syarat": [
+            {
+              "field": "objek_nama_setempat",
+              "op": "terisi",
+              "nilai": ""
+            }
+          ],
+          "teks": ", setempat dikenal sebagai “{{objek_nama_setempat}}”"
+        }
+      ],
+      "kode": "obj_meliputi_bersama",
+      "judul": "Butir 19 — bagian bersama rumah susun",
+      "teks": "<p>Jual beli ini meliputi pula :<br>- Hak atas bagian bersama, benda bersama, tanah bersama, fasilitas bersama beserta dengan segala turut-turutannya dengan nilai perbandingan proporsional {{objek_npp}} ({{objek_npp_terbilang}})%[[slot:setempat]];</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "angka",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "tipe_pihak",
+          "op": "=",
+          "nilai": "Saksi"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "domisili",
+          "label": "Untuk sementara berada di …",
+          "syarat": [
+            {
+              "field": "domisili_sementara",
+              "op": "terisi",
+              "nilai": ""
+            }
+          ],
+          "teks": "; untuk sementara berada di {{domisili_sementara}}"
+        }
+      ],
+      "kode": "saksi_identitas",
+      "judul": "Saksi — identitas",
+      "teks": "<p><b>{{sapaan}} {{nama}}</b>, lahir di {{tempat_lahir}}, pada tanggal {{tanggal_lahir}} ({{tanggal_lahir_terbilang}}), Warga Negara {{kewarganegaraan}}, {{pekerjaan}}, bertempat tinggal di {{jalan}}, Rukun Tetangga {{rt}}, Rukun Warga {{rw}}, {{label_kelurahan}} {{kelurahan}}, Kecamatan {{kecamatan}}, {{label_kota}} {{kota}}, Provinsi {{provinsi}}, Pemegang Kartu Tanda Penduduk Nomor: {{nik}}[[slot:domisili]].</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "tipe_pihak",
+          "op": "≠",
+          "nilai": "Saksi"
+        },
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Perorangan"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "ttd_kuasa",
+          "label": "Baris selaku kuasa",
+          "syarat": [
+            {
+              "field": "pihak_dikuasakan",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "teks": "<br>selaku kuasa dari {{nama}}"
+        }
+      ],
+      "kode": "ttd_orang",
+      "judul": "Tanda tangan — pihak perorangan",
+      "teks": "<p>( <b>{{nama}}</b> )[[slot:ttd_kuasa]]</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "tipe_pihak",
+          "op": "≠",
+          "nilai": "Saksi"
+        },
+        {
+          "field": "bentuk_pihak",
+          "op": "=",
+          "nilai": "Badan Hukum (PT)"
+        }
+      ],
+      "slot": [
+        {
+          "kode": "ttd_kuasapt",
+          "label": "Baris selaku kuasa",
+          "syarat": [
+            {
+              "field": "wakil_dikuasakan",
+              "op": "=",
+              "nilai": "Ya"
+            }
+          ],
+          "teks": "<br>selaku kuasa dari {{wakil.nama}}"
+        }
+      ],
+      "kode": "ttd_pt",
+      "judul": "Tanda tangan — pihak badan hukum",
+      "teks": "<p>( <b>{{wakil.nama}}</b> )[[slot:ttd_kuasapt]]<br>qq. {{nama_perseroan}}<br>berkedudukan di {{kota_kedudukan}}</p>"
+    },
+    {
+      "grup": null,
+      "ulang": "",
+      "nomor": "tanpa",
+      "tulis": "baris",
+      "syarat": [
+        {
+          "field": "tipe_pihak",
+          "op": "=",
+          "nilai": "Saksi"
+        }
+      ],
+      "slot": [],
+      "kode": "ttd_saksi",
+      "judul": "Tanda tangan — saksi",
+      "teks": "<p>SAKSI<br>( <b>{{nama}}</b> )</p>"
+    }
+  ],
+  "grup": [
+    {
+      "kode": "uraian_objek",
+      "judul": "Uraian objek — pilih satu menurut status sertipikat",
+      "anggota": [
+        "obj_b14",
+        "obj_b15",
+        "obj_b16",
+        "obj_elektronik"
+      ]
+    },
+    {
+      "kode": "meliputi_pula",
+      "judul": "Butir 19 — meliputi pula",
+      "anggota": [
+        "obj_meliputi_bebas",
+        "obj_meliputi_benda",
+        "obj_meliputi_bersama"
+      ]
+    }
+  ],
+  "varDokumen": [
+    {
+      "kode": "akta_jenis",
+      "label": "Jenis akta",
+      "nilai": "Jual Beli",
+      "otomatis": ""
+    },
+    {
+      "kode": "akta_jenis_kapital",
+      "label": "Jenis akta — huruf besar",
+      "nilai": "JUAL BELI",
+      "otomatis": ""
+    },
+    {
+      "kode": "akta_jenis_kecil",
+      "label": "Jenis akta — huruf kecil",
+      "nilai": "jual beli",
+      "otomatis": ""
+    },
+    {
+      "kode": "akta_tahun",
+      "label": "Tahun akta",
+      "nilai": "2026",
+      "otomatis": ""
+    },
+    {
+      "kode": "lembar",
+      "label": "Penanda lembar",
+      "nilai": "Pertama",
+      "otomatis": ""
+    },
+    {
+      "kode": "kantor_pertanahan",
+      "label": "Tujuan lembar kedua",
+      "nilai": "Kepala Kantor Pertanahan Kota Bandung",
+      "otomatis": ""
+    }
+  ],
+  "halaman": {
+    "kertas": "F4 / Folio (21,5 × 33 cm)",
+    "orientasi": "Tegak (Portrait)",
+    "mAtas": "1,5",
+    "mBawah": "1,5",
+    "mKiri": "6",
+    "mKanan": "1",
+    "font": "Courier New (monospace, khas akta)",
+    "ukuran": "12",
+    "spasi": "2",
+    "footerKiri": "{{notaris_nama_gelar}}\n{{notaris_wilayah}}",
+    "footerTengah": "",
+    "footerKanan": "Halaman {page} dari {total}"
+  }
+}
