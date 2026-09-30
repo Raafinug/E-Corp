@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engine</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="cangkang">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sisi" id="sisi">
+    <div class="logo"><span>Engine</span></div>
+
+    <div class="kartu-kantor">
+      <div class="kk-judul">Kantor Notaris &amp; PPAT</div>
+      <div class="kk-nama">Mochammad Raafi Dwi Nugraha, S.Tr.Kom.</div>
+      <div class="kk-baris"><i>▤</i>SK · 112/KEP-17.3/PPAT/XI/2021</div>
+      <div class="kk-baris"><i>◎</i>Wilayah · Kota Bandung</div>
+      <div class="kk-baris"><i>✆</i>(022) 86012345</div>
+      <div class="kk-baris"><i>⌂</i>Jl. Ir. H. Juanda No. 128</div>
+    </div>
+
+    <nav class="menu">
+      <div class="m-grup mati"><i>⚙</i>System<span class="pnh">›</span></div>
+      <div class="m-grup mati"><i>✎</i>CMS<span class="pnh">›</span></div>
+
+      <div class="m-grup buka"><i>▤</i>Engine Module<span class="pnh">⌄</span></div>
+      <button class="m-item mati"><i>▣</i>Dashboard</button>
+      <button class="m-item mati"><i>▤</i>Profil Kantor</button>
+      <button class="m-item" data-mode="rancang"><i>◧</i>Form Design</button>
+      <button class="m-item mati"><i>✔</i>Verifikasi</button>
+      <button class="m-item mati"><i>▦</i>Minuta</button>
+      <button class="m-item" data-mode="kondisi"><i>▤</i>Template Akta</button>
+      <button class="m-item mati"><i>◉</i>E-Akta Wizard</button>
+      <button class="m-item mati"><i>▥</i>Akta Repository</button>
+      <button class="m-item mati"><i>▩</i>Akta Salinan</button>
+      <button class="m-item mati"><i>◈</i>Aktivasi E-Materai</button>
+
+      <div class="m-grup buka"><i>▤</i>Layanan Engine<span class="pnh">⌄</span></div>
+      <button class="m-item" data-mode="pratinjau"><i>▸</i>Order A</button>
+    </nav>
+
+    <div class="sisi-kaki">Engine</div>
+  </aside>
+
+  <!-- ============ ISI ============ -->
+  <div class="utama">
+
+    <header class="atas">
+      <button class="ikon" id="lipat" title="Sembunyikan menu">☰</button>
+      <div class="atas-kanan">
+        <button class="btn btn-halus">◉ Lihat Landing</button>
+        <button class="ikon">🔔</button>
+        <div class="pengguna"><span class="av">A</span><span><b>Admin Default</b><small>SUPER ADMIN</small></span><span class="pnh">⌄</span></div>
+      </div>
+    </header>
+
+    <div class="gulir">
+
+      <div class="kepala-halaman">
+        <div class="remah" id="remah"></div>
+        <h1 id="judul-halaman"></h1>
+        <p class="sub-halaman" id="sub-halaman"></p>
+      </div>
+
+      <div class="spanduk" id="spanduk">
+        <span class="sp-ikon">◎</span>
+        <span class="sp-teks">Stempel Elektronik (TERA) kantor Anda belum didaftarkan. Lengkapi data pendaftaran TERA agar akta bisa distempel elektronik.</span>
+        <button class="btn btn-utama btn-kecil">→ Daftar TERA</button>
+        <button class="ikon" id="tutup-spanduk">×</button>
+      </div>
+
+      <!-- ======================= FORM DESIGN ======================= -->
+      <main class="layar" data-layar="rancang" hidden>
+        <div class="bar-judul">
+          <button class="btn">‹ Kembali</button>
+          <span class="bj-nama">Rancangan Form Order</span>
+          <span class="lencana">AJB</span>
+          <span class="bj-ket">Field yang dirancang di sini menjadi isian layar order sekaligus kamus variabel.</span>
+          <span class="kanan"><span class="status" id="status">siap</span>
+            <button class="btn" id="btn-ekspor">Ekspor JSON</button>
+            <button class="btn" id="btn-impor">Impor JSON</button>
+            <button class="btn" id="btn-ekspor-docx">Ekspor Word</button></span>
+        </div>
+
+        <div class="dua-kolom-kerja">
+          <aside class="panel-kiri">
+            <div class="pk-tab"><button aria-selected="true">Elemen formulir</button></div>
+            <div class="pk-isi">
+              <p class="ket">Tarik ke kanvas, atau klik untuk menambah di akhir.
+                Atur propertinya lewat klik kanan pada elemen.</p>
+              <div class="palet-daftar" id="palet"></div>
+
+              <div class="pk-pisah">Tab</div>
+              <p class="ket">Satu tab adalah satu layar pada order.</p>
+              <div class="tab-daftar" id="tab-daftar"></div>
+              <button class="btn btn-halus lebar" id="tambah-tab">+ Tab baru</button>
+            </div>
+          </aside>
+
+          <section class="panel-kanan">
+            <div class="pk-tab kanvas-kepala">
+              <input type="text" id="nama-tab" class="judul-input" placeholder="Nama tab">
+              <span class="kanan">
+                <label class="pilih-mode"><span>Bentuk tab</span>
+                  <select id="mode-tab">
+                    <option value="formulir">Formulir tunggal</option>
+                    <option value="daftar">Daftar + modal tambah</option>
+                  </select></label>
+                <button class="btn btn-bahaya btn-kecil" id="hapus-tab">Hapus tab</button>
+              </span>
+            </div>
+            <div class="kanvas-sub" id="kanvas-sub"></div>
+            <div class="kanvas" id="kanvas"></div>
+          </section>
+        </div>
+      </main>
+
+      <!-- ======================= TEMPLATE AKTA ======================= -->
+      <main class="layar" data-layar="kondisi" hidden>
+        <div class="bar-judul">
+          <button class="btn">‹ Kembali</button>
+          <span class="bj-nama">AJB Standar</span>
+          <span class="lencana">AJB</span>
+          <span class="bj-ket">Template bawaan platform — dipakai semua kantor, jadi hanya bisa dilihat. Salin dulu untuk menyuntingnya.</span>
+          <span class="kanan">
+            <button class="btn" id="btn-impor-template">Impor Template</button>
+            <button class="btn" id="btn-ekspor-template">Ekspor Template</button>
+            <button class="btn btn-utama">⧉ Salin &amp; Sunting</button></span>
+        </div>
+
+        <div class="dua-kolom-kerja">
+          <aside class="panel-kiri">
+            <div class="pk-tab">
+              <button data-ptab="bagian" aria-selected="true">Pasal &amp; Catatan <span id="n-bagian"></span></button>
+              <button data-ptab="lampiran" aria-selected="false">Lampiran (0)</button>
+            </div>
+            <div class="pk-isi">
+              <div class="pane" data-ppane="bagian">
+                <input type="text" class="cari" id="cari-bagian" placeholder="Cari judul…">
+                <div id="daftar-bagian"></div>
+                <div class="tambah-bagian">
+                  <button class="btn btn-halus" id="tambah-pasal">+ Pasal</button>
+                  <button class="btn btn-halus" id="tambah-catatan">+ Catatan</button>
+                  <button class="btn btn-halus lebar" id="tambah-bagian">+ Bagian Otomatis</button>
+                </div>
+              </div>
+              <div class="pane" data-ppane="lampiran" hidden>
+                <p class="ket">Berkas di sini tetap terpisah dan tidak digabung ke naskah.</p>
+                <div class="kosong-panel">Belum ada lampiran.</div>
+              </div>
+            </div>
+          </aside>
+
+          <section class="panel-kanan">
+            <div class="pk-tab">
+              <button data-ktab="bagian" aria-selected="true">▤ Bagian</button>
+              <button data-ktab="variabel" aria-selected="false">✦ Variabel <span id="n-var"></span></button>
+              <button data-ktab="halaman" aria-selected="false">⚙ Pengaturan Halaman</button>
+              <button data-ktab="pratinjau" aria-selected="false">◉ Pratinjau</button>
+            </div>
+            <div class="pk-badan">
+              <div class="pane" data-kpane="bagian"><div id="editor-pot"></div></div>
+              <div class="pane" data-kpane="variabel" hidden><div id="isi-variabel"></div></div>
+              <div class="pane" data-kpane="halaman" hidden><div id="isi-halaman"></div></div>
+              <div class="pane" data-kpane="pratinjau" hidden><div id="isi-pratinjau"></div></div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- ======================= ORDER ======================= -->
+      <main class="layar" data-layar="pratinjau" hidden>
+        <div class="bar-judul">
+          <button class="btn">‹ Kembali</button>
+          <span class="bj-nama">Order A</span>
+          <span class="bj-ket">Isi seperti pengguna sungguhan, lalu rakit naskahnya.</span>
+          <span class="kanan"><button class="btn btn-utama" id="btn-rakit">⧉ Rakit Naskah</button></span>
+        </div>
+        <div class="kartu-order">
+          <div class="tab-strip" id="pv-tabs"></div>
+          <div class="tab-isi" id="pv-isi"></div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+</div>
+
+<!-- menu klik kanan -->
+<div class="menu-konteks" id="menu-konteks" hidden>
+  <button data-aksi="edit">Edit Elemen…</button>
+  <button data-aksi="duplikat">Duplikat</button>
+  <div class="pisah"></div>
+  <button data-aksi="hapus" class="bahaya">Hapus</button>
+</div>
+
+<!-- modal properti elemen -->
+<div class="tirai" id="tirai-prop" hidden>
+  <div class="modal modal-prop" role="dialog" aria-modal="true">
+    <header>
+      <div><h2 id="mp-judul">Properti Elemen</h2><div class="mp-sub" id="mp-sub"></div></div>
+      <button class="tutup" data-tutup-prop>&#215;</button>
+    </header>
+    <div class="isi" id="mp-isi"></div>
+    <footer>
+      <button class="btn btn-bahaya" id="mp-hapus">Hapus elemen</button>
+      <span style="flex:1"></span>
+      <button class="btn btn-utama" data-tutup-prop>Selesai</button>
+    </footer>
+  </div>
+</div>
+
+<!-- modal tambah pada pratinjau order -->
+<div class="tirai" id="tirai" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <header><h2 id="m-judul">Tambah</h2><button class="tutup" data-tutup>&#215;</button></header>
+    <div class="isi" id="m-isi"></div>
+    <footer>
+      <button class="btn" data-tutup>Batal</button>
+      <button class="btn btn-utama" id="m-simpan">Simpan</button>
+    </footer>
+  </div>
+</div>
+
+<!-- hasil perakitan naskah -->
+<div class="tirai" id="tirai-rakit" hidden>
+  <div class="modal modal-rakit" role="dialog" aria-modal="true">
+    <header>
+      <div><h2>Naskah Hasil Perakitan</h2>
+        <div class="mp-sub" id="rk-sub"></div></div>
+      <button class="tutup" data-tutup-rakit>&#215;</button>
+    </header>
+    <div class="isi" id="rk-isi"></div>
+    <footer>
+      <span class="rk-catatan" id="rk-catatan"></span>
+      <button class="btn" data-tutup-rakit>Tutup</button>
+    </footer>
+  </div>
+</div>
+
+<script src="seed.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
