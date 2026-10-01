@@ -1,5 +1,20 @@
 /* Rancangan bawaan — meniru layar Order AJB: Narahubung, Para Pihak, Objek, Dokumen. */
 window.SEED = {
+  /* --- Pustaka Kondisi: kondisi bernama milik platform, dipakai bersama
+         semua layanan dan template. Potongan merujuk namanya, tidak
+         menulis ulang syaratnya. --- */
+  pustaka: [
+    { kode:'PIHAK_BADAN_HUKUM', label:'Pihak berbentuk badan hukum',
+      syarat:[ { field:'bentuk_pihak', op:'salah satu dari', nilai:['Badan Hukum (PT)'] } ] },
+    { kode:'PIHAK_PENJUAL', label:'Pihak di sisi penjual',
+      syarat:[ { grup:[ { field:'tipe_pihak', op:'=', nilai:'Penjual' },
+                        { field:'tipe_pihak', op:'=', nilai:'Pasangan' } ] } ] },
+    { kode:'ADA_PARA_PIHAK', label:'Tabel Para Pihak sudah terisi',
+      syarat:[ { field:'_baris_para_pihak', op:'ada barisnya', nilai:'' } ] },
+    { kode:'HARTA_BERSAMA', label:'Objek berasal dari harta bersama',
+      syarat:[ { field:'jenis_harta', op:'=', nilai:'Harta Bersama' } ] }
+  ],
+
   versi: 1,
   nama: 'Order AJB',
   tab: [

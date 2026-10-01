@@ -27,6 +27,7 @@
       <button class="m-item mati"><i>✔</i>Verifikasi</button>
       <button class="m-item" data-mode="minuta"><i>▦</i>Minuta</button>
       <button class="m-item" data-mode="kondisi" id="menu-template"><i>▤</i>Template Akta</button>
+      <button class="m-item" data-mode="pustaka" id="menu-pustaka"><i>❖</i>Pustaka Kondisi</button>
       <button class="m-item mati"><i>◉</i>E-Akta Wizard</button>
       <button class="m-item mati"><i>▥</i>Akta Repository</button>
       <button class="m-item mati"><i>▩</i>Akta Salinan</button>
@@ -36,7 +37,7 @@
       <div id="menu-order"></div>
     </nav>
 
-    <div class="sisi-kaki">Engine <span id="versi-lab">v0.10.3</span></div>
+    <div class="sisi-kaki">Engine <span id="versi-lab">v0.11.0</span></div>
   </aside>
 
   <!-- ============ ISI ============ -->
@@ -188,12 +189,14 @@
               <button data-ktab="bagian" aria-selected="true">▤ Bagian</button>
               <button data-ktab="variabel" aria-selected="false">✦ Variabel <span id="n-var"></span></button>
               <button data-ktab="halaman" aria-selected="false">⚙ Pengaturan Halaman</button>
+              <button data-ktab="skenario" aria-selected="false">▣ Skenario <span id="n-skenario"></span></button>
               <button data-ktab="pratinjau" aria-selected="false">◉ Pratinjau</button>
             </div>
             <div class="pk-badan">
               <div class="pane" data-kpane="bagian"><div id="editor-pot"></div></div>
               <div class="pane" data-kpane="variabel" hidden><div id="isi-variabel"></div></div>
               <div class="pane" data-kpane="halaman" hidden><div id="isi-halaman"></div></div>
+              <div class="pane" data-kpane="skenario" hidden><div id="isi-skenario"></div></div>
               <div class="pane" data-kpane="pratinjau" hidden><div id="isi-pratinjau"></div></div>
             </div>
           </section>
@@ -202,6 +205,27 @@
       </main>
 
       <!-- ======================= LAYANAN ======================= -->
+      <!-- ==================== PUSTAKA KONDISI ==================== -->
+      <main class="layar" data-layar="pustaka" hidden>
+        <div class="bar-tpl">
+          <span class="bj-nama">Pustaka Kondisi</span>
+          <span class="lencana" id="pst-lencana">—</span>
+          <span class="kanan"><button class="btn btn-utama" id="pst-tambah">+ Kondisi</button></span>
+        </div>
+        <p class="ket">Kondisi bernama milik <b>platform</b> — dipakai bersama oleh semua layanan dan
+          template. Potongan merujuk namanya, bukan menulis ulang syaratnya, jadi satu perubahan
+          di sini berlaku di seluruh akta.</p>
+        <div class="dua-kolom-kerja">
+          <aside class="panel-kiri">
+            <div class="pk-tab"><button aria-selected="true">Kondisi <span id="n-pustaka"></span></button></div>
+            <div class="pk-isi"><div class="pane"><div id="pst-daftar"></div></div></div>
+          </aside>
+          <section class="panel-kanan">
+            <div class="pk-badan"><div class="pane"><div id="pst-editor"></div></div></div>
+          </section>
+        </div>
+      </main>
+
       <main class="layar" data-layar="layanan" hidden>
         <div class="bar-tpl">
           <span class="bj-nama">Layanan &amp; template</span>

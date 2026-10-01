@@ -282,6 +282,7 @@ function sinkronAktif(){
     if (rancangan.potongan) T.isi.potongan = rancangan.potongan;
     if (rancangan.grup)     T.isi.grup     = rancangan.grup;
     if (rancangan.halaman)  T.isi.halaman  = rancangan.halaman;
+    if (rancangan.skenario) T.isi.skenario = rancangan.skenario;
   }
 }
 /* arahkan rancangan.tab ke formulir sebuah layanan */
@@ -306,10 +307,12 @@ function pakaiTemplate(id){
   T.isi.potongan = Array.isArray(T.isi.potongan) ? T.isi.potongan : [];
   T.isi.grup     = Array.isArray(T.isi.grup)     ? T.isi.grup     : [];
   T.isi.halaman  = (T.isi.halaman && typeof T.isi.halaman === 'object') ? T.isi.halaman : {};
+  T.isi.skenario = Array.isArray(T.isi.skenario) ? T.isi.skenario : [];
   rancangan.bagian   = T.isi.bagian;
   rancangan.potongan = T.isi.potongan;
   rancangan.grup     = T.isi.grup;
   rancangan.halaman  = T.isi.halaman;
+  rancangan.skenario = T.isi.skenario;
   termuatTemplate = T.id;
   if (T.layanan && T.layanan !== rancangan.layananAktif) pakaiLayanan(T.layanan);
   bagianAktif = null; potAktif = null; mnBagian = null;
@@ -351,8 +354,8 @@ function templateOrder(){
 function rapikanIsiTemplate(isi, tab){
   (isi.potongan || []).forEach(p => {
     p.slot   = Array.isArray(p.slot)   ? p.slot   : [];
-    p.syarat = Array.isArray(p.syarat) ? p.syarat : [];
-    p.slot.forEach(sl => { sl.syarat = Array.isArray(sl.syarat) ? sl.syarat : []; });
+    p.syarat = rapikanSyarat(p.syarat);
+    p.slot.forEach(sl => { sl.syarat = rapikanSyarat(sl.syarat); });
     if (typeof p.tulis !== 'string') p.tulis = 'baris';
     if (typeof p.teks  !== 'string') p.teks  = '';
     p.teks = naskahKeHtml(p.teks);
@@ -382,6 +385,14 @@ function pastikanBentuk(r){
   if (!Array.isArray(r.bagian) || !r.bagian.length) r.bagian = JSON.parse(JSON.stringify(S.bagian));
   if (!r.halaman || typeof r.halaman !== 'object') r.halaman = JSON.parse(JSON.stringify(S.halaman));
   r.peran = peranSah(r.peran);
+  /* Pustaka Kondisi milik platform — dipakai bersama semua layanan & template */
+  if (!Array.isArray(r.pustaka))
+    r.pustaka = JSON.parse(JSON.stringify((S.pustaka || [])));
+  r.pustaka.forEach(k => {
+    if (!k.kode) k.kode = 'KND_' + Math.random().toString(36).slice(2,6).toUpperCase();
+    if (typeof k.label !== 'string') k.label = k.kode;
+    k.syarat = rapikanSyarat(k.syarat);
+  });
 
   /* --- naikkan rancangan lama ke bentuk layanan + template --- */
   if (!Array.isArray(r.layanan) || !r.layanan.length){
@@ -482,8 +493,8 @@ function pastikanBentuk(r){
 
   r.potongan.forEach(p => {
     p.slot = Array.isArray(p.slot) ? p.slot : [];
-    p.syarat = Array.isArray(p.syarat) ? p.syarat : [];
-    p.slot.forEach(sl => { sl.syarat = Array.isArray(sl.syarat) ? sl.syarat : []; });
+    p.syarat = rapikanSyarat(p.syarat);
+    p.slot.forEach(sl => { sl.syarat = rapikanSyarat(sl.syarat); });
     if (typeof p.tulis !== 'string') p.tulis = 'baris';
     if (typeof p.teks !== 'string') p.teks = '';
     p.teks = naskahKeHtml(p.teks);
@@ -604,7 +615,7 @@ function labelField(kode){
   return f ? f.label : kode;
 }
 function ringkasSyarat(sy){
-  return (sy||[]).map(c => labelField(c.field) + ' ' + c.op + (c.op === 'terisi' ? '' : ' ' + c.nilai)).join(' dan ');
+  return teksSyarat(sy, labelField);
 }
 
 /* dua field dengan kode sama saling menimpa saat order disimpan */
@@ -1570,13 +1581,148 @@ function nilaiSekarang(akar){
   });
   return v;
 }
-function lolosSyarat(sy, v){
-  return (sy||[]).every(c => {
-    const x = v[c.field];
-    if (c.op === 'terisi') return !!(x && String(x).trim());
-    if (c.op === '≠')      return !!x && x !== c.nilai;
-    return x === c.nilai;
+/* =====================================================================
+   MESIN SYARAT
+
+   Bentuk simpul yang sah:
+     {field, op, nilai}   baris dasar
+     {grup:[baris, ...]}  gabungan ATAU — cukup satu terpenuhi
+     {ref:'KODE'}         rujukan ke Pustaka Kondisi
+
+   Tingkat atas SELALU digabung DAN. Penyimpanan sudah siap untuk pohon
+   bersarang; penyuntingnya yang dibatasi satu tingkat.
+
+   ATURAN NILAI KOSONG — satu aturan untuk semua operator:
+     bila nilai fieldnya kosong, setiap operator bernilai SALAH.
+     Kecualiannya hanya 'tidak terisi' dan 'tidak ada barisnya'.
+   Jadi `≠ "PT"` pada field kosong bernilai salah, bukan benar.
+   ===================================================================== */
+const OPERATOR = [
+  /* kode, label, bentuk nilai */
+  ['=',                  'sama dengan',             'nilai'],
+  ['≠',                  'tidak sama dengan',       'nilai'],
+  ['salah satu dari',    'termasuk salah satu dari','daftar'],
+  ['mengandung',         'mengandung teks',         'nilai'],
+  ['terisi',             'ada isinya',              'tanpa'],
+  ['tidak terisi',       'kosong',                  'tanpa'],
+  ['>',                  'lebih dari',              'angka'],
+  ['≥',                  'lebih dari atau sama',    'angka'],
+  ['<',                  'kurang dari',             'angka'],
+  ['≤',                  'kurang dari atau sama',   'angka'],
+  ['ada barisnya',       'ada barisnya',            'tanpa'],
+  ['tidak ada barisnya', 'tidak ada barisnya',      'tanpa']
+];
+const bentukNilai = op => (OPERATOR.find(o => o[0] === op) || ['','','nilai'])[2];
+const labelOp = op => (OPERATOR.find(o => o[0] === op) || ['', op])[1];
+
+/* "1.250.000" dan "0,85" sama-sama jadi angka; yang bukan angka jadi null */
+function angkaDari(v){
+  let t = String(v == null ? '' : v).replace(/\s/g, '');
+  t = t.replace(/\.(?=\d{3}(\D|$))/g, '');
+  t = t.replace(',', '.').replace(/[^0-9.\-]/g, '');
+  const n = Number(t);
+  return (t === '' || !isFinite(n)) ? null : n;
+}
+const daftarNilai = c => Array.isArray(c.nilai) ? c.nilai : (c.nilai == null ? [] : [c.nilai]);
+
+function ujiSyarat(c, v){
+  const x = v[c.field];
+  const kosong = !(x != null && String(x).trim() !== '');
+  /* dua operator ini memang menanyakan ketiadaan, jadi diperiksa sebelum aturan kosong */
+  if (c.op === 'tidak terisi')       return kosong;
+  if (c.op === 'tidak ada barisnya') return kosong || (angkaDari(x) || 0) <= 0;
+  if (kosong) return false;
+  const t = String(x);
+  switch (c.op){
+    case 'terisi':          return true;
+    case 'ada barisnya':    return (angkaDari(x) || 0) > 0;
+    case '=':               return t === String(c.nilai);
+    case '≠':               return t !== String(c.nilai);
+    case 'salah satu dari': return daftarNilai(c).map(String).indexOf(t) >= 0;
+    case 'mengandung':      return t.toLowerCase().indexOf(String(c.nilai || '').toLowerCase()) >= 0;
+    case '>': case '≥': case '<': case '≤': {
+      const a = angkaDari(t), b = angkaDari(c.nilai);
+      if (a === null || b === null) return false;
+      return c.op === '>' ? a > b : c.op === '≥' ? a >= b : c.op === '<' ? a < b : a <= b;
+    }
+  }
+  return false;
+}
+
+/* Bentuk yang sah saja yang disimpan; grup bersarang dibuang karena
+   penyuntingnya satu tingkat. */
+function rapikanSyarat(sy){
+  const dasar = c => c && c.field && !c.grup && !c.ref;
+  return (Array.isArray(sy) ? sy : []).map(c => {
+    if (!c) return null;
+    if (c.ref) return { ref: String(c.ref) };
+    if (c.grup !== undefined) return { grup: (Array.isArray(c.grup) ? c.grup : []).filter(dasar) };
+    return dasar(c) ? c : null;
+  }).filter(Boolean);
+}
+const kondisiPustaka = k => (rancangan.pustaka || []).find(x => x.kode === k);
+
+/* jejak menjaga rujukan berputar tidak membuat panggilan tak berujung */
+function lolosSyarat(sy, v, jejak){
+  const lihat = jejak || {};
+  return (sy || []).every(c => {
+    if (!c) return true;
+    if (c.ref){
+      if (lihat[c.ref]) return true;                  /* siklus — dilaporkan diagnosa */
+      const k = kondisiPustaka(c.ref);
+      if (!k) return true;                            /* rujukan hilang tidak menyembunyikan */
+      const l = Object.assign({}, lihat); l[c.ref] = 1;
+      return lolosSyarat(k.syarat, v, l);
+    }
+    if (Array.isArray(c.grup))
+      return c.grup.length ? c.grup.some(g => lolosSyarat([g], v, lihat)) : true;
+    return ujiSyarat(c, v);
   });
+}
+
+/* ---- menuliskan syarat sebagai teks; lab memakainya di kartu & diagnosa ---- */
+function teksSatuSyarat(c, lab){
+  if (c && c.ref){
+    const k = kondisiPustaka(c.ref);
+    return '⟨' + (k ? (k.label || k.kode) : c.ref + ' (hilang)') + '⟩';
+  }
+  if (!c || !c.field) return '?';
+  const b = bentukNilai(c.op);
+  if (b === 'tanpa')  return lab(c.field) + ' ' + c.op;
+  if (b === 'daftar') return lab(c.field) + ' ' + c.op + ' {' + daftarNilai(c).join(', ') + '}';
+  return lab(c.field) + ' ' + c.op + ' ' + c.nilai;
+}
+function teksSyarat(sy, lab){
+  return (sy || []).map(c => Array.isArray(c && c.grup)
+    ? (c.grup.length ? '(' + c.grup.map(x => teksSatuSyarat(x, lab)).join(' atau ') + ')' : '(grup kosong)')
+    : teksSatuSyarat(c, lab)).join(' dan ');
+}
+
+/* ---- pilihan nilai & operator yang masuk akal untuk sebuah field ---- */
+function opsiFieldSyarat(f){
+  if (!f) return [];
+  if (f.tipe === 'yatidak') return ['Ya', 'Tidak'];
+  if (f.tipe === 'pilihan' || f.tipe === 'segmented') return (f.opsi || []).slice();
+  return [];
+}
+function operatorUntuk(f){
+  if (f && f.hitungBaris) return ['ada barisnya','tidak ada barisnya','=','≠','>','≥','<','≤'];
+  if (opsiFieldSyarat(f).length) return ['=','≠','salah satu dari','terisi','tidak terisi'];
+  if (f && (f.tipe === 'angka' || f.tipe === 'terbilang')) return ['=','≠','>','≥','<','≤','terisi','tidak terisi'];
+  return ['=','≠','mengandung','terisi','tidak terisi'];
+}
+function opBawaan(f){
+  if (f && f.hitungBaris) return 'ada barisnya';
+  if (opsiFieldSyarat(f).length) return '=';
+  return 'terisi';
+}
+/* satu baris syarat baru, memakai field pertama yang tersedia */
+function syaratBaru(){
+  const f = semuaField()[0];
+  if (!f) return null;
+  const op = opBawaan(f);
+  return { field: f.kode, op,
+    nilai: bentukNilai(op) === 'daftar' ? [] : (opsiFieldSyarat(f)[0] || '') };
 }
 function terapkanSyarat(akar){
   const v = nilaiSekarang(akar);
@@ -2134,6 +2280,8 @@ const KEPALA = {
               'Rancangan isian layar order — field di sini sekaligus menjadi kamus variabel.'],
   kondisi:   ['Engine Module › Template Akta', 'Template Akta Kantor',
               'Template minuta milik kantor per layanan'],
+  pustaka:   ['Engine Module › Pustaka Kondisi', 'Pustaka Kondisi',
+              'Kondisi bernama milik platform — dirujuk template, bukan disalin'],
   pratinjau: ['Layanan Engine › Order A', 'Order A', 'Layanan contoh']
 };
 function pilihMode(mode){
@@ -2156,6 +2304,7 @@ function pilihMode(mode){
   if (mode === 'kantor')  gambarPanelKantor();
   if (mode === 'layanan') gambarLayarLayanan();
   if (mode === 'kondisi') gambarLayarTemplate();
+  if (mode === 'pustaka') gambarLayarPustaka();
   if (mode === 'rancang') gambarLayarForm();
   if (mode === 'minuta'){ pakaiTemplateOrder(); gambarMinuta(); }
   terapkanPeranLayar();
@@ -2212,7 +2361,13 @@ function terapkanPeranLayar(){
     mt.classList.toggle('mati', !bebas);
     mt.title = bebas ? '' : 'Hanya Super Admin. Notaris dan Asisten menyunting naskah di Minuta.';
   }
+  const mp = $('#menu-pustaka');
+  if (mp){
+    mp.classList.toggle('mati', !bebas);
+    mp.title = bebas ? '' : 'Hanya Super Admin — kondisi disusun di tingkat platform.';
+  }
   if (!bebas && !$('.layar[data-layar="kondisi"]').hidden) pilihMode('minuta');
+  if (!bebas && !$('.layar[data-layar="pustaka"]').hidden) pilihMode('minuta');
 }
 
 function gambarKartuPeran(){
@@ -2340,6 +2495,13 @@ function semuaField(){
     pecahanUser(f).forEach(x => taruh(Object.assign({}, x, tanda, { lebar:'penuh' })));
     pecahanTerbilang(f).forEach(x => taruh(Object.assign({}, x, tanda, { lebar:'penuh' })));
   }));
+  /* Setiap tab bermode tabel menyumbang satu variabel semu: jumlah barisnya.
+     Itulah yang dipakai operator 'ada barisnya'. */
+  rancangan.tab.forEach(t => {
+    if (t.mode !== 'daftar') return;
+    taruh({ kode:'_baris_' + t.id, label: t.nama + ' \u2014 jumlah baris', tipe:'angka',
+      tab: t.nama, tabId: t.id, hitungBaris: true });
+  });
   return out;
 }
 const fieldKode = k => semuaField().find(f => f.kode === k);
@@ -2347,7 +2509,7 @@ const labelKode = k => { const f = fieldKode(k); return f ? f.label : k; };
 
 function ringkasSyarat(sy){
   if (!sy || !sy.length) return 'selalu';
-  return sy.map(c => labelKode(c.field) + ' ' + c.op + (c.op === 'terisi' ? '' : ' ' + c.nilai)).join(' dan ');
+  return teksSyarat(sy, labelKode);
 }
 
 const LABEL_TULIS = { awalKelompok:'awal kelompok', akhirKelompok:'akhir kelompok', sekali:'sekali' };
@@ -2381,21 +2543,65 @@ function pilihanFieldHtml(terpilih){
 }
 function nilaiSyaratPotHtml(c){
   const f = fieldKode(c.field);
-  if (f && (f.tipe === 'pilihan' || f.tipe === 'segmented'))
-    return '<select data-s="nilai">' + (f.opsi||[]).map(o =>
-      '<option' + (o === c.nilai ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>';
-  if (f && f.tipe === 'yatidak')
-    return '<select data-s="nilai"><option' + (c.nilai==='Ya'?' selected':'') + '>Ya</option>' +
-      '<option' + (c.nilai==='Tidak'?' selected':'') + '>Tidak</option></select>';
-  return '<input type="text" data-s="nilai" value="' + esc(c.nilai||'') + '">';
+  const b = bentukNilai(c.op);
+  if (b === 'tanpa') return '<span class="tanpa-nilai">tidak perlu nilai</span>';
+  const opsi = opsiFieldSyarat(f);
+  if (b === 'daftar'){
+    if (!opsi.length)
+      return '<input type="text" data-s="daftar" placeholder="pisahkan dengan koma" value="' +
+        esc(daftarNilai(c).join(', ')) + '">';
+    const dipilih = daftarNilai(c).map(String);
+    return '<span class="pil-banyak">' + opsi.map(o =>
+      '<label><input type="checkbox" data-s="centang" value="' + esc(o) + '"' +
+      (dipilih.indexOf(String(o)) >= 0 ? ' checked' : '') + '> ' + esc(o) + '</label>').join('') + '</span>';
+  }
+  if (b === 'angka')
+    return '<input type="text" inputmode="decimal" data-s="nilai" placeholder="angka" value="' +
+      esc(c.nilai == null ? '' : c.nilai) + '">';
+  if (opsi.length)
+    return '<select data-s="nilai">' + opsi.map(o =>
+      '<option' + (String(o) === String(c.nilai) ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>';
+  return '<input type="text" data-s="nilai" value="' + esc(c.nilai == null ? '' : c.nilai) + '">';
+}
+function barisDasarPot(c, i, induk, g){
+  const f = fieldKode(c.field);
+  const ops = operatorUntuk(f);
+  if (ops.indexOf(c.op) < 0) ops.unshift(c.op);      /* operator lama tetap terlihat */
+  return '<div class="baris-syarat" data-i="' + i + '" data-induk="' + esc(induk) + '"' +
+    (g == null ? '' : ' data-g="' + g + '"') + '>' +
+    '<select data-s="field">' + pilihanFieldHtml(c.field) + '</select>' +
+    '<select data-s="op">' + ops.map(o =>
+      '<option value="' + esc(o) + '"' + (o === c.op ? ' selected' : '') + ' title="' +
+      esc(labelOp(o)) + '">' + esc(o) + '</option>').join('') + '</select>' +
+    nilaiSyaratPotHtml(c) +
+    '<button class="btn btn-kecil btn-bahaya" data-s="hapus">×</button></div>';
+}
+function barisRefPot(c, i, induk){
+  const daftar = rancangan.pustaka || [];
+  return '<div class="baris-syarat baris-ref" data-i="' + i + '" data-induk="' + esc(induk) + '">' +
+    '<span class="tanda-ref">Kondisi tersimpan</span>' +
+    '<select data-s="ref">' + (daftar.length
+      ? daftar.map(k => '<option value="' + esc(k.kode) + '"' + (k.kode === c.ref ? ' selected' : '') +
+          '>' + esc(k.label || k.kode) + '</option>').join('')
+      : '<option value="">(pustaka masih kosong)</option>') + '</select>' +
+    '<span class="hampa" style="margin:0">' +
+      esc(kondisiPustaka(c.ref) ? teksSyarat(kondisiPustaka(c.ref).syarat, labelKode) : '—') + '</span>' +
+    '<button class="btn btn-kecil btn-bahaya" data-s="hapus">×</button></div>';
 }
 function barisSyaratPot(c, i, induk){
-  return '<div class="baris-syarat" data-i="' + i + '" data-induk="' + induk + '">' +
-    '<select data-s="field">' + pilihanFieldHtml(c.field) + '</select>' +
-    '<select data-s="op">' + ['=','≠','terisi'].map(o =>
-      '<option' + (o === c.op ? ' selected' : '') + '>' + o + '</option>').join('') + '</select>' +
-    (c.op === 'terisi' ? '<span class="tanpa-nilai">tidak perlu nilai</span>' : nilaiSyaratPotHtml(c)) +
-    '<button class="btn btn-kecil btn-bahaya" data-s="hapus">×</button></div>';
+  if (c && c.ref) return barisRefPot(c, i, induk);
+  if (!Array.isArray(c && c.grup)) return barisDasarPot(c, i, induk, null);
+  let h = '<div class="grup-atau" data-i="' + i + '" data-induk="' + esc(induk) + '">' +
+    '<div class="atau-kepala">Cukup salah satu' +
+    '<button class="btn btn-kecil btn-bahaya kanan" data-s="hapusgrup">Hapus grup</button></div>';
+  if (!c.grup.length)
+    h += '<p class="hampa" style="margin:0 0 6px">Grup masih kosong — selama kosong dianggap terpenuhi.</p>';
+  c.grup.forEach((g, j) => {
+    if (j) h += '<div class="atau">ATAU</div>';
+    h += barisDasarPot(g, i, induk, j);
+  });
+  h += '<button class="btn btn-kecil" data-s="tambahatau" style="margin-top:6px">+ ATAU</button></div>';
+  return h;
 }
 
 /* ---------- editor potongan ---------- */
@@ -2411,13 +2617,17 @@ function gambarEditorPot(p, box){
   /* syarat */
   h += '<div class="f"><label class="j">Syarat tampil</label>';
   h += '<p class="hampa">' + (p.syarat.length
-    ? 'Potongan ini tertulis bila semua baris di bawah terpenuhi.'
+    ? 'Tertulis bila semua baris terpenuhi. Grup ATAU cukup salah satu barisnya. ' +
+      'Field kosong membuat semua operator salah, kecuali “tidak terisi”.'
     : 'Tanpa syarat — potongan ini selalu tertulis.') + '</p>';
   p.syarat.forEach((c,i) => {
     if (i) h += '<div class="dan">DAN</div>';
     h += barisSyaratPot(c, i, 'utama');
   });
-  h += '<button class="btn btn-kecil" data-tambahsyarat="utama" style="margin-top:6px">+ Syarat</button></div>';
+  h += '<div class="tombol-syarat">' +
+    '<button class="btn btn-kecil" data-tambahsyarat="utama">+ Syarat</button>' +
+    '<button class="btn btn-kecil" data-tambahgrup="utama">+ Grup ATAU</button>' +
+    '<button class="btn btn-kecil" data-tambahref="utama">+ Kondisi tersimpan</button></div></div>';
 
   /* perulangan & penomoran & grup */
   const indukUlang = bagianIni() && bagianIni().jenis === 'otomatis' ? (bagianIni().ulang || '') : '';
@@ -2491,7 +2701,10 @@ function gambarEditorPot(p, box){
       if (j) h += '<div class="dan">DAN</div>';
       h += barisSyaratPot(c, j, 'slot:' + i);
     });
-    h += '<button class="btn btn-kecil" data-tambahsyarat="slot:' + i + '" style="margin:2px 0 10px">+ Syarat</button>';
+    h += '<div class="tombol-syarat" style="margin:2px 0 10px">' +
+      '<button class="btn btn-kecil" data-tambahsyarat="slot:' + i + '">+ Syarat</button>' +
+      '<button class="btn btn-kecil" data-tambahgrup="slot:' + i + '">+ Grup ATAU</button>' +
+      '<button class="btn btn-kecil" data-tambahref="slot:' + i + '">+ Kondisi tersimpan</button></div>';
     h += penyuntingHtml('slot' + i, sl.teks, { pendek:true }) + '</div>';
   });
   h += '<button class="btn btn-kecil" data-tambahslot>+ Sisipan bersyarat</button></div>';
@@ -2503,6 +2716,88 @@ function gambarEditorPot(p, box){
 
   box.innerHTML = h;
   pasangEditorPot(p, grup, box);
+}
+
+/* Penangan baris syarat — dipakai penyunting potongan dan penyunting Pustaka Kondisi.
+   ambilSy(induk) menyerahkan array syarat yang sedang disunting; ulang() menggambar ulang. */
+function pasangBarisSyarat(box, ambilSy, ulang){
+  box.querySelectorAll('.baris-syarat').forEach(row => {
+    const sy = ambilSy(row.dataset.induk), i = +row.dataset.i;
+    if (!sy) return;
+    /* baris di dalam grup ATAU membawa data-g: wadahnya grup itu, bukan daftar teratas */
+    const g = row.dataset.g == null ? null : +row.dataset.g;
+    const wadah = g == null ? sy : (sy[i] || {}).grup;
+    const k = g == null ? i : g;
+    if (!wadah || !wadah[k]) return;
+
+    const hapus = row.querySelector('[data-s="hapus"]');
+    if (hapus) hapus.addEventListener('click', () => {
+      wadah.splice(k, 1);
+      /* grup yang tinggal satu baris tidak lagi berarti — dijadikan baris biasa */
+      if (g != null && wadah.length === 1) sy[i] = wadah[0];
+      ulang();
+    });
+
+    const rf = row.querySelector('[data-s="ref"]');
+    if (rf){
+      rf.addEventListener('change', e => { wadah[k] = { ref: e.target.value }; ulang(); });
+      return;
+    }
+
+    row.querySelector('[data-s="field"]').addEventListener('change', e => {
+      const f = fieldKode(e.target.value);
+      const op = opBawaan(f);
+      wadah[k].field = e.target.value;
+      wadah[k].op = op;
+      wadah[k].nilai = bentukNilai(op) === 'daftar' ? [] : (opsiFieldSyarat(f)[0] || '');
+      ulang();
+    });
+    row.querySelector('[data-s="op"]').addEventListener('change', e => {
+      wadah[k].op = e.target.value;
+      const b = bentukNilai(wadah[k].op);
+      if (b === 'daftar' && !Array.isArray(wadah[k].nilai))
+        wadah[k].nilai = wadah[k].nilai ? [wadah[k].nilai] : [];
+      if (b !== 'daftar' && Array.isArray(wadah[k].nilai))
+        wadah[k].nilai = wadah[k].nilai[0] || '';
+      ulang();
+    });
+    const nl = row.querySelector('[data-s="nilai"]');
+    if (nl) nl.addEventListener('change', e => { wadah[k].nilai = e.target.value; ulang(); });
+    const dft = row.querySelector('[data-s="daftar"]');
+    if (dft) dft.addEventListener('change', e => {
+      wadah[k].nilai = e.target.value.split(',').map(x => x.trim()).filter(Boolean);
+      ulang();
+    });
+    const centang = row.querySelectorAll('[data-s="centang"]');
+    centang.forEach(ck => ck.addEventListener('change', () => {
+      wadah[k].nilai = Array.from(centang).filter(x => x.checked).map(x => x.value);
+      ulang();
+    }));
+  });
+
+  box.querySelectorAll('.grup-atau').forEach(kotak => {
+    const sy = ambilSy(kotak.dataset.induk), i = +kotak.dataset.i;
+    if (!sy || !sy[i]) return;
+    kotak.querySelector('[data-s="hapusgrup"]').addEventListener('click', () => { sy.splice(i,1); ulang(); });
+    kotak.querySelector('[data-s="tambahatau"]').addEventListener('click', () => {
+      const c = syaratBaru(); if (!c) return;
+      (sy[i].grup = sy[i].grup || []).push(c); ulang();
+    });
+  });
+
+  box.querySelectorAll('[data-tambahsyarat]').forEach(b => b.addEventListener('click', () => {
+    const c = syaratBaru(); if (!c) return;
+    ambilSy(b.dataset.tambahsyarat).push(c); ulang();
+  }));
+  box.querySelectorAll('[data-tambahgrup]').forEach(b => b.addEventListener('click', () => {
+    const a = syaratBaru(), c = syaratBaru(); if (!a) return;
+    ambilSy(b.dataset.tambahgrup).push({ grup: [a, c] }); ulang();
+  }));
+  box.querySelectorAll('[data-tambahref]').forEach(b => b.addEventListener('click', () => {
+    const k = (rancangan.pustaka || [])[0];
+    if (!k){ window.alert('Pustaka Kondisi masih kosong. Buat kondisi bernama dulu di menu Pustaka Kondisi.'); return; }
+    ambilSy(b.dataset.tambahref).push({ ref: k.kode }); ulang();
+  }));
 }
 
 /* Tampilan potongan untuk PPAT dan Asisten: syarat, perulangan, penomoran dan
@@ -3088,30 +3383,7 @@ function pasangEditorPot(p, grup, box){
     ulang();
   });
 
-  box.querySelectorAll('.baris-syarat').forEach(row => {
-    const sy = ambilSy(row.dataset.induk), i = +row.dataset.i;
-    row.querySelector('[data-s="field"]').addEventListener('change', e => {
-      sy[i].field = e.target.value;
-      const f = fieldKode(e.target.value);
-      const bebas = !(f && f.opsi && f.opsi.length) && !(f && f.tipe === 'yatidak');
-      sy[i].op = bebas ? 'terisi' : '=';
-      sy[i].nilai = (f && f.opsi && f.opsi[0]) || (f && f.tipe === 'yatidak' ? 'Ya' : '');
-      ulang();
-    });
-    row.querySelector('[data-s="op"]').addEventListener('change', e => { sy[i].op = e.target.value; ulang(); });
-    const nl = row.querySelector('[data-s="nilai"]');
-    if (nl) nl.addEventListener('change', e => { sy[i].nilai = e.target.value; ulang(); });
-    row.querySelector('[data-s="hapus"]').addEventListener('click', () => { sy.splice(i,1); ulang(); });
-  });
-  box.querySelectorAll('[data-tambahsyarat]').forEach(b => b.addEventListener('click', () => {
-    const sy = ambilSy(b.dataset.tambahsyarat);
-    const f = semuaField()[0];
-    if (!f) return;
-    const bebas = !(f.opsi && f.opsi.length) && f.tipe !== 'yatidak';
-    sy.push({ field:f.kode, op: bebas ? 'terisi' : '=',
-      nilai:(f.opsi && f.opsi[0]) || (f.tipe === 'yatidak' ? 'Ya' : '') });
-    ulang();
-  }));
+  pasangBarisSyarat(box, ambilSy, ulang);
 
   box.querySelector('[data-ulang]').addEventListener('change', e => { p.ulang = e.target.value; simpanNanti(); });
   const selTulis = box.querySelector('[data-tulis]');
@@ -3316,6 +3588,7 @@ function gambarKanan(){
   if (t === 'bagian')    return gambarPanelBagian();
   if (t === 'variabel')  return gambarPanelVariabel();
   if (t === 'halaman')   return gambarPanelHalaman();
+  if (t === 'skenario')  return gambarPanelSkenario();
   if (t === 'pratinjau') return gambarPanelNaskah();
 }
 
@@ -3929,6 +4202,7 @@ function rakitBagianBebas(b, global, menang){
         if (menang[grup.kode][kunci]) return;
       }
       if (!lolosSyarat(p.syarat, ctx)) return;
+      jejakPot[p.kode] = 1;
       if (grup) menang[grup.kode][kunci] = p.kode;
       n++; jumlah++;
       const teks = rakitTeks(p, ctx);
@@ -3958,6 +4232,7 @@ function rakitBagianBerulang(b, global, menang){
   let html = '', jumlah = 0, hampa = 0, n = 0;
   const tulis = (p, ctx, kelas) => {
     if (!lolosSyarat(p.syarat, ctx)) return '';
+    jejakPot[p.kode] = 1;
     jumlah++;
     const t = rakitTeks(p, ctx);
     hampa += (t.match(/rk-hampa/g) || []).length;
@@ -3988,6 +4263,7 @@ function rakitBagianBerulang(b, global, menang){
           : [{ ctx: r.ctx, kunci: r.kunci }];
         sub.forEach(sx => {
           if (!lolosSyarat(p.syarat, sx.ctx)) return;
+          jejakPot[p.kode] = 1;
           if (grup) menang[grup.kode][r.kunci] = p.kode;
           jumlah++;
           const t = rakitTeks(p, sx.ctx);
@@ -4015,13 +4291,52 @@ function periksaNilaiSyarat(){
     if (f.tipe === 'pilihan' || f.tipe === 'segmented') opsiDari[f.kode] = (f.opsi || []).slice();
     else if (f.tipe === 'yatidak') opsiDari[f.kode] = ['Ya', 'Tidak'];
   }));
-  const uji = (sy, dimana) => (sy || []).forEach(c => {
-    if (!c || !c.field || c.op === 'terisi') return;
-    if (c.nilai == null || c.nilai === '') return;
+  /* satu baris dasar: nilai yang diuji harus ada di daftar pilihan fieldnya */
+  const ujiDasar = (c, dimana, dalamGrup) => {
+    if (!c || !c.field) return;
+    const bentuk = bentukNilai(c.op);
+    if (bentuk === 'tanpa') return;
     const o = opsiDari[c.field];
-    if (!o || !o.length || o.indexOf(c.nilai) >= 0) return;
-    catat('Syarat pada ' + dimana + ' menguji ' + c.field + ' = “' + c.nilai + '”, padahal pilihan ' +
-      'yang tersedia hanya “' + o.join('”, “') + '”. Syarat itu tidak akan pernah terpenuhi.');
+    if (!o || !o.length) return;
+    const ekor = dalamGrup
+      ? ', tetapi grup ATAU-nya masih bisa terpenuhi lewat baris lain.'
+      : '. Syarat itu tidak akan pernah terpenuhi.';
+    const salah = (bentuk === 'daftar' ? daftarNilai(c) : [c.nilai])
+      .filter(v => v != null && v !== '' && o.indexOf(String(v)) < 0);
+    if (!salah.length) return;
+    catat('Syarat pada ' + dimana + ' menguji ' + c.field + ' = “' + salah.join('”, “') +
+      '”, padahal pilihan yang tersedia hanya “' + o.join('”, “') + '”' + ekor);
+  };
+  const uji = (sy, dimana, jejak) => (sy || []).forEach(c => {
+    if (!c) return;
+    if (c.ref){
+      const k = kondisiPustaka(c.ref);
+      if (!k){
+        catat('Syarat pada ' + dimana + ' merujuk kondisi tersimpan “' + c.ref +
+          '” yang sudah tidak ada di Pustaka Kondisi. Rujukan yang hilang diabaikan, ' +
+          'jadi potongannya tetap tertulis.');
+        return;
+      }
+      const l = jejak || {};
+      if (l[c.ref]){
+        catat('Kondisi tersimpan “' + (k.label || k.kode) + '” merujuk dirinya sendiri ' +
+          '(berputar). Putaran itu dihentikan dan dianggap terpenuhi — perbaiki definisinya.');
+        return;
+      }
+      const l2 = Object.assign({}, l); l2[c.ref] = 1;
+      uji(k.syarat, 'kondisi tersimpan “' + (k.label || k.kode) + '”', l2);
+      return;
+    }
+    if (Array.isArray(c.grup)){
+      if (!c.grup.length){
+        catat('Ada grup ATAU yang masih kosong pada ' + dimana +
+          '. Grup kosong diabaikan, jadi ia tidak membatasi apa pun.');
+        return;
+      }
+      c.grup.forEach(g => ujiDasar(g, dimana, true));
+      return;
+    }
+    ujiDasar(c, dimana, false);
   });
   (rancangan.potongan || []).forEach(p => {
     uji(p.syarat, 'potongan “' + (p.judul || p.kode) + '”');
@@ -4031,15 +4346,23 @@ function periksaNilaiSyarat(){
     uji(f.tampilBila, 'elemen “' + (f.label || f.kode) + '” di tab ' + t.nama)));
 }
 
+/* Diisi rakitAkta: kode potongan yang benar-benar tertulis pada perakitan
+   terakhir. Dipakai laporan cakupan Skenario Uji. */
+let jejakPot = {};
 function rakitAkta(){
   catatanRakit = [];
+  jejakPot = {};
   periksaNilaiSyarat();
   const global = Object.assign({}, konteksDokumen());
   rancangan.tab.forEach(t => {
     if (t.mode === 'formulir') Object.assign(global, konteksBaris(t, nilaiForm[t.id] || {}));
   });
+  rancangan.tab.forEach(t => {
+    if (t.mode === 'daftar') global['_baris_' + t.id] = String((barisPv[t.id] || []).length);
+  });
 
   const menang = {};
+  const bagianKosong = [];
   let html = '', jumlahPotongan = 0, jumlahHampa = 0;
 
   (rancangan.bagian || []).forEach(b => {
@@ -4054,12 +4377,13 @@ function rakitAkta(){
     const isi = hasilBagian.html;
     jumlahPotongan += hasilBagian.jumlah;
     jumlahHampa += hasilBagian.hampa;
+    if (!isi) bagianKosong.push(b.judul);
     html += '<div class="rk-bagian oto">' + (isi ||
       '<div class="rk-lewat">Seluruh potongan pada bagian “' + esc(b.judul) +
       '” tidak memenuhi syarat, jadi bagian ini kosong.</div>') + '</div>';
   });
 
-  return { html, jumlahPotongan, jumlahHampa };
+  return { html, jumlahPotongan, jumlahHampa, bagianKosong };
 }
 /* =====================================================================
    Minuta — ruang kerja drafting. Struktur dan syarat datang dari Template
@@ -4504,3 +4828,318 @@ async function eksporTemplate(){
 }
 if ($('#btn-impor-template')) $('#btn-impor-template').addEventListener('click', imporTemplate);
 if ($('#btn-ekspor-template')) $('#btn-ekspor-template').addEventListener('click', eksporTemplate);
+
+/* =====================================================================
+   PUSTAKA KONDISI — kondisi bernama milik platform.
+
+   Potongan dan sisipan merujuk kondisi ini lewat simpul {ref:'KODE'},
+   jadi definisinya hidup di satu tempat. Hanya Super Admin yang masuk ke
+   sini; Notaris dan Asisten tidak pernah melihatnya.
+   ===================================================================== */
+let pstAktif = null;
+
+function pemakaiKondisi(kode){
+  const out = [];
+  const punyaRef = sy => (sy || []).some(c => c && c.ref === kode);
+  (rancangan.potongan || []).forEach(p => {
+    if (punyaRef(p.syarat)) out.push(p.judul || p.kode);
+    (p.slot || []).forEach(sl => {
+      if (punyaRef(sl.syarat)) out.push((p.judul || p.kode) + ' › ' + (sl.label || sl.kode));
+    });
+  });
+  (rancangan.pustaka || []).forEach(k => {
+    if (k.kode !== kode && punyaRef(k.syarat)) out.push('kondisi ' + (k.label || k.kode));
+  });
+  return out;
+}
+
+function gambarLayarPustaka(){
+  const daftar = rancangan.pustaka || [];
+  if (!pstAktif || !daftar.some(k => k.kode === pstAktif))
+    pstAktif = daftar.length ? daftar[0].kode : null;
+  const lc = $('#pst-lencana');
+  if (lc) lc.textContent = daftar.length + ' kondisi';
+  const n = $('#n-pustaka');
+  if (n) n.textContent = '(' + daftar.length + ')';
+  gambarPustakaDaftar();
+  gambarPustakaEditor();
+}
+
+function gambarPustakaDaftar(){
+  const box = $('#pst-daftar');
+  if (!box) return;
+  const daftar = rancangan.pustaka || [];
+  if (!daftar.length){
+    box.innerHTML = '<div class="kosong-panel">Belum ada kondisi. Tekan <b>+ Kondisi</b>.</div>';
+    return;
+  }
+  box.innerHTML = daftar.map(k => {
+    const dipakai = pemakaiKondisi(k.kode).length;
+    return '<div class="pot' + (pstAktif === k.kode ? ' aktif' : '') + '" data-pk="' + esc(k.kode) + '">' +
+      '<span class="nm">' + esc(k.label || k.kode) + '</span>' +
+      '<span class="slotn">' + dipakai + '×</span>' +
+      '<span class="sy">' + esc(teksSyarat(k.syarat, labelKode) || 'selalu') + '</span></div>';
+  }).join('');
+  box.querySelectorAll('[data-pk]').forEach(el => el.addEventListener('click', () => {
+    pstAktif = el.dataset.pk; gambarLayarPustaka();
+  }));
+}
+
+function gambarPustakaEditor(){
+  const box = $('#pst-editor');
+  if (!box) return;
+  const k = (rancangan.pustaka || []).find(x => x.kode === pstAktif);
+  if (!k){
+    box.innerHTML = '<div class="kosong-kanan"><div class="bulat">❖</div>' +
+      'Pilih kondisi di panel kiri, atau buat yang baru.</div>';
+    return;
+  }
+  k.syarat = rapikanSyarat(k.syarat);
+  const dipakai = pemakaiKondisi(k.kode);
+
+  let h = '<div class="ed-kepala">' +
+    '<input type="text" class="judul-input" data-pkl value="' + esc(k.label || '') +
+      '" placeholder="Nama kondisi, mis. Pihak berbentuk badan hukum">' +
+    '<span class="lencana">' + esc(k.kode) + '</span>' +
+    '<span class="kanan"><button class="btn btn-kecil btn-bahaya" data-pkhapus>Hapus kondisi</button></span></div>';
+
+  h += '<div class="ed-badan">';
+  h += '<div class="f"><label class="j">Kode rujukan</label>' +
+    '<input type="text" data-pkk value="' + esc(k.kode) + '">' +
+    '<p class="hampa">Dipakai template sebagai <code>{ref:\'' + esc(k.kode) + '\'}</code>. ' +
+    'Mengubah kode akan ikut memperbarui semua yang merujuknya.</p></div>';
+
+  h += '<div class="f"><label class="j">Syarat</label>';
+  h += '<p class="hampa">Terpenuhi bila semua baris terpenuhi. Grup ATAU cukup salah satu barisnya. ' +
+    'Field kosong membuat semua operator salah, kecuali “tidak terisi”.</p>';
+  k.syarat.forEach((c, i) => {
+    if (i) h += '<div class="dan">DAN</div>';
+    h += barisSyaratPot(c, i, 'utama');
+  });
+  h += '<div class="tombol-syarat">' +
+    '<button class="btn btn-kecil" data-tambahsyarat="utama">+ Syarat</button>' +
+    '<button class="btn btn-kecil" data-tambahgrup="utama">+ Grup ATAU</button>' +
+    '<button class="btn btn-kecil" data-tambahref="utama">+ Kondisi tersimpan</button></div></div>';
+
+  h += '<div class="f"><label class="j">Dipakai di</label>' +
+    (dipakai.length
+      ? '<ul class="daftar-pakai">' + dipakai.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>'
+      : '<p class="hampa">Belum dirujuk siapa pun.</p>') + '</div>';
+  h += '</div>';
+  box.innerHTML = h;
+
+  box.querySelector('[data-pkl]').addEventListener('input', e => {
+    k.label = e.target.value; gambarPustakaDaftar(); simpanNanti();
+  });
+  box.querySelector('[data-pkk]').addEventListener('change', e => {
+    const baru = e.target.value.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+    if (!baru || baru === k.kode){ gambarPustakaEditor(); return; }
+    if ((rancangan.pustaka || []).some(x => x !== k && x.kode === baru)){
+      window.alert('Kode “' + baru + '” sudah dipakai kondisi lain.');
+      gambarPustakaEditor(); return;
+    }
+    const lama = k.kode;
+    const ganti = sy => (sy || []).forEach(c => { if (c && c.ref === lama) c.ref = baru; });
+    (rancangan.potongan || []).forEach(p => { ganti(p.syarat); (p.slot || []).forEach(sl => ganti(sl.syarat)); });
+    (rancangan.pustaka  || []).forEach(x => ganti(x.syarat));
+    k.kode = baru; pstAktif = baru;
+    gambarLayarPustaka(); simpanNanti();
+  });
+  box.querySelector('[data-pkhapus]').addEventListener('click', () => {
+    if (dipakai.length && !window.confirm('Kondisi ini masih dirujuk ' + dipakai.length +
+      ' tempat. Rujukan yang hilang akan diabaikan, jadi potongannya tetap tertulis. Hapus?')) return;
+    rancangan.pustaka = (rancangan.pustaka || []).filter(x => x.kode !== k.kode);
+    pstAktif = null;
+    gambarLayarPustaka(); simpanNanti();
+  });
+
+  pasangBarisSyarat(box, () => k.syarat, () => { gambarLayarPustaka(); simpanNanti(); });
+}
+
+if ($('#pst-tambah')) $('#pst-tambah').addEventListener('click', () => {
+  rancangan.pustaka = rancangan.pustaka || [];
+  let i = rancangan.pustaka.length + 1, kode;
+  do { kode = 'KONDISI_' + i++; } while (rancangan.pustaka.some(x => x.kode === kode));
+  const c = syaratBaru();
+  rancangan.pustaka.push({ kode, label: 'Kondisi baru', syarat: c ? [c] : [] });
+  pstAktif = kode;
+  gambarLayarPustaka(); simpanNanti();
+});
+
+/* =====================================================================
+   SKENARIO UJI — tab di Template Akta, hanya Super Admin.
+
+   Satu skenario adalah satu set isian karangan (baris tabel + isian
+   formulir) yang disimpan BERSAMA TEMPLATENYA, bukan sebagai order.
+   Gunanya dua: memeriksa template sesudah syaratnya diubah, dan menjadi
+   kriteria penerimaan bagi developer yang menerapkan mesin ini —
+   "keluarannya harus sama untuk skenario-skenario ini".
+   ===================================================================== */
+
+function ringkasIsiSkenario(sk){
+  const bagian = [];
+  (rancangan.tab || []).forEach(t => {
+    if (t.mode === 'daftar'){
+      const n = ((sk.baris || {})[t.id] || []).length;
+      if (n) bagian.push(t.nama + ' ' + n);
+    } else {
+      const isi = (sk.form || {})[t.id] || {};
+      const n = Object.keys(isi).filter(k => String(isi[k] || '').trim() !== '').length;
+      if (n) bagian.push(t.nama + ' ' + n + ' isian');
+    }
+  });
+  return bagian.length ? bagian.join(' · ') : 'kosong';
+}
+
+/* Merakit setiap skenario dengan mesin yang sama seperti Minuta, lalu
+   mengumpulkan cakupannya. Isian yang sedang dibuka dikembalikan utuh. */
+function jalankanSkenario(){
+  const adaBaris = barisPv, adaForm = nilaiForm;
+  const salin = x => JSON.parse(JSON.stringify(x || {}));
+  const hasil = [];
+  const pernah = {};
+  (rancangan.skenario || []).forEach(sk => {
+    barisPv   = salin(sk.baris);
+    nilaiForm = salin(sk.form);
+    const r = rakitAkta();
+    const pot = Object.keys(jejakPot);
+    pot.forEach(k => { pernah[k] = (pernah[k] || 0) + 1; });
+    hasil.push({
+      id: sk.id, nama: sk.nama,
+      jumlah: r.jumlahPotongan, hampa: r.jumlahHampa,
+      pot, bagianKosong: r.bagianKosong.slice(),
+      catatan: catatanRakit.slice(0, 5)
+    });
+  });
+  barisPv = adaBaris; nilaiForm = adaForm;
+  const semua = (rancangan.potongan || []).filter(p =>
+    (rancangan.bagian || []).some(b => (b.potongan || []).includes(p.kode)));
+  const takPernah = semua.filter(p => !pernah[p.kode]);
+  return { hasil, pernah, takPernah, jumlahDipakai: semua.length };
+}
+
+function gambarPanelSkenario(){
+  const box = $('#isi-skenario');
+  if (!box) return;
+  rancangan.skenario = Array.isArray(rancangan.skenario) ? rancangan.skenario : [];
+  const daftar = rancangan.skenario;
+  const n = $('#n-skenario');
+  if (n) n.textContent = '(' + daftar.length + ')';
+
+  let h = '<div class="alat-var">' +
+    '<button class="btn btn-utama btn-kecil" data-sk-ambil>+ Ambil dari order yang dibuka</button>' +
+    '<button class="btn btn-kecil" data-sk-kosong>+ Skenario kosong</button>' +
+    (daftar.length ? '<button class="btn btn-kecil" data-sk-rakit>⟳ Rakit semua</button>' : '') +
+    '<span class="hint">Isian karangan untuk menguji template. Tidak pernah menjadi akta.</span></div>';
+
+  if (!daftar.length){
+    h += '<div class="kosong-panel">Belum ada skenario. Isi sebuah order di menu Order, ' +
+      'lalu tekan <b>+ Ambil dari order yang dibuka</b> untuk membekukan isiannya di sini.</div>';
+    box.innerHTML = h;
+  } else {
+    h += '<div class="tabel-bungkus"><table class="tabel-skenario"><thead><tr>' +
+      '<th>Nama skenario</th><th>Isi</th><th></th></tr></thead><tbody>' +
+      daftar.map(sk => '<tr data-skid="' + esc(sk.id) + '">' +
+        '<td><input type="text" data-sk-nama value="' + esc(sk.nama || '') + '"></td>' +
+        '<td class="sel-ket">' + esc(ringkasIsiSkenario(sk)) + '</td>' +
+        '<td class="kanan-sel">' +
+          '<button class="btn btn-kecil" data-sk-pakai>Muat ke order</button> ' +
+          '<button class="btn btn-kecil btn-bahaya" data-sk-hapus>×</button></td></tr>').join('') +
+      '</tbody></table></div>';
+    h += '<div id="sk-laporan"></div>';
+    box.innerHTML = h;
+  }
+
+  const ulang = () => { gambarPanelSkenario(); simpanNanti(); };
+
+  const ambil = box.querySelector('[data-sk-ambil]');
+  if (ambil) ambil.addEventListener('click', () => {
+    const salin = x => JSON.parse(JSON.stringify(x || {}));
+    rancangan.skenario.push({
+      id: 'sk_' + Math.random().toString(36).slice(2, 8),
+      nama: 'Skenario ' + (rancangan.skenario.length + 1),
+      baris: salin(barisPv), form: salin(nilaiForm)
+    });
+    ulang();
+  });
+  const kosong = box.querySelector('[data-sk-kosong]');
+  if (kosong) kosong.addEventListener('click', () => {
+    rancangan.skenario.push({
+      id: 'sk_' + Math.random().toString(36).slice(2, 8),
+      nama: 'Skenario ' + (rancangan.skenario.length + 1), baris: {}, form: {}
+    });
+    ulang();
+  });
+
+  box.querySelectorAll('tr[data-skid]').forEach(tr => {
+    const sk = rancangan.skenario.find(x => x.id === tr.dataset.skid);
+    if (!sk) return;
+    tr.querySelector('[data-sk-nama]').addEventListener('input', e => {
+      sk.nama = e.target.value; simpanNanti();
+    });
+    tr.querySelector('[data-sk-hapus]').addEventListener('click', () => {
+      if (!window.confirm('Hapus skenario “' + (sk.nama || '') + '”?')) return;
+      rancangan.skenario = rancangan.skenario.filter(x => x.id !== sk.id);
+      ulang();
+    });
+    tr.querySelector('[data-sk-pakai]').addEventListener('click', () => {
+      const salin = x => JSON.parse(JSON.stringify(x || {}));
+      barisPv = salin(sk.baris); nilaiForm = salin(sk.form);
+      $('#status').textContent = 'isian skenario “' + (sk.nama || '') + '” dimuat ke order yang dibuka';
+      gambarKanan();
+    });
+  });
+
+  const rakit = box.querySelector('[data-sk-rakit]');
+  if (rakit) rakit.addEventListener('click', () => {
+    const lap = jalankanSkenario();
+    gambarLaporanSkenario(lap);
+  });
+}
+
+function gambarLaporanSkenario(lap){
+  const box = $('#sk-laporan');
+  if (!box) return;
+  const pot = kode => {
+    const p = (rancangan.potongan || []).find(x => x.kode === kode);
+    return p ? (p.judul || p.kode) : kode;
+  };
+
+  let h = '<div class="lap-kepala">Laporan cakupan</div>';
+
+  h += '<div class="lap-kartu' + (lap.takPernah.length ? ' lap-waspada' : ' lap-aman') + '">' +
+    '<b>' + (lap.jumlahDipakai - lap.takPernah.length) + ' dari ' + lap.jumlahDipakai +
+    '</b> potongan tertulis di setidaknya satu skenario.';
+  if (lap.takPernah.length){
+    h += '<p>Yang <b>tidak pernah</b> muncul — syaratnya mungkin salah, atau skenarionya belum ada:</p><ul>' +
+      lap.takPernah.map(p => '<li>' + esc(p.judul || p.kode) + ' <span class="hampa">· ' +
+        esc(ringkasSyarat(p.syarat)) + '</span></li>').join('') + '</ul>';
+  } else {
+    h += '<p>Tidak ada potongan yang terlewat.</p>';
+  }
+  h += '</div>';
+
+  h += '<div class="tabel-bungkus"><table class="tabel-skenario"><thead><tr>' +
+    '<th>Skenario</th><th>Potongan</th><th>Variabel kosong</th><th>Bagian tanpa tulisan</th>' +
+    '</tr></thead><tbody>' +
+    lap.hasil.map(r => '<tr>' +
+      '<td><b>' + esc(r.nama || '') + '</b></td>' +
+      '<td>' + r.jumlah + '</td>' +
+      '<td class="' + (r.hampa ? 'sel-waspada' : '') + '">' + r.hampa + '</td>' +
+      '<td class="sel-ket">' + (r.bagianKosong.length ? esc(r.bagianKosong.join(', ')) : '—') + '</td>' +
+      '</tr>').join('') + '</tbody></table></div>';
+
+  const berCatatan = lap.hasil.filter(r => r.catatan.length);
+  if (berCatatan.length){
+    h += '<div class="lap-kartu lap-waspada"><b>Diagnosa</b>' +
+      berCatatan.map(r => '<p>' + esc(r.nama || '') + '</p><ul>' +
+        r.catatan.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>').join('') + '</div>';
+  }
+
+  const jarang = Object.keys(lap.pernah).filter(k => lap.pernah[k] === 1);
+  if (jarang.length)
+    h += '<p class="hampa">Hanya tertulis di satu skenario: ' +
+      jarang.map(k => esc(pot(k))).join(', ') + '.</p>';
+
+  box.innerHTML = h;
+}
